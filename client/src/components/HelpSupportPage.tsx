@@ -1,10 +1,10 @@
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Phone, Mail, MessageCircle, HelpCircle, Clock, MapPin } from "lucide-react";
 
 export default function HelpSupportPage() {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
 
   const faqItems = [
     {
@@ -30,7 +30,7 @@ export default function HelpSupportPage() {
       {/* Header */}
       <div className="bg-primary text-primary-foreground px-4 py-4 sticky top-0 z-10">
         <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="icon" className="text-white" onClick={() => navigate('/home')}>
+          <Button variant="ghost" size="icon" className="text-white" onClick={() => setLocation('/home')}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <h1 className="text-xl font-semibold">Help & Support</h1>
