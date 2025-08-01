@@ -33,21 +33,17 @@ export default function AdminPanel() {
     { id: 3, item: "Onions", quantity: 25, unit: "kg", minStock: 5, status: "Good" }
   ]);
 
-  const [feedback, setFeedback] = useState([
-    { id: 1, customer: "Rahul Kumar", rating: 4, comment: "Great food quality!", date: "2024-01-15", status: "New" },
-    { id: 2, customer: "Priya Sharma", rating: 5, comment: "Excellent service", date: "2024-01-14", status: "Reviewed" },
-    { id: 3, customer: "Amit Singh", rating: 2, comment: "Food was cold", date: "2024-01-13", status: "Resolved" }
-  ]);
+  const [feedback, setFeedback] = useState<any[]>([]);
 
   const stats = {
-    totalRevenue: 45678,
-    todayOrders: 127,
-    totalUsers: 1245,
-    avgRating: 4.2,
-    monthlyGrowth: 15.8,
-    pendingOrders: 8,
-    lowStockItems: 3,
-    activeCampaigns: 2
+    totalRevenue: 0,
+    todayOrders: 0,
+    totalUsers: 0,
+    avgRating: 0,
+    monthlyGrowth: 0,
+    pendingOrders: 0,
+    lowStockItems: 0,
+    activeCampaigns: 0
   };
 
   return (

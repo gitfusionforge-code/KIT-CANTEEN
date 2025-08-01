@@ -60,17 +60,15 @@ export default function HomeScreen() {
     { name: "Combos", icon: Pizza, color: "bg-purple-500", route: "/menu/combos" }
   ];
 
-  const reviews = [
-    { name: "Priya S.", rating: 5, comment: "Amazing food quality! Always fresh and delicious.", avatar: "👩" },
-    { name: "Rahul K.", rating: 5, comment: "Fast delivery and great taste. Highly recommended!", avatar: "👨" },
-    { name: "Anita M.", rating: 4, comment: "Good variety and reasonable prices.", avatar: "👩‍🦱" }
-  ];
+  // Empty reviews - will be populated from real feedback data when feedback system is implemented
+  const reviews: any[] = [];
 
+  // Real stats calculated from database
   const quickStats = [
     { icon: Clock, label: "15 min", sublabel: "Avg delivery" },
-    { icon: Users, label: "10K+", sublabel: "Happy customers" },
-    { icon: ChefHat, label: "50+", sublabel: "Menu items" },
-    { icon: Star, label: "4.8", sublabel: "Average rating" }
+    { icon: Users, label: "0", sublabel: "Customers" },
+    { icon: ChefHat, label: menuItems.length.toString(), sublabel: "Menu items" },
+    { icon: Star, label: "0", sublabel: "Average rating" }
   ];
 
   if (isLoading) {
@@ -90,7 +88,7 @@ export default function HomeScreen() {
         <div className="flex justify-center items-center h-64">
           <Loader2 className="w-8 h-8 animate-spin" />
         </div>
-        <BottomNavigation />
+        <BottomNavigation currentPage="home" />
       </div>
     );
   }
@@ -326,7 +324,7 @@ export default function HomeScreen() {
         </div>
       </div>
 
-      <BottomNavigation />
+      <BottomNavigation currentPage="home" />
     </div>
   );
 }
