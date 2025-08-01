@@ -28,47 +28,43 @@ export default function HomeScreen() {
 
   const isLoading = categoriesLoading || menuItemsLoading;
 
-  // Get trending items (first 3 available items)
+  // Get trending items from database
   const trendingItems = menuItems
     .filter(item => item.available)
     .slice(0, 3)
     .map(item => ({
       id: item.id.toString(),
       name: item.name,
-      price: item.price,
-      rating: 4.5,
-      orders: "New item",
-      trend: "Available"
+      price: item.price
     }));
 
-  // Get quick picks (next 3 available items)
+  // Get quick picks from database
   const quickPickItems = menuItems
     .filter(item => item.available)
     .slice(3, 6)
     .map(item => ({
       id: item.id.toString(),
       name: item.name,
-      price: item.price,
-      rating: 4.5,
-      time: "15 min"
+      price: item.price
     }));
 
-  const staticCategories = [
-    { name: "Meals", icon: Utensils, color: "bg-orange-500", route: "/menu/meals" },
-    { name: "Snacks", icon: Cookie, color: "bg-yellow-500", route: "/menu/snacks" },
-    { name: "Beverages", icon: Coffee, color: "bg-blue-500", route: "/menu/beverages" },
-    { name: "Combos", icon: Pizza, color: "bg-purple-500", route: "/menu/combos" }
-  ];
+  // Map database categories to UI categories
+  const displayCategories = categories.map(category => ({
+    name: category.name,
+    icon: Utensils, // Default icon, can be customized per category
+    color: "bg-primary",
+    route: `/menu/${category.name.toLowerCase()}`
+  }));
 
-  // Empty reviews - will be populated from real feedback data when feedback system is implemented
+  // Reviews will come from feedback system when implemented
   const reviews: any[] = [];
 
-  // Real stats calculated from database
+  // Stats calculated from actual database data
   const quickStats = [
-    { icon: Clock, label: "15 min", sublabel: "Avg delivery" },
-    { icon: Users, label: "0", sublabel: "Customers" },
+    { icon: Clock, label: "Available", sublabel: "Order now" },
+    { icon: Users, label: "0", sublabel: "Active orders" },
     { icon: ChefHat, label: menuItems.length.toString(), sublabel: "Menu items" },
-    { icon: Star, label: "0", sublabel: "Average rating" }
+    { icon: Star, label: categories.length.toString(), sublabel: "Categories" }
   ];
 
   if (isLoading) {
@@ -144,28 +140,30 @@ export default function HomeScreen() {
         </Card>
 
         {/* Categories */}
-        <div>
-          <h2 className="text-xl font-bold mb-4">Categories</h2>
-          <div className="grid grid-cols-4 gap-4">
-            {staticCategories.map((category, index) => {
-              const IconComponent = category.icon;
-              return (
-                <Card
-                  key={index}
-                  className="cursor-pointer hover:shadow-md transition-shadow"
-                  onClick={() => setLocation(category.route)}
-                >
-                  <CardContent className="p-4 text-center">
-                    <div className={`w-12 h-12 ${category.color} rounded-lg flex items-center justify-center mx-auto mb-2`}>
-                      <IconComponent className="w-6 h-6 text-white" />
-                    </div>
-                    <p className="text-sm font-medium">{category.name}</p>
-                  </CardContent>
-                </Card>
-              );
-            })}
+        {displayCategories.length > 0 && (
+          <div>
+            <h2 className="text-xl font-bold mb-4">Categories</h2>
+            <div className="grid grid-cols-4 gap-4">
+              {displayCategories.map((category, index) => {
+                const IconComponent = category.icon;
+                return (
+                  <Card
+                    key={index}
+                    className="cursor-pointer hover:shadow-md transition-shadow"
+                    onClick={() => setLocation(category.route)}
+                  >
+                    <CardContent className="p-4 text-center">
+                      <div className={`w-12 h-12 ${category.color} rounded-lg flex items-center justify-center mx-auto mb-2`}>
+                        <IconComponent className="w-6 h-6 text-white" />
+                      </div>
+                      <p className="text-sm font-medium">{category.name}</p>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Trending Now */}
         {trendingItems.length > 0 && (
@@ -190,16 +188,11 @@ export default function HomeScreen() {
                       <div className="flex items-center space-x-2 mb-1">
                         <h3 className="font-semibold">{item.name}</h3>
                         <Badge variant="secondary" className="bg-orange-100 text-orange-700">
-                          🔥 {item.trend}
+                          🔥 Trending
                         </Badge>
                       </div>
                       <div className="flex items-center space-x-3">
-                        <div className="flex items-center">
-                          <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                          <span className="ml-1 text-sm">{item.rating}</span>
-                        </div>
-                        <span className="text-sm text-muted-foreground">•</span>
-                        <span className="text-sm text-muted-foreground">{item.orders}</span>
+                        <span className="text-sm text-muted-foreground">Available now</span>
                       </div>
                     </div>
                     <div className="text-right">
@@ -247,13 +240,8 @@ export default function HomeScreen() {
                       <h3 className="font-semibold mb-1">{item.name}</h3>
                       <div className="flex items-center space-x-3">
                         <div className="flex items-center">
-                          <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                          <span className="ml-1 text-sm">{item.rating}</span>
-                        </div>
-                        <span className="text-sm text-muted-foreground">•</span>
-                        <div className="flex items-center">
                           <Clock className="w-4 h-4 text-muted-foreground" />
-                          <span className="ml-1 text-sm text-muted-foreground">{item.time}</span>
+                          <span className="ml-1 text-sm text-muted-foreground">Quick pick</span>
                         </div>
                       </div>
                     </div>

@@ -207,7 +207,7 @@ export default function AdminNotificationManagementPage() {
                 <Bell className="h-4 w-4 text-primary" />
               </div>
               <div>
-                <p className="text-2xl font-bold">8,450</p>
+                <p className="text-2xl font-bold">0</p>
                 <p className="text-xs text-muted-foreground">Notifications Sent Today</p>
               </div>
             </div>
@@ -221,7 +221,7 @@ export default function AdminNotificationManagementPage() {
                 <Eye className="h-4 w-4 text-success" />
               </div>
               <div>
-                <p className="text-2xl font-bold">74%</p>
+                <p className="text-2xl font-bold">0%</p>
                 <p className="text-xs text-muted-foreground">Average Open Rate</p>
               </div>
             </div>
@@ -235,7 +235,7 @@ export default function AdminNotificationManagementPage() {
                 <Users className="h-4 w-4 text-warning" />
               </div>
               <div>
-                <p className="text-2xl font-bold">31%</p>
+                <p className="text-2xl font-bold">0%</p>
                 <p className="text-xs text-muted-foreground">Click Through Rate</p>
               </div>
             </div>
@@ -249,7 +249,7 @@ export default function AdminNotificationManagementPage() {
                 <ChefHat className="h-4 w-4 text-primary" />
               </div>
               <div>
-                <p className="text-2xl font-bold">142</p>
+                <p className="text-2xl font-bold">0</p>
                 <p className="text-xs text-muted-foreground">Orders Generated</p>
               </div>
             </div>

@@ -55,9 +55,9 @@ export default function AdminUserManagementPage() {
     totalUsers: users.length,
     activeUsers: users.filter(u => u.status === "Active").length,
     suspendedUsers: users.filter(u => u.status === "Suspended").length,
-    newUsersThisMonth: 12,
-    totalRevenue: users.reduce((sum, user) => sum + user.totalSpent, 0),
-    avgOrderValue: 145
+    newUsersThisMonth: 0,
+    totalRevenue: 0,
+    avgOrderValue: 0
   };
 
   return (
@@ -249,7 +249,7 @@ export default function AdminUserManagementPage() {
                           <div className="flex items-start space-x-4">
                             <Avatar className="w-12 h-12">
                               <AvatarImage src={user.avatar} alt={user.name} />
-                              <AvatarFallback>{user.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                              <AvatarFallback>{user.name?.split(' ').map((n: string) => n[0]).join('') || 'U'}</AvatarFallback>
                             </Avatar>
                             <div className="flex-1">
                               <div className="flex items-center space-x-2 mb-1">

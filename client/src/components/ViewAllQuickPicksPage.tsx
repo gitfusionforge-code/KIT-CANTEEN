@@ -33,8 +33,6 @@ export default function ViewAllQuickPicksPage() {
       id: item.id.toString(),
       name: item.name,
       price: item.price,
-      rating: 4.5, // Default rating
-      time: "15 min", // Default time
       category: categories.find(cat => cat.id === item.categoryId)?.name || "General"
     }));
 
@@ -172,17 +170,13 @@ export default function ViewAllQuickPicksPage() {
                         <p className="text-lg font-bold">₹{item.price}</p>
                       </div>
                       <div className="flex items-center space-x-4 text-sm text-muted-foreground mb-2">
-                        <div className="flex items-center">
-                          <Star className="w-4 h-4 text-yellow-500 fill-current mr-1" />
-                          {item.rating}
-                        </div>
-                        <div className="flex items-center">
-                          <Clock className="w-4 h-4 mr-1" />
-                          {item.time}
-                        </div>
                         <span className="bg-muted px-2 py-1 rounded text-xs">
                           {item.category}
                         </span>
+                        <div className="flex items-center">
+                          <Clock className="w-4 h-4 mr-1" />
+                          Available now
+                        </div>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-muted-foreground">

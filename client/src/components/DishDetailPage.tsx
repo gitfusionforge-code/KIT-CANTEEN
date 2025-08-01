@@ -11,48 +11,24 @@ export default function DishDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [selectedAddons, setSelectedAddons] = useState<string[]>([]);
 
-  // Mock dish data - in real app this would come from API/database
-  const allDishes: Record<string, {
-    id: number;
-    name: string;
-    price: number;
-    rating: number;
-    reviews: number;
-    description: string;
-    prepTime: string;
-    category: string;
-    isVeg: boolean;
-    calories: number;
-    image: string;
-  }> = {
-    "1": { id: 1, name: "Veg Thali", price: 85, rating: 4.5, reviews: 128, description: "A complete meal with dal, rice, chapati, seasonal vegetable, pickle, and papad. Served with fresh salad and buttermilk.", prepTime: "15-20 mins", category: "Main Course", isVeg: true, calories: 450, image: "🍛" },
-    "2": { id: 2, name: "Non-Veg Thali", price: 120, rating: 4.3, reviews: 95, description: "Delicious chicken curry with basmati rice, fresh chapati, dal, and traditional pickles. A hearty non-vegetarian meal.", prepTime: "20-25 mins", category: "Main Course", isVeg: false, calories: 520, image: "🍗" },
-    "3": { id: 3, name: "South Indian Thali", price: 95, rating: 4.6, reviews: 156, description: "Authentic South Indian meal with sambar, rasam, coconut rice, curd, and traditional accompaniments.", prepTime: "18-22 mins", category: "South Indian", isVeg: true, calories: 380, image: "🥥" },
-    "4": { id: 4, name: "Samosa", price: 20, rating: 4.2, reviews: 89, description: "Crispy golden pastry filled with spiced potatoes, peas, and aromatic herbs. Served with mint and tamarind chutney.", prepTime: "5 mins", category: "Snacks", isVeg: true, calories: 150, image: "🥟" },
-    "5": { id: 5, name: "Grilled Sandwich", price: 40, rating: 4.0, reviews: 67, description: "Toasted bread with fresh vegetables, cheese, and special sauce. Grilled to perfection with crispy exterior.", prepTime: "8 mins", category: "Snacks", isVeg: true, calories: 280, image: "🥪" },
-    "6": { id: 6, name: "Pakora", price: 30, rating: 4.4, reviews: 112, description: "Mixed vegetable fritters with onions, potatoes, and spices. Crispy outside, soft inside, served hot with chutney.", prepTime: "6 mins", category: "Snacks", isVeg: true, calories: 200, image: "🧅" },
-    "7": { id: 7, name: "Masala Tea", price: 15, rating: 4.5, reviews: 203, description: "Traditional Indian spiced tea with cardamom, ginger, and aromatic spices. Brewed fresh and served hot.", prepTime: "3 mins", category: "Beverages", isVeg: true, calories: 50, image: "☕" },
-    "8": { id: 8, name: "Filter Coffee", price: 20, rating: 4.2, reviews: 78, description: "South Indian style filter coffee with perfect blend of coffee powder and chicory. Rich, aromatic, and refreshing.", prepTime: "4 mins", category: "Beverages", isVeg: true, calories: 60, image: "☕" },
-    "9": { id: 9, name: "Fresh Lime Soda", price: 25, rating: 4.3, reviews: 134, description: "Refreshing lime soda with fresh lime juice, soda water, and a hint of black salt. Perfect thirst quencher.", prepTime: "2 mins", category: "Beverages", isVeg: true, calories: 80, image: "🍋" },
-    "10": { id: 10, name: "Thali + Drink Combo", price: 100, rating: 4.4, reviews: 87, description: "Veg Thali with your choice of any beverage from our menu. Complete meal deal with great savings.", prepTime: "18 mins", category: "Combos", isVeg: true, calories: 500, image: "🍽️" },
-    "11": { id: 11, name: "Snack Combo", price: 60, rating: 4.1, reviews: 92, description: "Two delicious snacks of your choice paired with masala tea. Perfect for evening cravings.", prepTime: "10 mins", category: "Combos", isVeg: true, calories: 350, image: "🍴" },
-    "12": { id: 12, name: "Rajma Chawal", price: 75, rating: 4.4, reviews: 145, description: "Kidney beans curry cooked in rich tomato gravy served with steamed basmati rice. Comfort food at its best.", prepTime: "15 mins", category: "Main Course", isVeg: true, calories: 400, image: "🍚" },
-    "13": { id: 13, name: "Pav Bhaji", price: 55, rating: 4.5, reviews: 167, description: "Spiced mixed vegetable curry served with buttered bread rolls. Mumbai street food favorite.", prepTime: "12 mins", category: "Snacks", isVeg: true, calories: 320, image: "🍞" },
-    "14": { id: 14, name: "Dosa", price: 50, rating: 4.3, reviews: 198, description: "Crispy South Indian crepe made from fermented rice and lentil batter. Served with sambar and coconut chutney.", prepTime: "10 mins", category: "South Indian", isVeg: true, calories: 250, image: "🥞" },
-    "15": { id: 15, name: "Lassi", price: 30, rating: 4.6, reviews: 156, description: "Sweet yogurt drink blended with sugar and cardamom. Creamy, refreshing, and traditionally served chilled.", prepTime: "3 mins", category: "Beverages", isVeg: true, calories: 120, image: "🥛" },
-    "16": { id: 16, name: "Cold Coffee", price: 35, rating: 4.4, reviews: 89, description: "Iced coffee with milk, sugar, and ice cream. Blended to perfection for coffee lovers.", prepTime: "5 mins", category: "Beverages", isVeg: true, calories: 140, image: "🥤" },
-    "17": { id: 17, name: "South Special", price: 85, rating: 4.5, reviews: 123, description: "Dosa with sambar, coconut chutney, and filter coffee. Complete South Indian experience in one combo.", prepTime: "15 mins", category: "Combos", isVeg: true, calories: 320, image: "🌯" }
+  // This component will be populated with real dish data from the database
+  const allDishes: Record<string, any> = {}; // Will be fetched from actual menu items when menu system is implemented
+
+  const dish = allDishes[dishId || "1"] || { 
+    id: 0, 
+    name: "Dish Not Found", 
+    price: 0, 
+    rating: 0, 
+    reviews: 0, 
+    description: "This dish is not available in our menu.", 
+    prepTime: "N/A", 
+    category: "N/A", 
+    isVeg: true, 
+    calories: 0, 
+    image: "🍽️" 
   };
 
-  const dish = allDishes[dishId || "1"] || allDishes["1"];
-
-  const addons = [
-    { id: "extra-roti", name: "Extra Roti", price: 5 },
-    { id: "extra-dal", name: "Extra Dal", price: 10 },
-    { id: "pickle", name: "Mixed Pickle", price: 8 },
-    { id: "papad", name: "Roasted Papad", price: 5 },
-    { id: "buttermilk", name: "Fresh Buttermilk", price: 15 }
-  ];
+  const addons: any[] = []; // Will be populated from actual addon data when menu addon system is implemented
 
   const toggleAddon = (addonId: string) => {
     setSelectedAddons(prev => 

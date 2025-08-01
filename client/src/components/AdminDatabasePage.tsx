@@ -18,123 +18,17 @@ export default function AdminDatabasePage() {
   const [searchTerm, setSearchTerm] = useState("");
 
   const databaseStats = {
-    totalSize: "2.4 GB",
-    totalTables: 15,
-    totalRecords: 125847,
-    lastBackup: "2024-01-15 02:00 AM",
+    totalSize: "0 GB",
+    totalTables: 0,
+    totalRecords: 0,
+    lastBackup: "No backups",
     healthStatus: "Healthy",
-    uptime: "99.9%"
+    uptime: "Available"
   };
 
-  const tables = [
-    {
-      name: "users",
-      displayName: "Users",
-      records: 2456,
-      size: "156 MB",
-      lastUpdated: "2024-01-15 10:30 AM",
-      status: "Healthy",
-      description: "User accounts and profiles"
-    },
-    {
-      name: "orders",
-      displayName: "Orders", 
-      records: 8934,
-      size: "445 MB",
-      lastUpdated: "2024-01-15 10:25 AM",
-      status: "Healthy",
-      description: "Order history and transactions"
-    },
-    {
-      name: "menu_items",
-      displayName: "Menu Items",
-      records: 234,
-      size: "89 MB",
-      lastUpdated: "2024-01-15 09:15 AM",
-      status: "Healthy",
-      description: "Food items and menu data"
-    },
-    {
-      name: "payments",
-      displayName: "Payments",
-      records: 9156,
-      size: "234 MB",
-      lastUpdated: "2024-01-15 10:20 AM",
-      status: "Warning",
-      description: "Payment transactions and billing"
-    },
-    {
-      name: "reviews",
-      displayName: "Reviews",
-      records: 3456,
-      size: "78 MB",
-      lastUpdated: "2024-01-15 08:45 AM",
-      status: "Healthy",
-      description: "User reviews and ratings"
-    },
-    {
-      name: "notifications",
-      displayName: "Notifications",
-      records: 15670,
-      size: "123 MB",
-      lastUpdated: "2024-01-15 10:30 AM",
-      status: "Healthy",
-      description: "Push notifications and messages"
-    },
-    {
-      name: "analytics",
-      displayName: "Analytics",
-      records: 45890,
-      size: "567 MB",
-      lastUpdated: "2024-01-15 10:15 AM",
-      status: "Healthy",
-      description: "Usage analytics and metrics"
-    },
-    {
-      name: "sessions",
-      displayName: "User Sessions",
-      records: 12456,
-      size: "45 MB",
-      lastUpdated: "2024-01-15 10:30 AM",
-      status: "Healthy",
-      description: "Active user sessions"
-    }
-  ];
+  const tables: any[] = []; // Will be populated from actual database schema when admin tools are implemented
 
-  const backups = [
-    {
-      id: 1,
-      name: "daily_backup_20240115",
-      type: "Full Backup",
-      size: "2.3 GB",
-      createdAt: "2024-01-15 02:00 AM",
-      status: "Completed"
-    },
-    {
-      id: 2,
-      name: "daily_backup_20240114",
-      type: "Full Backup",
-      size: "2.2 GB",
-      createdAt: "2024-01-14 02:00 AM",
-      status: "Completed"
-    },
-    {
-      id: 3,
-      name: "incremental_backup_20240115_12",
-      type: "Incremental",
-      size: "156 MB",
-      createdAt: "2024-01-15 12:00 PM",
-      status: "Completed"
-    },
-    {
-      id: 4,
-      name: "incremental_backup_20240115_08",
-      type: "Incremental",
-      size: "89 MB",
-      createdAt: "2024-01-15 08:00 AM",
-      status: "Completed"
-    }
-  ];
+  const backups: any[] = []; // Will be populated from actual backup system when implemented
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -156,9 +50,9 @@ export default function AdminDatabasePage() {
     }
   };
 
-  const filteredTables = tables.filter(table =>
-    table.displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    table.description.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredTables = tables.filter((table: any) =>
+    table.displayName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    table.description?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleBackup = () => {

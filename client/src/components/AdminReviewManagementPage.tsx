@@ -19,86 +19,7 @@ export default function AdminReviewManagementPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [ratingFilter, setRatingFilter] = useState("all");
 
-  const reviews = [
-    {
-      id: 1,
-      user: "John Doe",
-      itemName: "Chicken Biryani",
-      itemId: "ITEM001",
-      rating: 5,
-      comment: "Absolutely delicious! The chicken was tender and the rice was perfectly cooked. Will definitely order again.",
-      status: "Approved",
-      submittedAt: "2024-01-15 02:30 PM",
-      helpfulVotes: 12,
-      reportCount: 0,
-      verified: true
-    },
-    {
-      id: 2,
-      user: "Sarah Wilson",
-      itemName: "Margherita Pizza",
-      itemId: "ITEM002",
-      rating: 2,
-      comment: "The pizza was cold when it arrived and the cheese was not melted properly. Very disappointed.",
-      status: "Pending",
-      submittedAt: "2024-01-15 01:15 PM",
-      helpfulVotes: 3,
-      reportCount: 1,
-      verified: true
-    },
-    {
-      id: 3,
-      user: "Mike Johnson",
-      itemName: "Veg Burger",
-      itemId: "ITEM003",
-      rating: 4,
-      comment: "Good taste and fresh ingredients. The bun was soft and the patty was crispy.",
-      status: "Approved",
-      submittedAt: "2024-01-15 12:45 PM",
-      helpfulVotes: 8,
-      reportCount: 0,
-      verified: false
-    },
-    {
-      id: 4,
-      user: "Emily Davis",
-      itemName: "Masala Dosa",
-      itemId: "ITEM004",
-      rating: 1,
-      comment: "This is completely inappropriate content that should not be here. Terrible service and food.",
-      status: "Flagged",
-      submittedAt: "2024-01-15 11:30 AM",
-      helpfulVotes: 0,
-      reportCount: 5,
-      verified: true
-    },
-    {
-      id: 5,
-      user: "Alex Brown",
-      itemName: "Chocolate Shake",
-      itemId: "ITEM005",
-      rating: 5,
-      comment: "Rich and creamy chocolate shake. Perfect sweetness level and great consistency.",
-      status: "Approved",
-      submittedAt: "2024-01-15 10:20 AM",
-      helpfulVotes: 15,
-      reportCount: 0,
-      verified: true
-    },
-    {
-      id: 6,
-      user: "Lisa Garcia",
-      itemName: "Caesar Salad",
-      itemId: "ITEM006",
-      rating: 3,
-      comment: "Average taste. The lettuce was fresh but the dressing was too salty for my liking.",
-      status: "Rejected",
-      submittedAt: "2024-01-14 08:15 PM",
-      helpfulVotes: 2,
-      reportCount: 0,
-      verified: false
-    }
-  ];
+  const reviews: any[] = []; // Will be populated from actual review data when review system is implemented
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -119,10 +40,10 @@ export default function AdminReviewManagementPage() {
     ));
   };
 
-  const filteredReviews = reviews.filter(review => {
-    const matchesSearch = review.user.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         review.itemName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         review.comment.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredReviews = reviews.filter((review: any) => {
+    const matchesSearch = review?.user?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         review?.itemName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         review?.comment?.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesRating = ratingFilter === "all" || review.rating.toString() === ratingFilter;
     
@@ -157,11 +78,11 @@ export default function AdminReviewManagementPage() {
   };
 
   const stats = {
-    total: reviews.length,
-    approved: reviews.filter(r => r.status === "Approved").length,
-    pending: reviews.filter(r => r.status === "Pending").length,
-    flagged: reviews.filter(r => r.status === "Flagged").length,
-    avgRating: (reviews.filter(r => r.status === "Approved").reduce((sum, r) => sum + r.rating, 0) / reviews.filter(r => r.status === "Approved").length).toFixed(1)
+    total: 0,
+    approved: 0,
+    pending: 0,
+    flagged: 0,
+    avgRating: "0.0"
   };
 
   return (

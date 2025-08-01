@@ -21,69 +21,13 @@ export default function AdminPaymentManagementPage() {
   const [selectedPayment, setSelectedPayment] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const payments = [
-    {
-      id: "PAY001",
-      orderId: "ORD-8935",
-      user: "John Doe",
-      amount: 250,
-      method: "UPI",
-      status: "Completed",
-      timestamp: "2024-01-15 14:30:00",
-      transactionId: "TXN789123456",
-      gateway: "Razorpay"
-    },
-    {
-      id: "PAY002",
-      orderId: "ORD-8934",
-      user: "Jane Smith", 
-      amount: 180,
-      method: "Credit Card",
-      status: "Failed",
-      timestamp: "2024-01-15 14:25:00",
-      transactionId: "TXN789123457",
-      gateway: "Stripe"
-    },
-    {
-      id: "PAY003",
-      orderId: "ORD-8933",
-      user: "Mike Johnson",
-      amount: 320,
-      method: "Debit Card",
-      status: "Pending",
-      timestamp: "2024-01-15 14:20:00",
-      transactionId: "TXN789123458",
-      gateway: "Razorpay"
-    },
-    {
-      id: "PAY004",
-      orderId: "ORD-8932",
-      user: "Sarah Wilson",
-      amount: 450,
-      method: "Net Banking",
-      status: "Completed",
-      timestamp: "2024-01-15 14:15:00",
-      transactionId: "TXN789123459",
-      gateway: "PayU"
-    },
-    {
-      id: "PAY005",
-      orderId: "ORD-8931",
-      user: "Tom Brown",
-      amount: 150,
-      method: "Wallet",
-      status: "Refunded",
-      timestamp: "2024-01-15 14:10:00",
-      transactionId: "TXN789123460",
-      gateway: "Paytm"
-    }
-  ];
+  const payments: any[] = []; // Will be populated from actual payment transactions when payment system is implemented
 
-  const filteredPayments = payments.filter(payment => {
-    const matchesSearch = payment.user.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         payment.orderId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         payment.transactionId.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "all" || payment.status.toLowerCase() === statusFilter.toLowerCase();
+  const filteredPayments = payments.filter((payment: any) => {
+    const matchesSearch = payment?.user?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         payment?.orderId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         payment?.transactionId?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === "all" || payment?.status?.toLowerCase() === statusFilter.toLowerCase();
     return matchesSearch && matchesStatus;
   });
 
@@ -108,10 +52,10 @@ export default function AdminPaymentManagementPage() {
   };
 
   const stats = {
-    totalTransactions: payments.length,
-    totalAmount: payments.filter(p => p.status === "Completed").reduce((sum, p) => sum + p.amount, 0),
-    successRate: ((payments.filter(p => p.status === "Completed").length / payments.length) * 100).toFixed(1),
-    pendingAmount: payments.filter(p => p.status === "Pending").reduce((sum, p) => sum + p.amount, 0)
+    totalTransactions: 0,
+    totalAmount: 0,
+    successRate: 0,
+    pendingAmount: 0
   };
 
   const handleExportReport = () => {

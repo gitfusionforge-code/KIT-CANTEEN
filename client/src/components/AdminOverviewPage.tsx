@@ -22,7 +22,7 @@ export default function AdminOverviewPage() {
     pendingOrders: 0,
     completedOrders: 0,
     averageRating: 0,
-    systemUptime: 99.8
+    systemUptime: 100
   };
 
   const recentActivity: any[] = []; // Will be populated from real activity logs
@@ -39,7 +39,7 @@ export default function AdminOverviewPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-success">₹{stats.totalRevenue.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">+12.5% from last month</p>
+            <p className="text-xs text-muted-foreground">No data available</p>
           </CardContent>
         </Card>
 
@@ -50,7 +50,7 @@ export default function AdminOverviewPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalUsers.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">+8.2% from last month</p>
+            <p className="text-xs text-muted-foreground">No data available</p>
           </CardContent>
         </Card>
 
@@ -61,7 +61,7 @@ export default function AdminOverviewPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalOrders.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">+15.3% from last month</p>
+            <p className="text-xs text-muted-foreground">No data available</p>
           </CardContent>
         </Card>
 

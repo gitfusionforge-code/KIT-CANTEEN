@@ -257,7 +257,7 @@ export default function CanteenOwnerDashboard() {
     setSettings(prev => ({
       ...prev,
       [section]: {
-        ...prev[section as keyof typeof prev],
+        ...(prev[section as keyof typeof prev] as any),
         [key]: value
       }
     }));

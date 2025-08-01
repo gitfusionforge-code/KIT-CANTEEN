@@ -174,9 +174,9 @@ export default function OrdersPage() {
 
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-lg font-bold">₹{order.totalAmount}</p>
+                      <p className="text-lg font-bold">₹{order.amount}</p>
                       <p className="text-sm text-muted-foreground">
-                        Payment: {order.paymentStatus || 'Pending'}
+                        Payment: Pending
                       </p>
                     </div>
                     <Button

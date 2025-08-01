@@ -37,11 +37,7 @@ export default function SendWarningPage() {
     { value: "high", label: "High", color: "destructive" }
   ];
 
-  const mockUsers = [
-    { id: 1, name: "Rahul Kumar", email: "rahul@kit.ac.in" },
-    { id: 2, name: "Priya Sharma", email: "priya@kit.ac.in" },
-    { id: 3, name: "Amit Singh", email: "amit@kit.ac.in" }
-  ];
+  const mockUsers: any[] = []; // Will be populated from actual user data when user management system is implemented
 
   const handleSendWarning = () => {
     toast({

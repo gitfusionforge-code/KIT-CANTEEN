@@ -30,10 +30,10 @@ export default function AboutPage() {
   ];
 
   const stats = [
-    { label: "Happy Customers", value: "5000+" },
-    { label: "Daily Orders", value: "500+" },
-    { label: "Menu Items", value: "50+" },
-    { label: "Years of Service", value: "10+" }
+    { label: "Happy Customers", value: "0" },
+    { label: "Daily Orders", value: "0" },
+    { label: "Menu Items", value: "0" },
+    { label: "Years of Service", value: "Available" }
   ];
 
   return (

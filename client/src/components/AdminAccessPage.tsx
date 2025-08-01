@@ -18,76 +18,7 @@ export default function AdminAccessPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
 
-  const admins = [
-    {
-      id: 1,
-      name: "John Admin",
-      email: "john@admin.com",
-      role: "Super Admin",
-      status: "Active",
-      lastLogin: "2024-01-15 10:30 AM",
-      createdAt: "2024-01-01",
-      permissions: {
-        userManagement: true,
-        orderManagement: true,
-        menuManagement: true,
-        analytics: true,
-        systemSettings: true,
-        adminAccess: true
-      }
-    },
-    {
-      id: 2,
-      name: "Sarah Manager",
-      email: "sarah@admin.com",
-      role: "Content Manager",
-      status: "Active",
-      lastLogin: "2024-01-15 09:45 AM",
-      createdAt: "2024-01-05",
-      permissions: {
-        userManagement: false,
-        orderManagement: true,
-        menuManagement: true,
-        analytics: true,
-        systemSettings: false,
-        adminAccess: false
-      }
-    },
-    {
-      id: 3,
-      name: "Mike Support",
-      email: "mike@admin.com",
-      role: "Support Admin",
-      status: "Active",
-      lastLogin: "2024-01-14 06:20 PM",
-      createdAt: "2024-01-10",
-      permissions: {
-        userManagement: true,
-        orderManagement: true,
-        menuManagement: false,
-        analytics: false,
-        systemSettings: false,
-        adminAccess: false
-      }
-    },
-    {
-      id: 4,
-      name: "Lisa Analyst",
-      email: "lisa@admin.com",
-      role: "Data Analyst",
-      status: "Inactive",
-      lastLogin: "2024-01-12 02:15 PM",
-      createdAt: "2024-01-08",
-      permissions: {
-        userManagement: false,
-        orderManagement: false,
-        menuManagement: false,
-        analytics: true,
-        systemSettings: false,
-        adminAccess: false
-      }
-    }
-  ];
+  const admins: any[] = []; // Will be populated from actual admin user data when admin management system is implemented
 
   const roles = [
     {
@@ -156,10 +87,10 @@ export default function AdminAccessPage() {
   };
 
   const stats = {
-    total: admins.length,
-    active: admins.filter(a => a.status === "Active").length,
-    inactive: admins.filter(a => a.status === "Inactive").length,
-    superAdmins: admins.filter(a => a.role === "Super Admin").length
+    total: 0,
+    active: 0,
+    inactive: 0,
+    superAdmins: 0
   };
 
   return (

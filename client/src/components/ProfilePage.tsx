@@ -18,35 +18,13 @@ export default function ProfilePage() {
     course: "B.Tech Computer Science"
   });
 
-  const orderHistory = [
-    {
-      id: "12345",
-      date: "Today, 2:30 PM",
-      items: ["Veg Thali", "Masala Tea"],
-      total: 194,
-      status: "Completed"
-    },
-    {
-      id: "12344",
-      date: "Yesterday, 1:15 PM",
-      items: ["Samosa", "Coffee"],
-      total: 40,
-      status: "Completed"
-    },
-    {
-      id: "12343",
-      date: "2 days ago, 12:45 PM",
-      items: ["Chole Bhature", "Lassi"],
-      total: 95,
-      status: "Completed"
-    }
-  ];
+  const orderHistory: any[] = []; // Will be populated from user's actual order history when user system is implemented
 
   const stats = {
-    totalOrders: 25,
-    totalSpent: 2150,
-    favoriteItem: "Veg Thali",
-    avgRating: 4.5
+    totalOrders: 0,
+    totalSpent: 0,
+    favoriteItem: "None",
+    avgRating: 0
   };
 
   const handleSave = () => {
