@@ -1,4 +1,5 @@
 import { useLocation, useParams } from "wouter";
+import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,8 +12,58 @@ import {
   Star,
   User,
   Phone,
-  CreditCard
+  CreditCard,
+  Package
 } from "lucide-react";
+import JsBarcode from 'jsbarcode';
+
+// Real Barcode Generator Component using JsBarcode library
+const BarcodeGenerator = ({ orderId }: { orderId: string }) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    if (canvasRef.current) {
+      try {
+        // Generate a proper Code 128 barcode
+        JsBarcode(canvasRef.current, orderId, {
+          format: "CODE128",
+          width: 2,
+          height: 60,
+          displayValue: true,
+          background: "#ffffff",
+          lineColor: "#000000",
+          margin: 10,
+          fontSize: 14,
+          textAlign: "center",
+          textPosition: "bottom"
+        });
+      } catch (error) {
+        console.error('Barcode generation error:', error);
+        // Fallback: display order ID as text
+        const canvas = canvasRef.current;
+        const ctx = canvas?.getContext('2d');
+        if (ctx && canvas) {
+          canvas.width = 250;
+          canvas.height = 80;
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.fillStyle = '#000000';
+          ctx.font = '16px monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText(`Order: ${orderId}`, canvas.width/2, canvas.height/2);
+        }
+      }
+    }
+  }, [orderId]);
+
+  return (
+    <canvas 
+      ref={canvasRef}
+      className="mx-auto"
+      style={{ maxWidth: '100%', height: 'auto' }}
+    />
+  );
+};
 
 export default function OrderDetailPage() {
   const [, setLocation] = useLocation();
@@ -122,6 +173,26 @@ export default function OrderDetailPage() {
                   <span>Delivered: {orderDetails.deliveredAt}</span>
                 </div>
               )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Order Barcode */}
+        <Card className="shadow-card">
+          <CardContent className="p-4">
+            <h3 className="font-semibold mb-3 flex items-center">
+              <Package className="w-5 h-5 mr-2 text-primary" />
+              Order Barcode
+            </h3>
+            <div className="bg-accent/50 rounded-lg p-4 text-center">
+              {/* Real Code 128 Barcode using JsBarcode library */}
+              <div className="bg-white p-4 rounded-lg inline-block mb-3 border-2 border-gray-200">
+                <BarcodeGenerator orderId={orderDetails.id} />
+              </div>
+              <p className="font-bold text-lg mb-1">Order ID: {orderDetails.id}</p>
+              <p className="text-sm text-muted-foreground">
+                Scannable Code 128 barcode for quick order verification
+              </p>
             </div>
           </CardContent>
         </Card>
