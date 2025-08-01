@@ -1,14 +1,13 @@
 import { useState } from "react";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { useLocation, useParams } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Plus, Minus, Star, Clock } from "lucide-react";
 
 export default function DishDetailPage() {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const { dishId } = useParams();
-  const location = useLocation();
   const [quantity, setQuantity] = useState(1);
   const [selectedAddons, setSelectedAddons] = useState<string[]>([]);
 
@@ -74,7 +73,7 @@ export default function DishDetailPage() {
 
   const handleAddToCart = () => {
     // In real app, this would update cart state/context
-    navigate("/cart");
+    setLocation("/cart");
   };
 
   return (
@@ -90,7 +89,7 @@ export default function DishDetailPage() {
               if (window.history.length > 1) {
                 window.history.back();
               } else {
-                navigate('/home');
+                setLocation('/home');
               }
             }}
             className="bg-white/80 backdrop-blur-sm hover:bg-white"

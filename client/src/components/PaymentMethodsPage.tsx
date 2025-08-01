@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { ArrowLeft, CreditCard, Smartphone, Wallet, Plus, Trash2 } from "lucide-react";
 
 export default function PaymentMethodsPage() {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const [selectedMethod, setSelectedMethod] = useState("cash");
   const [savedCards, setSavedCards] = useState([
     {
@@ -53,7 +53,7 @@ export default function PaymentMethodsPage() {
       {/* Header */}
       <div className="bg-primary px-4 pt-12 pb-6">
         <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="icon" className="text-white" onClick={() => navigate('/profile')}>
+          <Button variant="ghost" size="icon" className="text-white" onClick={() => setLocation('/profile')}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <h1 className="text-xl font-bold text-white">Payment Methods</h1>

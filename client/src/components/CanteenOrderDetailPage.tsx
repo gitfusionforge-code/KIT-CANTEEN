@@ -1,4 +1,4 @@
-import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { useLocation, useParams } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -17,9 +17,8 @@ import {
 } from "lucide-react";
 
 export default function CanteenOrderDetailPage() {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const { orderId } = useParams();
-  const location = useLocation();
 
   // Mock order data - in real app, fetch based on orderId
   const orderDetails = {
@@ -86,7 +85,7 @@ export default function CanteenOrderDetailPage() {
 
   const handleRejectOrder = () => {
     toast.error("Order rejected");
-    navigate(-1);
+    window.history.back();
   };
 
   const handleMarkReady = () => {
@@ -108,7 +107,7 @@ export default function CanteenOrderDetailPage() {
               if (window.history.length > 1) {
                 window.history.back();
               } else {
-                navigate('/canteen-owner');
+                setLocation('/canteen-owner');
               }
             }}>
               <ArrowLeft className="w-5 h-5" />
