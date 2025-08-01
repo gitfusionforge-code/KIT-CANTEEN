@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useSearch } from 'wouter';
 import { ArrowLeft, Plus, Minus, ShoppingCart } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,8 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 
 const ReorderPage = () => {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [, setLocation] = useLocation();
+  const searchParams = new URLSearchParams(useSearch());
   const orderId = searchParams.get('orderId');
   const { toast } = useToast();
 
@@ -81,7 +81,7 @@ const ReorderPage = () => {
     });
     
     // Navigate to cart or home
-    navigate('/cart');
+    setLocation('/cart');
   };
 
   return (
@@ -92,7 +92,7 @@ const ReorderPage = () => {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate(-1)}
+            onClick={() => window.history.back()}
             className="shrink-0"
           >
             <ArrowLeft className="h-5 w-5" />

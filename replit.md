@@ -6,6 +6,17 @@ KIT-Canteen is a modern food ordering application designed for college campuses.
 
 Preferred communication style: Simple, everyday language.
 
+# Recent Changes
+
+## January 2025 - Navigation Bug Fixes & Barcode Implementation
+- **Complete Navigation Overhaul**: Fixed React Router navigation bugs across 8+ components by replacing `useNavigate` with wouter's `useLocation`
+  - Components fixed: OrderDetailPage, NotificationsPage, PaymentMethodsPage, DishDetailPage, CanteenOrderDetailPage, ReorderPage
+  - All navigation now properly uses wouter routing system
+- **Real Barcode Implementation**: Implemented scannable Code 128 barcodes using JsBarcode library
+  - Added to both OrderStatusPage and OrderDetailPage for completed orders
+  - Barcodes are properly formatted and scannable by standard barcode scanners
+  - Used for staff order verification and management
+
 # System Architecture
 
 ## Frontend Architecture
