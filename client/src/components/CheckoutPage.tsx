@@ -116,8 +116,33 @@ export default function CheckoutPage() {
       }
     };
 
-    const rzp = new (window as any).Razorpay(options);
-    rzp.open();
+    // Check if Razorpay is loaded
+    if (!(window as any).Razorpay) {
+      toast({
+        title: "Payment Error",
+        description: "Payment service is not available. Please try again later.",
+        variant: "destructive"
+      });
+      setIsTimerActive(false);
+      setPaymentInProgress(false);
+      paymentValidRef.current = false;
+      return;
+    }
+
+    try {
+      const rzp = new (window as any).Razorpay(options);
+      rzp.open();
+    } catch (error) {
+      console.error("Razorpay initialization error:", error);
+      toast({
+        title: "Payment Error",
+        description: "Failed to initialize payment. Please try again.",
+        variant: "destructive"
+      });
+      setIsTimerActive(false);
+      setPaymentInProgress(false);
+      paymentValidRef.current = false;
+    }
   };
 
   return (
