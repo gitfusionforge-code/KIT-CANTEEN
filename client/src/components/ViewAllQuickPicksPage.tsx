@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Search, Star, Filter } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { ArrowLeft, Search, Star, Clock, Plus, Loader2, ChefHat, Filter } from "lucide-react";
 import BottomNavigation from "./BottomNavigation";
+import type { MenuItem, Category } from "@shared/schema";
 
 export default function ViewAllQuickPicksPage() {
   const [, setLocation] = useLocation();
@@ -13,18 +15,28 @@ export default function ViewAllQuickPicksPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [cart, setCart] = useState<{[key: string]: number}>({});
 
-  const quickPickItems = [
-    { id: "1", name: "Veg Thali", price: 85, rating: 4.5, time: "15 min", category: "Meals" },
-    { id: "2", name: "Masala Dosa", price: 60, rating: 4.3, time: "12 min", category: "South Indian" },
-    { id: "3", name: "Chole Bhature", price: 70, rating: 4.6, time: "18 min", category: "North Indian" },
-    { id: "4", name: "Pav Bhaji", price: 55, rating: 4.4, time: "10 min", category: "Street Food" },
-    { id: "5", name: "Biryani", price: 120, rating: 4.7, time: "25 min", category: "Rice" },
-    { id: "6", name: "Paneer Butter Masala", price: 95, rating: 4.5, time: "20 min", category: "Curry" },
-    { id: "7", name: "Samosa (2 pcs)", price: 30, rating: 4.2, time: "5 min", category: "Snacks" },
-    { id: "8", name: "Rajma Chawal", price: 75, rating: 4.3, time: "15 min", category: "Combo" },
-    { id: "9", name: "Butter Chicken", price: 110, rating: 4.6, time: "22 min", category: "Non-Veg" },
-    { id: "10", name: "Aloo Paratha", price: 50, rating: 4.4, time: "12 min", category: "Breakfast" }
-  ];
+  // Fetch real data from database
+  const { data: categories = [], isLoading: categoriesLoading } = useQuery<Category[]>({
+    queryKey: ['/api/categories'],
+  });
+
+  const { data: menuItems = [], isLoading: menuItemsLoading } = useQuery<MenuItem[]>({
+    queryKey: ['/api/menu'],
+  });
+
+  const isLoading = categoriesLoading || menuItemsLoading;
+
+  // Transform menu items to quick picks format
+  const quickPickItems = menuItems
+    .filter(item => item.available)
+    .map(item => ({
+      id: item.id.toString(),
+      name: item.name,
+      price: item.price,
+      rating: 4.5, // Default rating
+      time: "15 min", // Default time
+      category: categories.find(cat => cat.id === item.categoryId)?.name || "General"
+    }));
 
   const filteredItems = quickPickItems.filter(item =>
     item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -45,6 +57,35 @@ export default function ViewAllQuickPicksPage() {
   const getCartQuantity = (itemId: string) => cart[itemId] || 0;
 
   const getTotalItems = () => Object.values(cart).reduce((sum, qty) => sum + qty, 0);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <div className="bg-primary px-4 pt-12 pb-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-4">
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={() => setLocation("/home")}
+                className="text-white hover:bg-white/20"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+              <div>
+                <h1 className="text-xl font-bold text-white">Quick Picks</h1>
+                <p className="text-white/80 text-sm">Fast & delicious options</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="flex justify-center items-center h-64">
+          <Loader2 className="w-8 h-8 animate-spin" />
+        </div>
+        <BottomNavigation />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -74,99 +115,105 @@ export default function ViewAllQuickPicksPage() {
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Search quick picks..."
+            placeholder="Search for food..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 bg-white border-0 h-11 text-base"
+            className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/60"
           />
         </div>
       </div>
 
-      {/* Items List */}
-      <div className="px-4 py-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">All Quick Picks ({filteredItems.length})</h2>
-          {getTotalItems() > 0 && (
-            <Button 
-              variant="cart" 
-              size="sm"
-              onClick={() => setLocation("/cart")}
-              className="animate-fade-in"
-            >
-              Cart ({getTotalItems()})
-            </Button>
-          )}
+      <div className="px-4 space-y-4 -mt-3">
+        {/* Results header */}
+        <div className="bg-white rounded-lg p-4 shadow-sm">
+          <div className="flex justify-between items-center">
+            <p className="text-sm text-muted-foreground">
+              {filteredItems.length} items available
+            </p>
+            {getTotalItems() > 0 && (
+              <Button 
+                size="sm" 
+                onClick={() => setLocation("/cart")}
+                className="bg-primary hover:bg-primary/90"
+              >
+                View Cart ({getTotalItems()})
+              </Button>
+            )}
+          </div>
         </div>
 
-        <div className="space-y-3">
-          {filteredItems.map((item) => (
-            <Card key={item.id} className="shadow-card hover:shadow-lg transition-all duration-300 animate-fade-in">
-              <CardContent className="p-4 flex items-center space-x-4">
-                <div className="w-20 h-20 bg-muted rounded-lg flex-shrink-0 hover-scale transition-transform duration-200"></div>
-                <div className="flex-1">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h3 className="font-semibold text-lg">{item.name}</h3>
-                      <p className="text-sm text-muted-foreground">{item.category}</p>
-                      <div className="flex items-center space-x-3 mt-2">
+        {/* Menu items */}
+        {filteredItems.length === 0 ? (
+          <div className="text-center py-8">
+            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+              <ChefHat className="w-8 h-8 text-muted-foreground" />
+            </div>
+            <h3 className="text-lg font-semibold mb-2">
+              {menuItems.length === 0 ? "No Menu Items Available" : "No items found"}
+            </h3>
+            <p className="text-muted-foreground mb-4">
+              {menuItems.length === 0 
+                ? "Check back later for delicious food options!" 
+                : "Try searching for something else"}
+            </p>
+          </div>
+        ) : (
+          <div className="grid gap-4">
+            {filteredItems.map((item) => (
+              <Card key={item.id} className="hover:shadow-md transition-shadow">
+                <CardContent className="p-4">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-16 h-16 bg-gradient-to-br from-orange-400 to-red-500 rounded-lg flex-shrink-0 flex items-center justify-center">
+                      <span className="text-white text-lg">🍽️</span>
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-1">
+                        <h3 className="font-semibold">{item.name}</h3>
+                        <p className="text-lg font-bold">₹{item.price}</p>
+                      </div>
+                      <div className="flex items-center space-x-4 text-sm text-muted-foreground mb-2">
                         <div className="flex items-center">
-                          <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                          <span className="text-sm ml-1 font-medium">{item.rating}</span>
+                          <Star className="w-4 h-4 text-yellow-500 fill-current mr-1" />
+                          {item.rating}
                         </div>
-                        <span className="text-sm text-muted-foreground">• {item.time}</span>
+                        <div className="flex items-center">
+                          <Clock className="w-4 h-4 mr-1" />
+                          {item.time}
+                        </div>
+                        <span className="bg-muted px-2 py-1 rounded text-xs">
+                          {item.category}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">
+                          Available now
+                        </span>
+                        <div className="flex items-center space-x-2">
+                          {getCartQuantity(item.id) > 0 && (
+                            <span className="text-sm font-medium">
+                              {getCartQuantity(item.id)} in cart
+                            </span>
+                          )}
+                          <Button
+                            size="sm"
+                            onClick={() => addToCart(item)}
+                            className="bg-primary hover:bg-primary/90"
+                          >
+                            <Plus className="w-4 h-4 mr-1" />
+                            ADD
+                          </Button>
+                        </div>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-bold text-xl text-primary">₹{item.price}</p>
-                      {getCartQuantity(item.id) > 0 ? (
-                        <div className="flex items-center space-x-2 mt-2">
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
-                            onClick={() => setCart(prev => ({
-                              ...prev,
-                              [item.id]: Math.max(0, (prev[item.id] || 0) - 1)
-                            }))}
-                            className="w-8 h-8 p-0"
-                          >
-                            -
-                          </Button>
-                          <span className="font-semibold w-8 text-center">{getCartQuantity(item.id)}</span>
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
-                            onClick={() => addToCart(item)}
-                            className="w-8 h-8 p-0"
-                          >
-                            +
-                          </Button>
-                        </div>
-                      ) : (
-                        <Button 
-                          size="sm" 
-                          variant="food" 
-                          onClick={() => addToCart(item)}
-                          className="mt-2 hover-scale animate-fade-in transition-all duration-300 hover:shadow-lg active:scale-95"
-                        >
-                          ADD
-                        </Button>
-                      )}
-                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {filteredItems.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">No items found matching your search</p>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         )}
       </div>
 
-      <BottomNavigation currentPage="home" />
+      <BottomNavigation />
     </div>
   );
 }
