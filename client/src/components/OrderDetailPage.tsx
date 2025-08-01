@@ -1,4 +1,4 @@
-import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { useLocation, useParams } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -15,9 +15,8 @@ import {
 } from "lucide-react";
 
 export default function OrderDetailPage() {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const { orderId } = useParams();
-  const location = useLocation();
 
   // Mock order data - in real app, fetch based on orderId
   const orderDetails = {
@@ -85,7 +84,7 @@ export default function OrderDetailPage() {
             if (window.history.length > 1) {
               window.history.back();
             } else {
-              navigate('/orders');
+              setLocation('/orders');
             }
           }}>
             <ArrowLeft className="w-5 h-5" />
@@ -288,7 +287,7 @@ export default function OrderDetailPage() {
             variant="food"
             size="mobile"
             className="w-full"
-            onClick={() => navigate(`/reorder?orderId=${orderDetails.id}`)}
+            onClick={() => setLocation(`/reorder?orderId=${orderDetails.id}`)}
           >
             Reorder
           </Button>
@@ -298,7 +297,7 @@ export default function OrderDetailPage() {
               variant="outline"
               size="mobile"
               className="w-full"
-              onClick={() => navigate(`/rate-review?orderId=${orderDetails.id}`)}
+              onClick={() => setLocation(`/rate-review?orderId=${orderDetails.id}`)}
             >
               Rate & Review
             </Button>
@@ -308,7 +307,7 @@ export default function OrderDetailPage() {
             variant="outline"
             size="mobile"
             className="w-full"
-            onClick={() => navigate('/help-support')}
+            onClick={() => setLocation('/help-support')}
           >
             Get Help
           </Button>
