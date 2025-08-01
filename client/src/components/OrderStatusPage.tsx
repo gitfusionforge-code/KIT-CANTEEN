@@ -57,8 +57,8 @@ const BarcodeGenerator = ({ orderId }: { orderId: string }) => {
 export default function OrderStatusPage() {
   const [, setLocation] = useLocation();
   const { orderId } = useParams();
-  const [orderStatus, setOrderStatus] = useState<"placed" | "preparing" | "ready">("placed");
-  const [progress, setProgress] = useState(25);
+  const [orderStatus, setOrderStatus] = useState<"placed" | "preparing" | "ready">("preparing");
+  const [progress, setProgress] = useState(60);
 
   const orderDetails = {
     id: orderId || "12345",

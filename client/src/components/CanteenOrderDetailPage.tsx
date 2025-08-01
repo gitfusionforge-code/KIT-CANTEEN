@@ -23,7 +23,7 @@ export default function CanteenOrderDetailPage() {
   // Mock order data - in real app, fetch based on orderId
   const orderDetails = {
     id: orderId || "1233",
-    status: "pending",
+    status: "preparing",
     placedAt: "2:30 PM",
     estimatedTime: "15 mins",
     total: 60,
@@ -79,14 +79,7 @@ export default function CanteenOrderDetailPage() {
     // In real app, update order status in database
   };
 
-  const handleAcceptOrder = () => {
-    handleStatusUpdate("preparing");
-  };
 
-  const handleRejectOrder = () => {
-    toast.error("Order rejected");
-    window.history.back();
-  };
 
   const handleMarkReady = () => {
     handleStatusUpdate("ready");
@@ -140,26 +133,6 @@ export default function CanteenOrderDetailPage() {
 
             {/* Action Buttons based on status */}
             <div className="flex gap-2">
-              {orderDetails.status === "pending" && (
-                <>
-                  <Button 
-                    onClick={handleAcceptOrder}
-                    className="flex-1 bg-success text-success-foreground hover:bg-success/90"
-                  >
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                    Accept Order
-                  </Button>
-                  <Button 
-                    variant="destructive"
-                    onClick={handleRejectOrder}
-                    className="flex-1"
-                  >
-                    <XCircle className="w-4 h-4 mr-2" />
-                    Reject Order
-                  </Button>
-                </>
-              )}
-
               {orderDetails.status === "preparing" && (
                 <Button 
                   onClick={handleMarkReady}

@@ -51,7 +51,7 @@ export default function CanteenOwnerDashboard() {
   
   // Mock data with state management
   const [orders, setOrders] = useState([
-    { id: "#1234", customer: "John Doe", items: "2x Masala Dosa, 1x Coffee", amount: 85, status: "pending", time: "2 min ago", estimatedTime: 15 },
+    { id: "#1234", customer: "John Doe", items: "2x Masala Dosa, 1x Coffee", amount: 85, status: "preparing", time: "2 min ago", estimatedTime: 15 },
     { id: "#1233", customer: "Jane Smith", items: "1x Idli Sambar, 1x Tea", amount: 45, status: "preparing", time: "5 min ago", estimatedTime: 8 },
     { id: "#1232", customer: "Mike Johnson", items: "1x Vada Pav, 1x Lassi", amount: 60, status: "ready", time: "8 min ago", estimatedTime: 0 },
   ]);
@@ -367,17 +367,6 @@ export default function CanteenOwnerDashboard() {
                           </div>
 
                           <div className="flex space-x-2">
-                            {order.status === "pending" && (
-                              <Button 
-                                size="sm" 
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleOrderStatusUpdate(order.id, "preparing");
-                                }}
-                              >
-                                Start Preparing
-                              </Button>
-                            )}
                             {order.status === "preparing" && (
                               <Button 
                                 size="sm" 

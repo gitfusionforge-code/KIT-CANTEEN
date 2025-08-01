@@ -27,7 +27,7 @@ export default function AdminOrderManagementPage() {
       email: "john@example.com",
       items: ["Veg Thali", "Coffee"],
       total: 150,
-      status: "pending",
+      status: "preparing",
       canteen: "Main Hall",
       orderTime: "2024-01-20 14:30",
       estimatedTime: "15 mins",
@@ -275,24 +275,6 @@ export default function AdminOrderManagementPage() {
                       {/* Order Actions */}
                       {order.status !== "completed" && order.status !== "cancelled" && (
                         <div className="flex items-center space-x-2 pt-2 border-t">
-                          {order.status === "pending" && (
-                            <>
-                              <Button 
-                                size="sm" 
-                                variant="food"
-                                onClick={() => updateOrderStatus(order.id, "preparing")}
-                              >
-                                Accept Order
-                              </Button>
-                              <Button 
-                                size="sm" 
-                                variant="destructive"
-                                onClick={() => updateOrderStatus(order.id, "cancelled")}
-                              >
-                                Cancel Order
-                              </Button>
-                            </>
-                          )}
                           {order.status === "preparing" && (
                             <Button 
                               size="sm" 

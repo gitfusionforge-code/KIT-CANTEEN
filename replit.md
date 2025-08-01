@@ -16,6 +16,11 @@ Preferred communication style: Simple, everyday language.
   - Added to both OrderStatusPage and OrderDetailPage for completed orders
   - Barcodes are properly formatted and scannable by standard barcode scanners
   - Used for staff order verification and management
+- **Streamlined Order Flow**: Removed accept/reject logic for automatic order placement
+  - Orders now start directly in "preparing" status instead of "pending"
+  - Removed Manual Order button and functionality from CanteenOwnerDashboard
+  - Eliminated accept/reject buttons from CanteenOrderDetailPage and AdminOrderManagementPage
+  - Simplified order workflow: placed → preparing → ready → completed
 
 # System Architecture
 
