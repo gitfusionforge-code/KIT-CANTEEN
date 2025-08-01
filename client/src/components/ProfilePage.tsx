@@ -237,13 +237,6 @@ export default function ProfilePage() {
               </button>
               <button 
                 className="w-full flex items-center justify-between p-3 text-left hover:bg-accent/50 rounded-lg transition-colors"
-                onClick={() => setLocation("/payment-methods")}
-              >
-                <span>Payment Methods</span>
-                <ChevronRight className="w-5 h-5 text-muted-foreground" />
-              </button>
-              <button 
-                className="w-full flex items-center justify-between p-3 text-left hover:bg-accent/50 rounded-lg transition-colors"
                 onClick={() => setLocation("/help-support")}
               >
                 <span>Help & Support</span>
