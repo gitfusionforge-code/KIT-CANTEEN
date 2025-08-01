@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,7 +7,7 @@ import { ArrowLeft, Clock, Package, Star } from "lucide-react";
 import BottomNavigation from "./BottomNavigation";
 
 export default function OrdersPage() {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState<"active" | "completed">("active");
 
   const activeOrders = [
@@ -62,7 +62,7 @@ export default function OrdersPage() {
       {/* Header */}
       <div className="bg-white border-b px-4 py-4 sticky top-0 z-10">
         <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/home')}>
+          <Button variant="ghost" size="icon" onClick={() => setLocation('/home')}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <h1 className="text-xl font-bold">My Orders</h1>
@@ -97,7 +97,7 @@ export default function OrdersPage() {
                 <Card 
                   key={order.id} 
                   className="shadow-card cursor-pointer hover:shadow-lg transition-shadow"
-                  onClick={() => navigate(`/order-status/${order.id}`, { state: { from: '/orders' } })}
+                  onClick={() => setLocation(`/order-status/${order.id}`)}
                 >
                   <CardContent className="p-4">
                     <div className="flex justify-between items-start mb-3">
@@ -127,7 +127,7 @@ export default function OrdersPage() {
                       <Button 
                         variant="outline" 
                         size="sm"
-                        onClick={() => navigate(`/order-status/${order.id}`, { state: { from: '/orders' } })}
+                        onClick={() => setLocation(`/order-status/${order.id}`)}
                       >
                         Track Order
                       </Button>
@@ -144,7 +144,7 @@ export default function OrdersPage() {
                 <p className="text-muted-foreground mb-6">
                   You don't have any active orders right now
                 </p>
-                <Button variant="food" onClick={() => navigate("/home")}>
+                <Button variant="food" onClick={() => setLocation("/home")}>
                   Order Now
                 </Button>
               </div>
@@ -156,7 +156,7 @@ export default function OrdersPage() {
               <Card 
                 key={order.id} 
                 className="shadow-card cursor-pointer hover:shadow-lg transition-shadow"
-                onClick={() => navigate(`/order-detail/${order.id}`, { state: { from: '/orders' } })}
+                onClick={() => setLocation(`/order-detail/${order.id}`)}
               >
                 <CardContent className="p-4">
                   <div className="flex justify-between items-start mb-3">
@@ -190,7 +190,7 @@ export default function OrdersPage() {
                         onClick={(e) => {
                           e.stopPropagation();
                           console.log('Reorder button clicked, navigating to:', `/reorder?orderId=${order.id}`);
-                          navigate(`/reorder?orderId=${order.id}`);
+                          setLocation(`/reorder?orderId=${order.id}`);
                         }}
                       >
                         Reorder
@@ -201,7 +201,7 @@ export default function OrdersPage() {
                         onClick={(e) => {
                           e.stopPropagation();
                           console.log('Rate & Review button clicked, navigating to:', `/rate-review?orderId=${order.id}`);
-                          navigate(`/rate-review?orderId=${order.id}`);
+                          setLocation(`/rate-review?orderId=${order.id}`);
                         }}
                       >
                         Rate & Review

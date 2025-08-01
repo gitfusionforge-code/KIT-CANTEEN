@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +13,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 
 export default function AdminAccessPage() {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
@@ -169,7 +169,7 @@ export default function AdminAccessPage() {
         <div className="flex items-center space-x-4">
           <Button 
             variant="ghost" 
-            onClick={() => navigate("/admin")}
+            onClick={() => setLocation("/admin")}
             className="p-2"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -181,7 +181,7 @@ export default function AdminAccessPage() {
         </div>
         <Button 
           className="bg-primary text-primary-foreground"
-          onClick={() => navigate("/add-new-admin")}
+          onClick={() => setLocation("/add-new-admin")}
         >
           <Plus className="h-4 w-4 mr-2" />
           Add New Admin
@@ -323,7 +323,7 @@ export default function AdminAccessPage() {
                         <Button 
                           variant="ghost" 
                           size="sm"
-                          onClick={() => navigate(`/edit-admin-access/${admin.id}`)}
+                          onClick={() => setLocation(`/edit-admin-access/${admin.id}`)}
                         >
                           <Edit className="h-3 w-3" />
                         </Button>

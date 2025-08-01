@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +13,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 
 export default function AdminFeedbackManagementPage() {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
@@ -175,7 +175,7 @@ export default function AdminFeedbackManagementPage() {
         <div className="flex items-center space-x-4">
           <Button 
             variant="ghost" 
-            onClick={() => navigate("/admin-dashboard")}
+            onClick={() => setLocation("/admin-dashboard")}
             className="p-2"
           >
             <ArrowLeft className="h-4 w-4" />

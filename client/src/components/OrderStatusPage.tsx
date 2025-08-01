@@ -1,14 +1,13 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { useLocation, useParams } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle, Clock, ChefHat, Package, Phone, ArrowLeft } from "lucide-react";
 
 export default function OrderStatusPage() {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const { orderId } = useParams();
-  const location = useLocation();
   const [orderStatus, setOrderStatus] = useState<"placed" | "preparing" | "ready">("placed");
   const [progress, setProgress] = useState(25);
 
@@ -81,7 +80,7 @@ export default function OrderStatusPage() {
               if (window.history.length > 1) {
                 window.history.back();
               } else {
-                navigate('/orders');
+                setLocation('/orders');
               }
             }}
           >
@@ -217,7 +216,7 @@ export default function OrderStatusPage() {
             variant="food"
             size="mobile"
             className="w-full"
-            onClick={() => navigate("/home")}
+            onClick={() => setLocation("/home")}
           >
             Order Complete - Browse Menu
           </Button>
@@ -227,7 +226,7 @@ export default function OrderStatusPage() {
               variant="outline"
               size="mobile"
               className="flex-1"
-              onClick={() => navigate("/home")}
+              onClick={() => setLocation("/home")}
             >
               Browse Menu
             </Button>

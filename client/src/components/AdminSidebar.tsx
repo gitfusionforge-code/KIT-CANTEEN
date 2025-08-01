@@ -1,4 +1,4 @@
-import { NavLink, useLocation } from "react-router-dom";
+import { useLocation, Link } from "wouter";
 import {
   LayoutDashboard,
   Users,
@@ -62,8 +62,8 @@ const systemItems = [
 
 export function AdminSidebar() {
   const { state } = useSidebar();
-  const location = useLocation();
-  const currentPath = location.pathname;
+  const [location] = useLocation();
+  const currentPath = location;
   const collapsed = state === "collapsed";
 
   const isActive = (path: string) => currentPath === path;
@@ -80,13 +80,13 @@ export function AdminSidebar() {
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton asChild>
-                <NavLink 
-                  to={item.url} 
-                  className={({ isActive }) => getNavCls({ isActive })}
+                <Link 
+                  href={item.url} 
+                  className={getNavCls({ isActive: isActive(item.url) })}
                 >
                   <item.icon className="h-4 w-4" />
                   {!collapsed && <span>{item.title}</span>}
-                </NavLink>
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}

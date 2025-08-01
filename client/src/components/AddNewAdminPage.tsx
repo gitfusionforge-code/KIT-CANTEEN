@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,7 @@ import { ArrowLeft, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function AddNewAdminPage() {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
 
   const [newAdmin, setNewAdmin] = useState({
@@ -38,7 +38,7 @@ export default function AddNewAdminPage() {
       title: "Success",
       description: "New admin user created successfully",
     });
-    navigate("/admin-dashboard");
+    setLocation("/admin-dashboard");
   };
 
   const togglePermission = (permission: string) => {
@@ -61,7 +61,7 @@ export default function AddNewAdminPage() {
             <Button 
               variant="ghost" 
               size="icon"
-              onClick={() => navigate("/admin-dashboard")}
+              onClick={() => setLocation("/admin-dashboard")}
             >
               <ArrowLeft className="w-4 h-4" />
             </Button>
@@ -158,7 +158,7 @@ export default function AddNewAdminPage() {
               </Button>
               <Button 
                 variant="outline" 
-                onClick={() => navigate("/admin-dashboard")}
+                onClick={() => setLocation("/admin-dashboard")}
               >
                 Cancel
               </Button>
