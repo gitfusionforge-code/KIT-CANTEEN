@@ -9,6 +9,16 @@ Environment variables: Always store credentials in .env file when possible for b
 
 # Recent Changes
 
+## January 2025 - Role-Based Authentication Enhancement
+- **Super Admin Access**: Created super admin account for kitcanteen1@gmail.com
+  - Automatic role detection and privilege assignment during Google authentication
+  - Direct redirection to admin dashboard for super admin users
+  - API endpoint for role-based user lookup by email/username
+- **Canteen Owner Access**: Created canteen owner account for kitcanteenowner@gmail.com
+  - Dedicated canteen owner dashboard with inventory and order management
+  - Role-based authentication with automatic dashboard redirection
+  - Enhanced authentication system to support multiple user roles
+
 ## January 2025 - Database Connection Stability Fix
 - **Resolved Recurring DATABASE_URL Error**: Fixed persistent database connection issue during app remixing
   - Modified database initialization to use lazy loading pattern instead of immediate connection

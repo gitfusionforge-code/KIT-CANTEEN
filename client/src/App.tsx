@@ -86,6 +86,7 @@ const App = () => (
           <Route path="/privacy-policy" component={PrivacyPolicyPage} />
           <Route path="/terms-conditions" component={TermsConditionsPage} />
           <Route path="/canteen-owner" component={CanteenOwnerDashboard} />
+          <Route path="/canteen-owner-dashboard" component={CanteenOwnerDashboard} />
           <Route path="/admin" component={AdminDashboard} />
           <Route path="/edit-admin-access/:userId">
             <AdminLayout><EditAdminAccessPage /></AdminLayout>

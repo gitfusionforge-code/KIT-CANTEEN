@@ -39,6 +39,9 @@ export default function LoginScreen() {
             if (userRole === 'super_admin') {
               toast({ title: "Welcome Super Admin!" });
               setLocation('/admin');
+            } else if (userRole === 'canteen_owner') {
+              toast({ title: "Welcome Canteen Owner!" });
+              setLocation('/canteen-owner-dashboard');
             } else {
               setLocation('/home');
             }
@@ -95,6 +98,9 @@ export default function LoginScreen() {
           if (userRole === 'super_admin') {
             toast({ title: "Welcome Super Admin!" });
             setLocation("/admin");
+          } else if (userRole === 'canteen_owner') {
+            toast({ title: "Welcome Canteen Owner!" });
+            setLocation("/canteen-owner-dashboard");
           } else {
             setLocation("/home");
           }

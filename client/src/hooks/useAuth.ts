@@ -51,6 +51,10 @@ export function useAuth() {
     return user?.role === 'super_admin';
   };
 
+  const isCanteenOwner = () => {
+    return user?.role === 'canteen_owner';
+  };
+
   const hasRole = (role: string) => {
     return user?.role === role;
   };
@@ -63,6 +67,7 @@ export function useAuth() {
     updateUser,
     isAdmin,
     isSuperAdmin,
+    isCanteenOwner,
     hasRole,
     isAuthenticated: !!user
   };
