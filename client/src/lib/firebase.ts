@@ -26,7 +26,7 @@ export const signInWithGoogle = () => {
 // Handle redirect result
 export const handleGoogleRedirect = () => {
   return getRedirectResult(auth)
-    .then((result) => {
+    .then((result: any) => {
       if (result) {
         // This gives you a Google Access Token. You can use it to access Google APIs.
         const credential = GoogleAuthProvider.credentialFromResult(result);
@@ -37,7 +37,7 @@ export const handleGoogleRedirect = () => {
       }
       return null;
     })
-    .catch((error) => {
+    .catch((error: any) => {
       // Handle Errors here.
       const errorCode = error.code;
       const errorMessage = error.message;
