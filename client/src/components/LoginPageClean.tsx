@@ -123,12 +123,26 @@ export default function LoginPage() {
 
   const handleGoogleSignIn = async () => {
     try {
-      await signInWithGoogle();
-      // Redirect will be handled by Firebase
+      console.log("Starting Google sign-in...");
+      const result = await signInWithGoogle();
+      console.log("Google sign-in result:", result);
+      
+      if (result?.user) {
+        toast({ title: "Google sign-in successful!" });
+        // Store user data and redirect
+        localStorage.setItem('user', JSON.stringify({
+          id: result.user.uid,
+          name: result.user.displayName,
+          email: result.user.email,
+          role: 'student'
+        }));
+        setLocation('/home');
+      }
     } catch (error: any) {
+      console.error("Google sign-in error:", error);
       toast({ 
         title: "Google sign-in failed", 
-        description: error.message || "Please try again",
+        description: error.message || "Please try again. Make sure popups are enabled.",
         variant: "destructive" 
       });
     }
