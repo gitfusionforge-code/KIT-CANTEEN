@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, CheckCircle, Plus, Trash2 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ArrowLeft, CheckCircle, Plus, Trash2, ShoppingCart } from "lucide-react";
 import { toast } from "sonner";
 
 export default function BarcodeScannerPage() {
@@ -14,12 +15,7 @@ export default function BarcodeScannerPage() {
   const [orderId, setOrderId] = useState("");
   
   // Manual order creation state
-  const [isCreatingManualOrder, setIsCreatingManualOrder] = useState(false);
-  const [newOrder, setNewOrder] = useState({
-    customerName: "",
-    studentId: "",
-    paymentMethod: "pending"
-  });
+  const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
 
   // Sample menu items - in real app, this would come from API
@@ -75,8 +71,8 @@ export default function BarcodeScannerPage() {
   };
 
   const handleCreateManualOrder = () => {
-    if (!newOrder.customerName || selectedItems.length === 0) {
-      toast.error("Please add customer name and at least one item");
+    if (selectedItems.length === 0) {
+      toast.error("Please add at least one item");
       return;
     }
 
@@ -84,12 +80,11 @@ export default function BarcodeScannerPage() {
     const orderItems = selectedItems.map(item => `${item.quantity}x ${item.name}`).join(', ');
     const total = calculateOrderTotal();
 
-    toast.success(`Manual order created: ${orderNumber} for ${newOrder.customerName} - Total: ₹${total}`);
+    toast.success(`Order created: ${orderNumber} - Total: ₹${total}`);
     
-    // Reset form
-    setNewOrder({ customerName: "", studentId: "", paymentMethod: "pending" });
+    // Reset form and close modal
     setSelectedItems([]);
-    setIsCreatingManualOrder(false);
+    setIsMenuModalOpen(false);
   };
 
   return (
@@ -108,12 +103,12 @@ export default function BarcodeScannerPage() {
           </Button>
           <h1 className="text-lg font-semibold">Order Entry</h1>
           <Button 
-            onClick={() => setIsCreatingManualOrder(!isCreatingManualOrder)}
+            onClick={() => setIsMenuModalOpen(true)}
             variant="outline"
             size="sm"
           >
-            <Plus className="w-4 h-4 mr-2" />
-            {isCreatingManualOrder ? "Cancel" : "Manual Order"}
+            <ShoppingCart className="w-4 h-4 mr-2" />
+            Quick Order
           </Button>
         </div>
       </div>
@@ -155,139 +150,109 @@ export default function BarcodeScannerPage() {
           </CardContent>
         </Card>
 
-        {/* Manual Order Creation Section */}
-        <Card className="shadow-card">
-          <CardHeader>
-            <CardTitle>Create Manual Order</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {isCreatingManualOrder && (
-              <div className="space-y-6 border-t pt-4">
-                {/* Customer Details */}
-                <div className="space-y-4">
-                  <h3 className="font-medium">Customer Details</h3>
-                  <div className="grid grid-cols-1 gap-4">
-                    <div>
-                      <Label htmlFor="customer-name">Customer Name *</Label>
-                      <Input
-                        id="customer-name"
-                        value={newOrder.customerName}
-                        onChange={(e) => setNewOrder({...newOrder, customerName: e.target.value})}
-                        placeholder="Enter customer name"
-                      />
+        {/* Quick Order Menu Modal */}
+        <Dialog open={isMenuModalOpen} onOpenChange={setIsMenuModalOpen}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Quick Order Menu</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-6">
+              {/* Menu Items Selection */}
+              <div className="space-y-4">
+                <h3 className="font-medium">Available Items</h3>
+                <div className="grid grid-cols-1 gap-2 max-h-64 overflow-y-auto border rounded p-3">
+                  {menuItems.filter(item => item.available).map((item) => (
+                    <div key={item.id} className="flex items-center justify-between p-3 border rounded hover:bg-accent/50">
+                      <div className="flex-1">
+                        <div className="font-medium">{item.name}</div>
+                        <div className="text-sm text-muted-foreground">{item.category}</div>
+                        <div className="text-lg font-semibold text-primary">₹{item.price}</div>
+                      </div>
+                      <Button
+                        size="sm"
+                        onClick={() => handleAddItemToOrder(item)}
+                      >
+                        <Plus className="w-3 h-3 mr-1" />
+                        Add
+                      </Button>
                     </div>
-                    <div>
-                      <Label htmlFor="student-id">Student ID (Optional)</Label>
-                      <Input
-                        id="student-id"
-                        value={newOrder.studentId}
-                        onChange={(e) => setNewOrder({...newOrder, studentId: e.target.value})}
-                        placeholder="e.g. 21CS1234"
-                      />
-                    </div>
-                  </div>
+                  ))}
                 </div>
+              </div>
 
-                {/* Menu Items Selection */}
+              {/* Selected Items */}
+              {selectedItems.length > 0 && (
                 <div className="space-y-4">
-                  <h3 className="font-medium">Add Items</h3>
-                  <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto border rounded p-3">
-                    {menuItems.filter(item => item.available).map((item) => (
-                      <div key={item.id} className="flex items-center justify-between p-2 border rounded">
+                  <h3 className="font-medium">Order Summary</h3>
+                  <div className="space-y-2 max-h-32 overflow-y-auto">
+                    {selectedItems.map((item) => (
+                      <div key={item.id} className="flex items-center justify-between p-3 bg-accent/50 rounded">
                         <div>
                           <span className="font-medium">{item.name}</span>
-                          <span className="text-sm text-muted-foreground ml-2">₹{item.price}</span>
+                          <span className="text-sm text-muted-foreground ml-2">₹{item.price} each</span>
                         </div>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleAddItemToOrder(item)}
-                        >
-                          <Plus className="w-3 h-3" />
-                        </Button>
+                        <div className="flex items-center space-x-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleUpdateItemQuantity(item.id, item.quantity - 1)}
+                          >
+                            -
+                          </Button>
+                          <span className="w-8 text-center font-medium">{item.quantity}</span>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleUpdateItemQuantity(item.id, item.quantity + 1)}
+                          >
+                            +
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => handleRemoveItemFromOrder(item.id)}
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
                       </div>
                     ))}
                   </div>
-                </div>
-
-                {/* Selected Items */}
-                {selectedItems.length > 0 && (
-                  <div className="space-y-4">
-                    <h3 className="font-medium">Order Items</h3>
-                    <div className="space-y-2">
-                      {selectedItems.map((item) => (
-                        <div key={item.id} className="flex items-center justify-between p-3 bg-accent/50 rounded">
-                          <div>
-                            <span className="font-medium">{item.name}</span>
-                            <span className="text-sm text-muted-foreground ml-2">₹{item.price} each</span>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleUpdateItemQuantity(item.id, item.quantity - 1)}
-                            >
-                              -
-                            </Button>
-                            <span className="w-8 text-center">{item.quantity}</span>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleUpdateItemQuantity(item.id, item.quantity + 1)}
-                            >
-                              +
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              onClick={() => handleRemoveItemFromOrder(item.id)}
-                            >
-                              <Trash2 className="w-3 h-3" />
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    
-                    {/* Order Total */}
-                    <div className="border-t pt-4">
-                      <div className="flex justify-between items-center">
-                        <span className="text-lg font-semibold">Total:</span>
-                        <span className="text-xl font-bold">₹{calculateOrderTotal()}</span>
-                      </div>
+                  
+                  {/* Order Total */}
+                  <div className="border-t pt-4">
+                    <div className="flex justify-between items-center mb-4">
+                      <span className="text-lg font-semibold">Total:</span>
+                      <span className="text-2xl font-bold text-primary">₹{calculateOrderTotal()}</span>
                     </div>
 
-                    {/* Payment Method */}
-                    <div>
-                      <Label>Payment Method</Label>
-                      <Select value={newOrder.paymentMethod} onValueChange={(value) => setNewOrder({...newOrder, paymentMethod: value})}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="pending">Pending Payment</SelectItem>
-                          <SelectItem value="cash">Cash</SelectItem>
-                          <SelectItem value="card">Card</SelectItem>
-                          <SelectItem value="upi">UPI</SelectItem>
-                        </SelectContent>
-                      </Select>
+                    {/* Action Buttons */}
+                    <div className="flex space-x-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setSelectedItems([]);
+                          setIsMenuModalOpen(false);
+                        }}
+                        className="flex-1"
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={handleCreateManualOrder}
+                        disabled={selectedItems.length === 0}
+                        className="flex-1"
+                        size="lg"
+                      >
+                        Create Order
+                      </Button>
                     </div>
-
-                    {/* Create Order Button */}
-                    <Button
-                      onClick={handleCreateManualOrder}
-                      disabled={!newOrder.customerName || selectedItems.length === 0}
-                      className="w-full"
-                      size="lg"
-                    >
-                      Create Order (₹{calculateOrderTotal()})
-                    </Button>
                   </div>
-                )}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
