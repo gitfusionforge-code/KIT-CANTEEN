@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation } from 'wouter';
 import { ArrowLeft, Star, Camera, Send } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,10 +7,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 
 const RateReviewPage = () => {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const orderId = searchParams.get('orderId');
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
+  
+  // Get orderId from URL search params
+  const urlParams = new URLSearchParams(window.location.search);
+  const orderId = urlParams.get('orderId');
 
   // Mock order data
   const orderData = {
@@ -97,7 +99,7 @@ const RateReviewPage = () => {
       description: "Your feedback helps us improve our service.",
     });
     
-    navigate('/orders');
+    setLocation('/orders');
   };
 
   return (
@@ -108,7 +110,7 @@ const RateReviewPage = () => {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate(-1)}
+            onClick={() => setLocation('/orders')}
             className="shrink-0"
           >
             <ArrowLeft className="h-5 w-5" />

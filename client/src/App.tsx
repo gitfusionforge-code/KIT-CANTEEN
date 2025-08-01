@@ -1,7 +1,8 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "@/lib/queryClient";
 import { Router, Route, Switch } from "wouter";
 import SplashScreen from "./components/SplashScreen";
 import LoginScreen from "./components/LoginScreen";
@@ -58,8 +59,6 @@ import CanteenOrderDetailPage from "./components/CanteenOrderDetailPage";
 import BarcodeScannerPage from "./components/BarcodeScannerPage";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-
-const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
