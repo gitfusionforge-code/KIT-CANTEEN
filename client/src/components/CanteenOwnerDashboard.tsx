@@ -285,7 +285,7 @@ export default function CanteenOwnerDashboard() {
             <Button 
               variant="outline" 
               size="sm"
-              onClick={() => navigate("/barcode-scanner")}
+              onClick={() => setLocation("/barcode-scanner")}
             >
               <ScanLine className="w-4 h-4 mr-2" />
               Enter Order
@@ -301,7 +301,7 @@ export default function CanteenOwnerDashboard() {
             <Button 
               variant="ghost" 
               size="sm"
-              onClick={() => navigate("/login")}
+              onClick={() => setLocation("/login")}
             >
               Logout
             </Button>
@@ -354,7 +354,7 @@ export default function CanteenOwnerDashboard() {
                     <div 
                       key={order.id} 
                       className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-accent/50 transition-colors"
-                      onClick={() => navigate(`/canteen-order-detail/${order.id.replace('#', '')}`, { state: { from: '/canteen-owner' } })}
+                      onClick={() => setLocation(`/canteen-order-detail/${order.id.replace('#', '')}`)}
                     >
                       <div className="flex-1">
                         <div className="flex items-center space-x-2">
@@ -398,7 +398,7 @@ export default function CanteenOwnerDashboard() {
                         <div key={order.id} className="p-4 border rounded-lg space-y-3">
                           <div 
                             className="flex items-center justify-between cursor-pointer hover:bg-accent/20 -m-2 p-2 rounded transition-colors"
-                            onClick={() => navigate(`/canteen-order-detail/${order.id.replace('#', '')}`, { state: { from: '/canteen-owner' } })}
+                            onClick={() => setLocation(`/canteen-order-detail/${order.id.replace('#', '')}`)}
                           >
                             <div className="flex items-center space-x-3">
                               <span className="font-semibold">{order.id}</span>
@@ -416,7 +416,7 @@ export default function CanteenOwnerDashboard() {
                           
                           <div 
                             className="cursor-pointer hover:bg-accent/20 -mx-2 px-2 py-1 rounded transition-colors"
-                            onClick={() => navigate(`/canteen-order-detail/${order.id.replace('#', '')}`, { state: { from: '/canteen-owner' } })}
+                            onClick={() => setLocation(`/canteen-order-detail/${order.id.replace('#', '')}`)}
                           >
                             <p className="text-sm text-muted-foreground">Customer: {order.customer}</p>
                             <p className="text-sm">{order.items}</p>

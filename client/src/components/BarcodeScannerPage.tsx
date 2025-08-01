@@ -95,7 +95,7 @@ export default function BarcodeScannerPage() {
           <Button 
             variant="ghost" 
             size="sm" 
-            onClick={() => navigate(-1)}
+            onClick={() => setLocation("/canteen-owner")}
             className="flex items-center"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />

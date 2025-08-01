@@ -103,7 +103,7 @@ export default function MenuListingPage() {
       {/* Menu Items */}
       <div className="p-4 space-y-4">
         {filteredItems.map((item) => (
-          <Card key={item.id} className="shadow-card cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate(`/dish/${item.id}`, { state: { from: `/menu/${category}` } })}>
+          <Card key={item.id} className="shadow-card cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setLocation(`/dish/${item.id}`, { state: { from: `/menu/${category}` } })}>
             <CardContent className="p-0">
               <div className="flex">
                 {/* Image */}

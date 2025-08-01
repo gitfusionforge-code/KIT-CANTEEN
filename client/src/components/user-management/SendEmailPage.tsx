@@ -132,7 +132,7 @@ export default function SendEmailPage() {
           </Card>
 
           <div className="flex space-x-4">
-            <Button variant="outline" onClick={() => navigate("/admin/user-management")}>
+            <Button variant="outline" onClick={() => setLocation("/admin/user-management")}>
               Cancel
             </Button>
             <Button 
