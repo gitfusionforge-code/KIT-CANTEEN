@@ -234,24 +234,7 @@ export default function CanteenOwnerDashboard() {
     toast.success(`Stock updated for ${stockUpdateItem.name}`);
   };
 
-  const handleQuickStockUpdate = (itemId: any, change: number) => {
-    setMenuItems(menuItems.map(item => {
-      if (item.id === itemId) {
-        const newStock = Math.max(0, item.stock + change);
-        return { 
-          ...item, 
-          stock: newStock, 
-          available: newStock > 0 
-        };
-      }
-      return item;
-    }));
-    
-    const item = menuItems.find(i => i.id === itemId);
-    if (item) {
-      toast.success(`${item.name} stock ${change > 0 ? 'increased' : 'decreased'}`);
-    }
-  };
+
 
 
 
@@ -771,30 +754,13 @@ export default function CanteenOwnerDashboard() {
                             </p>
                           )}
                         </div>
-                        <div className="flex items-center space-x-2">
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            onClick={() => handleQuickStockUpdate(item.id, -1)}
-                            disabled={item.stock === 0}
-                          >
-                            -
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            onClick={() => handleQuickStockUpdate(item.id, 1)}
-                          >
-                            +
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            onClick={() => handleUpdateStock(item)}
-                          >
-                            Update Stock
-                          </Button>
-                        </div>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleUpdateStock(item)}
+                        >
+                          Update Stock
+                        </Button>
                       </div>
                     </div>
                   ))}
