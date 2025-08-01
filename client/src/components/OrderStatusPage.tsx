@@ -5,6 +5,62 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle, Clock, ChefHat, Package, Phone, ArrowLeft } from "lucide-react";
 
+// Code 128 Barcode Generator Component
+const BarcodeGenerator = ({ orderId }: { orderId: string }) => {
+  // Code 128 encoding patterns for digits 0-9
+  const code128Patterns: { [key: string]: string } = {
+    '0': '11011001100',
+    '1': '11001101100', 
+    '2': '11001100110',
+    '3': '10010011000',
+    '4': '10010001100',
+    '5': '10001001100',
+    '6': '10011001000',
+    '7': '10011000100',
+    '8': '10001100100',
+    '9': '11001001000',
+    'start': '11010000100', // Start Code B
+    'stop': '1100011101011' // Stop pattern
+  };
+
+  // Generate barcode pattern for the order ID
+  const generateBarcodePattern = (id: string) => {
+    let pattern = code128Patterns['start']; // Start code
+    
+    // Add each digit of the order ID
+    for (let i = 0; i < id.length; i++) {
+      const digit = id[i];
+      if (code128Patterns[digit]) {
+        pattern += code128Patterns[digit];
+      }
+    }
+    
+    pattern += code128Patterns['stop']; // Stop code
+    return pattern;
+  };
+
+  const pattern = generateBarcodePattern(orderId);
+  let xPos = 10;
+  const barWidth = 2;
+  const barHeight = 40;
+
+  return (
+    <svg width="250" height="60" viewBox="0 0 250 60" className="mx-auto">
+      <rect width="250" height="60" fill="white"/>
+      {pattern.split('').map((bit, index) => {
+        if (bit === '1') {
+          const rect = <rect key={index} x={xPos} y="10" width={barWidth} height={barHeight} fill="black"/>;
+          xPos += barWidth;
+          return rect;
+        } else {
+          xPos += barWidth;
+          return null;
+        }
+      })}
+    </svg>
+  );
+};
+
 export default function OrderStatusPage() {
   const [, setLocation] = useLocation();
   const { orderId } = useParams();
@@ -102,63 +158,17 @@ export default function OrderStatusPage() {
               Order Barcode
             </h3>
             <div className="bg-accent/50 rounded-lg p-4 text-center">
-              {/* Linear Barcode */}
-              <div className="bg-white p-4 rounded-lg inline-block mb-3">
-                <svg width="200" height="60" viewBox="0 0 200 60" className="mx-auto">
-                  <rect width="200" height="60" fill="white"/>
-                  {/* Barcode pattern - representing order ID */}
-                  <rect x="10" y="10" width="2" height="40" fill="black"/>
-                  <rect x="14" y="10" width="1" height="40" fill="black"/>
-                  <rect x="17" y="10" width="3" height="40" fill="black"/>
-                  <rect x="22" y="10" width="1" height="40" fill="black"/>
-                  <rect x="25" y="10" width="2" height="40" fill="black"/>
-                  <rect x="29" y="10" width="1" height="40" fill="black"/>
-                  <rect x="32" y="10" width="4" height="40" fill="black"/>
-                  <rect x="38" y="10" width="1" height="40" fill="black"/>
-                  <rect x="41" y="10" width="2" height="40" fill="black"/>
-                  <rect x="45" y="10" width="1" height="40" fill="black"/>
-                  <rect x="48" y="10" width="3" height="40" fill="black"/>
-                  <rect x="53" y="10" width="2" height="40" fill="black"/>
-                  <rect x="57" y="10" width="1" height="40" fill="black"/>
-                  <rect x="60" y="10" width="2" height="40" fill="black"/>
-                  <rect x="64" y="10" width="1" height="40" fill="black"/>
-                  <rect x="67" y="10" width="3" height="40" fill="black"/>
-                  <rect x="72" y="10" width="1" height="40" fill="black"/>
-                  <rect x="75" y="10" width="2" height="40" fill="black"/>
-                  <rect x="79" y="10" width="4" height="40" fill="black"/>
-                  <rect x="85" y="10" width="1" height="40" fill="black"/>
-                  <rect x="88" y="10" width="2" height="40" fill="black"/>
-                  <rect x="92" y="10" width="1" height="40" fill="black"/>
-                  <rect x="95" y="10" width="3" height="40" fill="black"/>
-                  <rect x="100" y="10" width="1" height="40" fill="black"/>
-                  <rect x="103" y="10" width="2" height="40" fill="black"/>
-                  <rect x="107" y="10" width="1" height="40" fill="black"/>
-                  <rect x="110" y="10" width="4" height="40" fill="black"/>
-                  <rect x="116" y="10" width="2" height="40" fill="black"/>
-                  <rect x="120" y="10" width="1" height="40" fill="black"/>
-                  <rect x="123" y="10" width="3" height="40" fill="black"/>
-                  <rect x="128" y="10" width="1" height="40" fill="black"/>
-                  <rect x="131" y="10" width="2" height="40" fill="black"/>
-                  <rect x="135" y="10" width="1" height="40" fill="black"/>
-                  <rect x="138" y="10" width="3" height="40" fill="black"/>
-                  <rect x="143" y="10" width="2" height="40" fill="black"/>
-                  <rect x="147" y="10" width="1" height="40" fill="black"/>
-                  <rect x="150" y="10" width="4" height="40" fill="black"/>
-                  <rect x="156" y="10" width="1" height="40" fill="black"/>
-                  <rect x="159" y="10" width="2" height="40" fill="black"/>
-                  <rect x="163" y="10" width="1" height="40" fill="black"/>
-                  <rect x="166" y="10" width="3" height="40" fill="black"/>
-                  <rect x="171" y="10" width="1" height="40" fill="black"/>
-                  <rect x="174" y="10" width="2" height="40" fill="black"/>
-                  <rect x="178" y="10" width="1" height="40" fill="black"/>
-                  <rect x="181" y="10" width="3" height="40" fill="black"/>
-                  <rect x="186" y="10" width="2" height="40" fill="black"/>
-                  <rect x="190" y="10" width="1" height="40" fill="black"/>
-                </svg>
+              {/* Code 128 Barcode for Order ID */}
+              <div className="bg-white p-4 rounded-lg inline-block mb-3 border-2 border-gray-200">
+                <BarcodeGenerator orderId={orderDetails.id} />
+                {/* Human readable text below barcode */}
+                <div className="text-xs font-mono mt-2 tracking-widest text-center">
+                  {orderDetails.id}
+                </div>
               </div>
               <p className="font-bold text-lg mb-1">Order ID: {orderDetails.id}</p>
               <p className="text-sm text-muted-foreground">
-                Show this barcode to canteen staff for pickup
+                Scannable barcode for staff verification
               </p>
             </div>
           </CardContent>
