@@ -13,17 +13,46 @@ export default function LoginScreen() {
   // Handle Firebase redirect result on component mount
   useEffect(() => {
     handleGoogleRedirect()
-      .then((result) => {
+      .then(async (result) => {
         if (result) {
           toast({ title: "Google sign-in successful!" });
-          // Store user data and redirect
-          localStorage.setItem('user', JSON.stringify({
-            id: result.user.uid,
-            name: result.user.displayName,
-            email: result.user.email,
-            role: 'student'
-          }));
-          setLocation('/home');
+          
+          // Check if user has admin privileges
+          try {
+            const response = await fetch(`/api/users/by-username/${result.user.email}`);
+            let userRole = 'student';
+            
+            if (response.ok) {
+              const userData = await response.json();
+              userRole = userData.role;
+            }
+            
+            // Store user data with actual role from database
+            localStorage.setItem('user', JSON.stringify({
+              id: result.user.uid,
+              name: result.user.displayName,
+              email: result.user.email,
+              role: userRole
+            }));
+            
+            // Redirect based on role
+            if (userRole === 'super_admin') {
+              toast({ title: "Welcome Super Admin!" });
+              setLocation('/admin');
+            } else {
+              setLocation('/home');
+            }
+          } catch (error) {
+            console.error("Error checking user role:", error);
+            // Default to student role if API fails
+            localStorage.setItem('user', JSON.stringify({
+              id: result.user.uid,
+              name: result.user.displayName,
+              email: result.user.email,
+              role: 'student'
+            }));
+            setLocation('/home');
+          }
         }
       })
       .catch((error) => {
@@ -44,15 +73,42 @@ export default function LoginScreen() {
       if (result.user) {
         toast({ title: "Successfully signed in!" });
         
-        // Store user data
-        localStorage.setItem('user', JSON.stringify({
-          id: result.user.uid,
-          name: result.user.displayName,
-          email: result.user.email,
-          role: 'student'
-        }));
-        
-        setLocation("/home");
+        // Check if user has admin privileges
+        try {
+          const response = await fetch(`/api/users/by-username/${result.user.email}`);
+          let userRole = 'student';
+          
+          if (response.ok) {
+            const userData = await response.json();
+            userRole = userData.role;
+          }
+          
+          // Store user data with actual role from database
+          localStorage.setItem('user', JSON.stringify({
+            id: result.user.uid,
+            name: result.user.displayName,
+            email: result.user.email,
+            role: userRole
+          }));
+          
+          // Redirect based on role
+          if (userRole === 'super_admin') {
+            toast({ title: "Welcome Super Admin!" });
+            setLocation("/admin");
+          } else {
+            setLocation("/home");
+          }
+        } catch (error) {
+          console.error("Error checking user role:", error);
+          // Default to student role if API fails
+          localStorage.setItem('user', JSON.stringify({
+            id: result.user.uid,
+            name: result.user.displayName,
+            email: result.user.email,
+            role: 'student'
+          }));
+          setLocation("/home");
+        }
       }
     } catch (error: any) {
       console.error("Google sign-in error:", error);
