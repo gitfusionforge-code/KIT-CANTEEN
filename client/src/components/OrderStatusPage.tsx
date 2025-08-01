@@ -1,63 +1,56 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation, useParams } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle, Clock, ChefHat, Package, Phone, ArrowLeft } from "lucide-react";
+import JsBarcode from 'jsbarcode';
 
-// Code 128 Barcode Generator Component
+// Real Barcode Generator Component using JsBarcode library
 const BarcodeGenerator = ({ orderId }: { orderId: string }) => {
-  // Code 128 encoding patterns for digits 0-9
-  const code128Patterns: { [key: string]: string } = {
-    '0': '11011001100',
-    '1': '11001101100', 
-    '2': '11001100110',
-    '3': '10010011000',
-    '4': '10010001100',
-    '5': '10001001100',
-    '6': '10011001000',
-    '7': '10011000100',
-    '8': '10001100100',
-    '9': '11001001000',
-    'start': '11010000100', // Start Code B
-    'stop': '1100011101011' // Stop pattern
-  };
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // Generate barcode pattern for the order ID
-  const generateBarcodePattern = (id: string) => {
-    let pattern = code128Patterns['start']; // Start code
-    
-    // Add each digit of the order ID
-    for (let i = 0; i < id.length; i++) {
-      const digit = id[i];
-      if (code128Patterns[digit]) {
-        pattern += code128Patterns[digit];
+  useEffect(() => {
+    if (canvasRef.current) {
+      try {
+        // Generate a proper Code 128 barcode
+        JsBarcode(canvasRef.current, orderId, {
+          format: "CODE128",
+          width: 2,
+          height: 60,
+          displayValue: true,
+          background: "#ffffff",
+          lineColor: "#000000",
+          margin: 10,
+          fontSize: 14,
+          textAlign: "center",
+          textPosition: "bottom"
+        });
+      } catch (error) {
+        console.error('Barcode generation error:', error);
+        // Fallback: display order ID as text
+        const canvas = canvasRef.current;
+        const ctx = canvas?.getContext('2d');
+        if (ctx && canvas) {
+          canvas.width = 250;
+          canvas.height = 80;
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.fillStyle = '#000000';
+          ctx.font = '16px monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText(`Order: ${orderId}`, canvas.width/2, canvas.height/2);
+        }
       }
     }
-    
-    pattern += code128Patterns['stop']; // Stop code
-    return pattern;
-  };
-
-  const pattern = generateBarcodePattern(orderId);
-  let xPos = 10;
-  const barWidth = 2;
-  const barHeight = 40;
+  }, [orderId]);
 
   return (
-    <svg width="250" height="60" viewBox="0 0 250 60" className="mx-auto">
-      <rect width="250" height="60" fill="white"/>
-      {pattern.split('').map((bit, index) => {
-        if (bit === '1') {
-          const rect = <rect key={index} x={xPos} y="10" width={barWidth} height={barHeight} fill="black"/>;
-          xPos += barWidth;
-          return rect;
-        } else {
-          xPos += barWidth;
-          return null;
-        }
-      })}
-    </svg>
+    <canvas 
+      ref={canvasRef}
+      className="mx-auto"
+      style={{ maxWidth: '100%', height: 'auto' }}
+    />
   );
 };
 
@@ -158,17 +151,13 @@ export default function OrderStatusPage() {
               Order Barcode
             </h3>
             <div className="bg-accent/50 rounded-lg p-4 text-center">
-              {/* Code 128 Barcode for Order ID */}
+              {/* Real Code 128 Barcode using JsBarcode library */}
               <div className="bg-white p-4 rounded-lg inline-block mb-3 border-2 border-gray-200">
                 <BarcodeGenerator orderId={orderDetails.id} />
-                {/* Human readable text below barcode */}
-                <div className="text-xs font-mono mt-2 tracking-widest text-center">
-                  {orderDetails.id}
-                </div>
               </div>
               <p className="font-bold text-lg mb-1">Order ID: {orderDetails.id}</p>
               <p className="text-sm text-muted-foreground">
-                Scannable barcode for staff verification
+                Scannable Code 128 barcode for quick order verification
               </p>
             </div>
           </CardContent>
