@@ -1,17 +1,17 @@
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
 export default function LoginScreen() {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
 
   const handleGoogleSignIn = () => {
     // Simulate login success
-    navigate("/home");
+    setLocation("/home");
   };
 
   const handleSkip = () => {
-    navigate("/home");
+    setLocation("/home");
   };
 
   return (
@@ -62,7 +62,7 @@ export default function LoginScreen() {
               <p className="text-sm text-muted-foreground mb-4">Dashboard Access</p>
             </div>
             <Button
-              onClick={() => navigate("/canteen-owner")}
+              onClick={() => setLocation("/canteen-owner")}
               variant="outline"
               size="mobile"
               className="w-full"
@@ -70,7 +70,7 @@ export default function LoginScreen() {
               Canteen Owner Login
             </Button>
             <Button
-              onClick={() => navigate("/admin")}
+              onClick={() => setLocation("/admin")}
               variant="outline"
               size="mobile"
               className="w-full"

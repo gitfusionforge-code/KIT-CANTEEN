@@ -1,10 +1,10 @@
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Users, Target, Award, Heart, Clock, Utensils } from "lucide-react";
 
 export default function AboutPage() {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
 
   const features = [
     {
@@ -41,7 +41,7 @@ export default function AboutPage() {
       {/* Header */}
       <div className="bg-primary text-primary-foreground px-4 py-4 sticky top-0 z-10">
         <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="icon" className="text-white" onClick={() => navigate('/home')}>
+          <Button variant="ghost" size="icon" className="text-white" onClick={() => setLocation('/home')}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <h1 className="text-xl font-semibold">About Us</h1>
@@ -142,7 +142,7 @@ export default function AboutPage() {
             <p className="text-sm text-muted-foreground mb-4">
               Have suggestions or feedback? We'd love to hear from you!
             </p>
-            <Button onClick={() => navigate('/help-support')}>
+            <Button onClick={() => setLocation('/help-support')}>
               Contact Us
             </Button>
           </CardContent>

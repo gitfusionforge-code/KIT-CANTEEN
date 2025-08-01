@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 
 export default function AdminPanel() {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("overview");
   
   // Mock data
@@ -70,7 +70,7 @@ export default function AdminPanel() {
               <Download className="w-4 h-4 mr-2" />
               Export Data
             </Button>
-            <Button variant="food" size="sm" onClick={() => navigate("/login")}>
+            <Button variant="food" size="sm" onClick={() => setLocation("/login")}>
               Logout
             </Button>
           </div>

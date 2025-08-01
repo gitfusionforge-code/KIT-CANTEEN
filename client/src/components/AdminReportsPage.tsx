@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 
 export default function AdminReportsPage() {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const [dateRange, setDateRange] = useState<any>();
   const [reportType, setReportType] = useState("revenue");
 
@@ -70,7 +70,7 @@ export default function AdminReportsPage() {
             <Button 
               variant="ghost" 
               size="icon"
-              onClick={() => navigate("/admin")}
+              onClick={() => setLocation("/admin")}
             >
               <ArrowLeft className="w-4 h-4" />
             </Button>
