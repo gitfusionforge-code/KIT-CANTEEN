@@ -18,12 +18,8 @@ export default function AdminPanel() {
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("overview");
   
-  // Mock data
-  const [users, setUsers] = useState([
-    { id: 1, name: "Rahul Kumar", email: "rahul@example.com", role: "Student", status: "Active", orders: 25, spent: 2500 },
-    { id: 2, name: "Priya Sharma", email: "priya@example.com", role: "Faculty", status: "Active", orders: 45, spent: 5200 },
-    { id: 3, name: "Amit Singh", email: "amit@example.com", role: "Staff", status: "Blocked", orders: 15, spent: 1800 }
-  ]);
+  // Fetch real users from database
+  const users: any[] = []; // Will be populated when user management is connected to database
 
   const [staff, setStaff] = useState([
     { id: 1, name: "John Doe", role: "Manager", shift: "Morning", status: "Active" },

@@ -82,7 +82,7 @@ export default function ViewAllQuickPicksPage() {
         <div className="flex justify-center items-center h-64">
           <Loader2 className="w-8 h-8 animate-spin" />
         </div>
-        <BottomNavigation />
+        <BottomNavigation currentPage="home" />
       </div>
     );
   }
@@ -213,7 +213,7 @@ export default function ViewAllQuickPicksPage() {
         )}
       </div>
 
-      <BottomNavigation />
+      <BottomNavigation currentPage="home" />
     </div>
   );
 }

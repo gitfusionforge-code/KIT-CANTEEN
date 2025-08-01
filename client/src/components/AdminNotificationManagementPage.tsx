@@ -17,117 +17,11 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-// Initial data for templates
-const initialNotificationTemplates = [
-  {
-    id: 1,
-    category: "Food Craving",
-    title: "Biryani calls your name! 🍛",
-    message: "Your favorite aromatic biryani is waiting for you. Order now and satisfy those cravings!",
-    emoji: "🍛",
-    timing: "Lunch Time",
-    isActive: true
-  },
-  {
-    id: 2,
-    category: "Romantic",
-    title: "Pizza date night? 💕",
-    message: "Nothing says love like sharing a cheesy pizza together. Make tonight special!",
-    emoji: "🍕",
-    timing: "Evening",
-    isActive: true
-  },
-  {
-    id: 3,
-    category: "Morning Boost",
-    title: "Good morning, sunshine! ☀️",
-    message: "Start your day right with our fresh breakfast combos and aromatic coffee!",
-    emoji: "☕",
-    timing: "Morning",
-    isActive: true
-  },
-  {
-    id: 4,
-    category: "Weekend Vibes",
-    title: "Weekend mood: Burger & Chill 🍔",
-    message: "Kick back and relax with our juicy burgers. Perfect for your weekend vibes!",
-    emoji: "🍔",
-    timing: "Weekend",
-    isActive: false
-  },
-  {
-    id: 5,
-    category: "Sweet Tooth",
-    title: "Life's too short to skip dessert 🍰",
-    message: "Treat yourself to our heavenly desserts. Because you deserve something sweet today!",
-    emoji: "🍰",
-    timing: "Afternoon",
-    isActive: true
-  },
-  {
-    id: 6,
-    category: "Comfort Food",
-    title: "Feeling stressed? Pasta therapy! 🍝",
-    message: "Let our creamy, comforting pasta dishes melt your stress away. Order your therapy now!",
-    emoji: "🍝",
-    timing: "Evening",
-    isActive: true
-  },
-  {
-    id: 7,
-    category: "Healthy Choice",
-    title: "Your body will thank you! 🥗",
-    message: "Fresh salads and healthy bowls that taste amazing. Fuel your body right!",
-    emoji: "🥗",
-    timing: "Lunch Time",
-    isActive: false
-  },
-  {
-    id: 8,
-    category: "Spicy Mood",
-    title: "Feeling spicy today? 🌶️",
-    message: "Turn up the heat with our fiery dishes. Perfect for those who like it hot!",
-    emoji: "🌶️",
-    timing: "Dinner",
-    isActive: true
-  }
-];
+// Empty templates - fetch from database when notification system is implemented
+const initialNotificationTemplates: any[] = [];
 
-// Initial automation settings
-const initialAutomationSettings = [
-  {
-    id: 1,
-    name: "Morning Motivation",
-    description: "Send breakfast promotions every morning",
-    frequency: "Daily at 8:00 AM",
-    status: "Active",
-    recipients: 2450
-  },
-  {
-    id: 2,
-    name: "Lunch Rush",
-    description: "Promote lunch specials during peak hours",
-    frequency: "Daily at 11:30 AM",
-    status: "Active",
-    recipients: 3200
-  },
-  {
-    id: 3,
-    name: "Weekend Indulgence",
-    description: "Special weekend food campaigns",
-    frequency: "Saturdays at 12:00 PM",
-    status: "Paused",
-    recipients: 1800
-  },
-  {
-    id: 4,
-    name: "Evening Cravings",
-    description: "Dinner and comfort food notifications",
-    frequency: "Daily at 6:00 PM",
-    status: "Active",
-    recipients: 2800
-  }
-];
+// Empty automation settings - fetch from database when automation system is implemented  
+const initialAutomationSettings: any[] = [];
 
 export default function AdminNotificationManagementPage() {
   const [, setLocation] = useLocation();
@@ -146,45 +40,8 @@ export default function AdminNotificationManagementPage() {
     timing: ""
   });
 
-  // Recent automated notifications sent
-  const recentNotifications = [
-    {
-      id: 1,
-      template: "Biryani calls your name! 🍛",
-      sentTo: 2450,
-      openRate: "82%",
-      clickRate: "34%",
-      sentAt: "Today, 11:30 AM",
-      status: "Delivered"
-    },
-    {
-      id: 2,
-      template: "Pizza date night? 💕",
-      sentTo: 1800,
-      openRate: "76%",
-      clickRate: "28%",
-      sentAt: "Yesterday, 6:00 PM",
-      status: "Delivered"
-    },
-    {
-      id: 3,
-      template: "Good morning, sunshine! ☀️",
-      sentTo: 3200,
-      openRate: "68%",
-      clickRate: "22%",
-      sentAt: "Today, 8:00 AM",
-      status: "Delivered"
-    },
-    {
-      id: 4,
-      template: "Weekend mood: Burger & Chill 🍔",
-      sentTo: 2100,
-      openRate: "85%",
-      clickRate: "41%",
-      sentAt: "Saturday, 12:00 PM",
-      status: "Delivered"
-    }
-  ];
+  // Empty recent notifications - will be populated from database when notification system is implemented
+  const recentNotifications: any[] = [];
 
   const getStatusColor = (status: string) => {
     switch (status) {

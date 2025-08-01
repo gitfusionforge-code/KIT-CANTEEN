@@ -1,212 +1,191 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Clock, Package, Star } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
+import { ArrowLeft, Search, Clock, CheckCircle, Package, Loader2, Receipt } from "lucide-react";
 import BottomNavigation from "./BottomNavigation";
+import type { Order } from "@shared/schema";
 
 export default function OrdersPage() {
   const [, setLocation] = useLocation();
-  const [activeTab, setActiveTab] = useState<"active" | "completed">("active");
+  const { toast } = useToast();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
 
-  const activeOrders = [
-    {
-      id: "12345",
-      items: ["Veg Thali x2", "Masala Tea x1"],
-      total: 194,
-      time: "2:30 PM",
-      status: "preparing",
-      estimatedTime: "5 mins left"
-    }
-  ];
-
-  const completedOrders = [
-    {
-      id: "12344",
-      items: ["Samosa x2", "Coffee x1"],
-      total: 60,
-      time: "Yesterday, 1:15 PM",
-      status: "completed",
-      rating: 4.5
-    },
-    {
-      id: "12343",
-      items: ["Chole Bhature x1", "Lassi x1"],
-      total: 95,
-      time: "2 days ago, 12:45 PM",
-      status: "completed",
-      rating: 4.2
-    },
-    {
-      id: "12342",
-      items: ["Dosa x1", "Filter Coffee x1"],
-      total: 75,
-      time: "3 days ago, 2:20 PM",
-      status: "completed",
-      rating: 4.8
-    }
-  ];
+  // Fetch real orders from database
+  const { data: orders = [], isLoading } = useQuery<Order[]>({
+    queryKey: ['/api/orders'],
+  });
 
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case "preparing": return "bg-warning";
-      case "ready": return "bg-success";
-      case "completed": return "bg-muted";
-      default: return "bg-muted";
+    switch (status?.toLowerCase()) {
+      case 'pending': return 'bg-yellow-100 text-yellow-800';
+      case 'preparing': return 'bg-blue-100 text-blue-800';
+      case 'ready': return 'bg-green-100 text-green-800';
+      case 'delivered': return 'bg-gray-100 text-gray-800';
+      case 'cancelled': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
+
+  const getStatusIcon = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case 'pending': return <Clock className="w-4 h-4" />;
+      case 'preparing': return <Package className="w-4 h-4" />;
+      case 'ready': 
+      case 'delivered': return <CheckCircle className="w-4 h-4" />;
+      default: return <Clock className="w-4 h-4" />;
+    }
+  };
+
+  const filteredOrders = orders.filter(order => {
+    const matchesSearch = order.id.toString().includes(searchTerm.toLowerCase());
+    const matchesStatus = filterStatus === "all" || order.status?.toLowerCase() === filterStatus;
+    return matchesSearch && matchesStatus;
+  });
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <div className="bg-primary px-4 pt-12 pb-6">
+          <div className="flex items-center space-x-4">
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => setLocation("/home")}
+              className="text-white hover:bg-white/20"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <div>
+              <h1 className="text-xl font-bold text-white">My Orders</h1>
+            </div>
+          </div>
+        </div>
+        <div className="flex justify-center items-center h-64">
+          <Loader2 className="w-8 h-8 animate-spin" />
+        </div>
+        <BottomNavigation currentPage="orders" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
-      <div className="bg-white border-b px-4 py-4 sticky top-0 z-10">
-        <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="icon" onClick={() => setLocation('/home')}>
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <h1 className="text-xl font-bold">My Orders</h1>
-        </div>
-
-        {/* Tabs */}
-        <div className="flex space-x-8 mt-4">
-          {[
-            { id: "active", label: "Active" },
-            { id: "completed", label: "Completed" }
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`pb-2 font-medium transition-colors ${
-                activeTab === tab.id
-                  ? "text-primary border-b-2 border-primary"
-                  : "text-muted-foreground"
-              }`}
+      <div className="bg-primary px-4 pt-12 pb-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => setLocation("/home")}
+              className="text-white hover:bg-white/20"
             >
-              {tab.label}
-            </button>
-          ))}
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <div>
+              <h1 className="text-xl font-bold text-white">My Orders</h1>
+              <p className="text-white/80 text-sm">
+                {orders.length > 0 ? `${orders.length} orders found` : "No orders yet"}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="px-4 py-6">
-        {activeTab === "active" ? (
-          <div className="space-y-4">
-            {activeOrders.length > 0 ? (
-              activeOrders.map((order) => (
-                <Card 
-                  key={order.id} 
-                  className="shadow-card cursor-pointer hover:shadow-lg transition-shadow"
-                  onClick={() => setLocation(`/order-status/${order.id}`)}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-start mb-3">
-                      <div>
-                        <div className="flex items-center space-x-2 mb-1">
-                          <h3 className="font-semibold">Order #{order.id}</h3>
-                          <Badge className={getStatusColor(order.status)}>
-                            {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground">{order.time}</p>
-                      </div>
-                      <p className="font-bold text-lg">₹{order.total}</p>
-                    </div>
-
-                    <div className="space-y-2 mb-4">
-                      {order.items.map((item, index) => (
-                        <p key={index} className="text-sm">{item}</p>
-                      ))}
-                    </div>
-
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                        <Clock className="w-4 h-4" />
-                        <span>{order.estimatedTime}</span>
-                      </div>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => setLocation(`/order-status/${order.id}`)}
-                      >
-                        Track Order
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            ) : (
-              <div className="text-center py-12">
-                <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Package className="w-12 h-12 text-muted-foreground" />
+      <div className="px-4 space-y-4 -mt-3">
+        {/* Search and Filter */}
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                  <Input
+                    placeholder="Search by order ID..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
                 </div>
-                <h3 className="text-lg font-semibold mb-2">No Active Orders</h3>
-                <p className="text-muted-foreground mb-6">
-                  You don't have any active orders right now
-                </p>
-                <Button variant="food" onClick={() => setLocation("/home")}>
-                  Order Now
-                </Button>
               </div>
-            )}
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {completedOrders.map((order) => (
-              <Card 
-                key={order.id} 
-                className="shadow-card cursor-pointer hover:shadow-lg transition-shadow"
-                onClick={() => setLocation(`/order-detail/${order.id}`)}
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                className="px-3 py-2 border rounded-md"
               >
+                <option value="all">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="preparing">Preparing</option>
+                <option value="ready">Ready</option>
+                <option value="delivered">Delivered</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Orders List */}
+        {filteredOrders.length === 0 ? (
+          <Card>
+            <CardContent className="p-12 text-center">
+              <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                <Receipt className="w-8 h-8 text-muted-foreground" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2">
+                {orders.length === 0 ? "No orders yet" : "No orders found"}
+              </h3>
+              <p className="text-muted-foreground mb-4">
+                {orders.length === 0 
+                  ? "Start ordering delicious food from our menu!"
+                  : "Try adjusting your search or filter criteria"
+                }
+              </p>
+              <Button onClick={() => setLocation("/home")}>
+                Browse Menu
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-3">
+            {filteredOrders.map((order) => (
+              <Card key={order.id} className="hover:shadow-md transition-shadow">
                 <CardContent className="p-4">
-                  <div className="flex justify-between items-start mb-3">
+                  <div className="flex items-center justify-between mb-3">
                     <div>
-                      <div className="flex items-center space-x-2 mb-1">
-                        <h3 className="font-semibold">Order #{order.id}</h3>
-                        <Badge className={getStatusColor(order.status)}>
-                          Completed
-                        </Badge>
+                      <h3 className="font-semibold">Order #{order.id}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {new Date(order.createdAt).toLocaleDateString()} at{' '}
+                        {new Date(order.createdAt).toLocaleTimeString()}
+                      </p>
+                    </div>
+                    <Badge className={getStatusColor(order.status || 'pending')}>
+                      <div className="flex items-center space-x-1">
+                        {getStatusIcon(order.status || 'pending')}
+                        <span className="capitalize">{order.status || 'Pending'}</span>
                       </div>
-                      <p className="text-sm text-muted-foreground">{order.time}</p>
-                    </div>
-                    <p className="font-bold text-lg">₹{order.total}</p>
+                    </Badge>
                   </div>
 
-                  <div className="space-y-2 mb-4">
-                    {order.items.map((item, index) => (
-                      <p key={index} className="text-sm">{item}</p>
-                    ))}
-                  </div>
-
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center space-x-1">
-                      <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                      <span className="text-sm font-medium">{order.rating}</span>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-lg font-bold">₹{order.totalAmount}</p>
+                      <p className="text-sm text-muted-foreground">
+                        Payment: {order.paymentStatus || 'Pending'}
+                      </p>
                     </div>
-                    <div className="flex space-x-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          console.log('Reorder button clicked, navigating to:', `/reorder?orderId=${order.id}`);
-                          setLocation(`/reorder?orderId=${order.id}`);
-                        }}
-                      >
-                        Reorder
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          console.log('Rate & Review button clicked, navigating to:', `/rate-review?orderId=${order.id}`);
-                          setLocation(`/rate-review?orderId=${order.id}`);
-                        }}
-                      >
-                        Rate & Review
-                      </Button>
-                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setLocation(`/order/${order.id}`)}
+                    >
+                      View Details
+                    </Button>
                   </div>
                 </CardContent>
               </Card>

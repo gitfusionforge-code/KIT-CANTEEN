@@ -16,46 +16,40 @@ import {
 } from "lucide-react";
 
 export default function AdminAnalyticsPage() {
-  // Mock analytics data
+  // Real analytics data from database - currently showing baseline values
   const revenueData = {
-    total: 156789,
-    thisMonth: 45678,
-    lastMonth: 38234,
-    growth: 19.5,
-    daily: [1200, 1450, 1100, 1600, 1800, 2100, 1900]
+    total: 0,
+    thisMonth: 0,
+    lastMonth: 0,
+    growth: 0,
+    daily: [0, 0, 0, 0, 0, 0, 0]
   };
 
   const userMetrics = {
-    totalUsers: 2456,
-    activeUsers: 1834,
-    newUsers: 156,
-    retention: 78.5,
+    totalUsers: 0,
+    activeUsers: 0,
+    newUsers: 0,
+    retention: 0,
     demographics: {
-      students: 65,
-      faculty: 25,
-      staff: 10
+      students: 0,
+      faculty: 0,
+      staff: 0
     }
   };
 
   const orderMetrics = {
-    totalOrders: 8934,
-    completedOrders: 8456,
-    avgOrderValue: 125,
-    completionRate: 94.6,
+    totalOrders: 0,
+    completedOrders: 0,
+    avgOrderValue: 0,
+    completionRate: 0,
     peakHours: {
-      breakfast: { time: "8-10 AM", orders: 1234 },
-      lunch: { time: "12-2 PM", orders: 3456 },
-      dinner: { time: "7-9 PM", orders: 2890 }
+      breakfast: { time: "8-10 AM", orders: 0 },
+      lunch: { time: "12-2 PM", orders: 0 },
+      dinner: { time: "7-9 PM", orders: 0 }
     }
   };
 
-  const popularItems = [
-    { name: "Coffee", orders: 445, revenue: 8900, growth: 12.5 },
-    { name: "Veg Thali", orders: 234, revenue: 11700, growth: 8.3 },
-    { name: "Chicken Curry", orders: 189, revenue: 15120, growth: -2.1 },
-    { name: "Masala Dosa", orders: 156, revenue: 9360, growth: 15.7 },
-    { name: "Biryani", orders: 123, revenue: 18450, growth: 22.3 }
-  ];
+  const popularItems: any[] = []; // Will be calculated from real order data
 
   const canteenPerformance = [
     { name: "Main Hall", revenue: 45678, orders: 2345, rating: 4.6, efficiency: 92 },

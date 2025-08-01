@@ -1,157 +1,228 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Plus, Minus, Tag } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import { ArrowLeft, Plus, Minus, Trash2, ShoppingCart, Loader2 } from "lucide-react";
 import BottomNavigation from "./BottomNavigation";
+import type { MenuItem } from "@shared/schema";
+import { queryClient, apiRequest } from "@/lib/queryClient";
+
+interface CartItem {
+  menuItem: MenuItem;
+  quantity: number;
+}
 
 export default function CartPage() {
   const [, setLocation] = useLocation();
-  const [promoCode, setPromoCode] = useState("");
-  const [cartItems, setCartItems] = useState([
-    { id: 1, name: "Veg Thali", price: 85, quantity: 2, isVeg: true },
-    { id: 2, name: "Masala Tea", price: 15, quantity: 1, isVeg: true }
-  ]);
+  const { toast } = useToast();
+  const [cart, setCart] = useState<CartItem[]>([]);
 
-  const updateQuantity = (id: number, newQuantity: number) => {
-    if (newQuantity === 0) {
-      setCartItems(cartItems.filter(item => item.id !== id));
-    } else {
-      setCartItems(cartItems.map(item => 
-        item.id === id ? { ...item, quantity: newQuantity } : item
-      ));
+  // Fetch menu items in case we need to display them
+  const { data: menuItems = [], isLoading } = useQuery<MenuItem[]>({
+    queryKey: ['/api/menu'],
+  });
+
+  const updateQuantity = (itemId: number, newQuantity: number) => {
+    if (newQuantity <= 0) {
+      setCart(prev => prev.filter(item => item.menuItem.id !== itemId));
+      return;
     }
+    
+    setCart(prev => prev.map(item => 
+      item.menuItem.id === itemId 
+        ? { ...item, quantity: newQuantity }
+        : item
+    ));
   };
 
-  const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const tax = Math.round(subtotal * 0.05); // 5% tax
-  const total = subtotal + tax;
+  const removeItem = (itemId: number) => {
+    setCart(prev => prev.filter(item => item.menuItem.id !== itemId));
+    toast({
+      title: "Item Removed",
+      description: "Item has been removed from your cart",
+    });
+  };
+
+  const getTotalPrice = () => {
+    return cart.reduce((total, item) => total + (item.menuItem.price * item.quantity), 0);
+  };
+
+  const getTotalItems = () => {
+    return cart.reduce((total, item) => total + item.quantity, 0);
+  };
+
+  const proceedToCheckout = () => {
+    if (cart.length === 0) {
+      toast({
+        title: "Cart Empty",
+        description: "Please add items to your cart before proceeding",
+        variant: "destructive"
+      });
+      return;
+    }
+    setLocation("/checkout");
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <div className="bg-primary px-4 pt-12 pb-6">
+          <div className="flex items-center space-x-4">
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => setLocation("/home")}
+              className="text-white hover:bg-white/20"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <div>
+              <h1 className="text-xl font-bold text-white">My Cart</h1>
+            </div>
+          </div>
+        </div>
+        <div className="flex justify-center items-center h-64">
+          <Loader2 className="w-8 h-8 animate-spin" />
+        </div>
+        <BottomNavigation currentPage="cart" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
-      <div className="bg-white border-b px-4 py-4 sticky top-0 z-10">
-        <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="icon" onClick={() => setLocation('/home')}>
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <h1 className="text-xl font-bold">Cart ({cartItems.length} items)</h1>
+      <div className="bg-primary px-4 pt-12 pb-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => setLocation("/home")}
+              className="text-white hover:bg-white/20"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <div>
+              <h1 className="text-xl font-bold text-white">My Cart</h1>
+              <p className="text-white/80 text-sm">
+                {cart.length > 0 ? `${getTotalItems()} items` : "Your cart is empty"}
+              </p>
+            </div>
+          </div>
+          {cart.length > 0 && (
+            <Badge variant="secondary" className="bg-white/20 text-white">
+              ₹{getTotalPrice()}
+            </Badge>
+          )}
         </div>
       </div>
 
-      {cartItems.length === 0 ? (
-        <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
-          <div className="w-32 h-32 bg-muted rounded-full flex items-center justify-center mb-4">
-            <span className="text-4xl">🛒</span>
-          </div>
-          <h2 className="text-xl font-semibold mb-2">Your cart is empty</h2>
-          <p className="text-muted-foreground text-center mb-6">
-            Add some delicious food to get started
-          </p>
-          <Button variant="food" onClick={() => setLocation("/home")}>
-            Browse Menu
-          </Button>
-        </div>
-      ) : (
-        <>
-          {/* Cart Items */}
-          <div className="p-4 space-y-4">
-            {cartItems.map((item) => (
-              <Card key={item.id} className="shadow-card">
-                <CardContent className="p-4">
-                  <div className="flex items-center space-x-4">
-                    <div className={`w-3 h-3 rounded border-2 ${item.isVeg ? 'border-green-600' : 'border-red-600'} flex-shrink-0`}>
-                      <div className={`w-1.5 h-1.5 rounded-full ${item.isVeg ? 'bg-green-600' : 'bg-red-600'} m-0.5`}></div>
+      <div className="px-4 space-y-4 -mt-3">
+        {cart.length === 0 ? (
+          // Empty Cart State
+          <Card>
+            <CardContent className="p-12 text-center">
+              <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                <ShoppingCart className="w-8 h-8 text-muted-foreground" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2">Your cart is empty</h3>
+              <p className="text-muted-foreground mb-4">
+                Looks like you haven't added any items to your cart yet
+              </p>
+              <Button onClick={() => setLocation("/home")}>
+                Browse Menu
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <>
+            {/* Cart Items */}
+            <div className="space-y-3">
+              {cart.map((item) => (
+                <Card key={item.menuItem.id}>
+                  <CardContent className="p-4">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-16 h-16 bg-gradient-to-br from-orange-400 to-red-500 rounded-lg flex-shrink-0 flex items-center justify-center">
+                        <span className="text-white text-lg">🍽️</span>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold">{item.menuItem.name}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          {item.menuItem.description || "Delicious food item"}
+                        </p>
+                        <p className="text-lg font-bold">₹{item.menuItem.price}</p>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => updateQuantity(item.menuItem.id, item.quantity - 1)}
+                        >
+                          <Minus className="w-4 h-4" />
+                        </Button>
+                        <span className="w-8 text-center font-medium">{item.quantity}</span>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => updateQuantity(item.menuItem.id, item.quantity + 1)}
+                        >
+                          <Plus className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => removeItem(item.menuItem.id)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
                     </div>
-                    
-                    <div className="flex-1">
-                      <h3 className="font-semibold">{item.name}</h3>
-                      <p className="text-lg font-bold text-primary">₹{item.price}</p>
-                    </div>
-                    
-                    <div className="flex items-center space-x-3">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="w-8 h-8"
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                      >
-                        <Minus className="w-4 h-4" />
-                      </Button>
-                      <span className="font-semibold min-w-[20px] text-center">{item.quantity}</span>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="w-8 h-8"
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                      >
-                        <Plus className="w-4 h-4" />
-                      </Button>
-                    </div>
-                    
-                    <div className="text-right">
-                      <p className="font-bold">₹{item.price * item.quantity}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
 
-            {/* Promo Code */}
-            <Card className="shadow-card">
-              <CardContent className="p-4">
-                <div className="flex space-x-2">
-                  <div className="flex-1 relative">
-                    <Tag className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Enter promo code"
-                      value={promoCode}
-                      onChange={(e) => setPromoCode(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
-                  <Button variant="outline">Apply</Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Bill Summary */}
-            <Card className="shadow-card">
-              <CardContent className="p-4 space-y-3">
-                <h3 className="font-semibold">Bill Summary</h3>
+            {/* Order Summary */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Order Summary</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
                 <div className="flex justify-between">
-                  <span>Subtotal</span>
-                  <span>₹{subtotal}</span>
+                  <span>Subtotal ({getTotalItems()} items)</span>
+                  <span>₹{getTotalPrice()}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Tax (5%)</span>
-                  <span>₹{tax}</span>
+                  <span>Delivery Fee</span>
+                  <span>₹0</span>
                 </div>
-                <div className="border-t pt-3">
-                  <div className="flex justify-between font-bold text-lg">
-                    <span>Total</span>
-                    <span>₹{total}</span>
-                  </div>
+                <div className="flex justify-between">
+                  <span>Taxes</span>
+                  <span>₹{Math.round(getTotalPrice() * 0.05)}</span>
                 </div>
+                <hr />
+                <div className="flex justify-between font-bold text-lg">
+                  <span>Total</span>
+                  <span>₹{getTotalPrice() + Math.round(getTotalPrice() * 0.05)}</span>
+                </div>
+                <Button 
+                  className="w-full mt-4" 
+                  size="lg"
+                  onClick={proceedToCheckout}
+                >
+                  Proceed to Checkout
+                </Button>
               </CardContent>
             </Card>
-          </div>
+          </>
+        )}
+      </div>
 
-          {/* Place Order Button */}
-          <div className="sticky bottom-0 bg-white border-t p-4">
-            <Button
-              variant="food"
-              size="mobile"
-              className="w-full"
-              onClick={() => setLocation("/checkout")}
-            >
-              Place Order • ₹{total}
-            </Button>
-          </div>
-        </>
-      )}
-      
       <BottomNavigation currentPage="cart" />
     </div>
   );

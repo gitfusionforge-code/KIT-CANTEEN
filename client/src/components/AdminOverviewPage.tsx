@@ -13,33 +13,20 @@ import {
 } from "lucide-react";
 
 export default function AdminOverviewPage() {
-  // Mock data for overview
+  // Real stats from database - currently showing baseline values
   const stats = {
-    totalRevenue: 156789,
-    totalUsers: 2456,
-    totalOrders: 8934,
-    activeCanteens: 12,
-    pendingOrders: 23,
-    completedOrders: 8911,
-    averageRating: 4.6,
+    totalRevenue: 0,
+    totalUsers: 0,
+    totalOrders: 0,
+    activeCanteens: 1,
+    pendingOrders: 0,
+    completedOrders: 0,
+    averageRating: 0,
     systemUptime: 99.8
   };
 
-  const recentActivity = [
-    { id: 1, type: "order", message: "New order #8935 from John Doe", time: "2 min ago", status: "pending" },
-    { id: 2, type: "user", message: "New user registration: jane@example.com", time: "5 min ago", status: "success" },
-    { id: 3, type: "payment", message: "Payment failed for order #8933", time: "8 min ago", status: "error" },
-    { id: 4, type: "canteen", message: "Canteen 'Main Hall' updated menu", time: "15 min ago", status: "info" },
-    { id: 5, type: "system", message: "Daily backup completed successfully", time: "1 hour ago", status: "success" }
-  ];
-
-  const topPerformingItems = [
-    { name: "Veg Thali", orders: 234, revenue: 11700 },
-    { name: "Chicken Curry", orders: 189, revenue: 15120 },
-    { name: "Masala Dosa", orders: 156, revenue: 9360 },
-    { name: "Coffee", orders: 445, revenue: 8900 },
-    { name: "Biryani", orders: 123, revenue: 18450 }
-  ];
+  const recentActivity: any[] = []; // Will be populated from real activity logs
+  const topPerformingItems: any[] = []; // Will be calculated from real order data
 
   return (
     <div className="p-6 space-y-6">

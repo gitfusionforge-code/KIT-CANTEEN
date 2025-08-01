@@ -32,117 +32,12 @@ export default function AdminContentManagementPage() {
   // Edit form state
   const [editForm, setEditForm] = useState<any>({});
 
-  // State management for data
-  const [pagesData, setPagesData] = useState([
-    {
-      id: 1,
-      title: "About Us",
-      slug: "/about",
-      status: "Published",
-      lastModified: "2024-01-15",
-      author: "Admin",
-      views: 1250
-    },
-    {
-      id: 2,
-      title: "Privacy Policy",
-      slug: "/privacy-policy",
-      status: "Published",
-      lastModified: "2024-01-10",
-      author: "Admin",
-      views: 890
-    },
-    {
-      id: 3,
-      title: "Terms & Conditions",
-      slug: "/terms-conditions",
-      status: "Published",
-      lastModified: "2024-01-08",
-      author: "Admin",
-      views: 650
-    },
-    {
-      id: 4,
-      title: "Help & Support",
-      slug: "/help-support",
-      status: "Draft",
-      lastModified: "2024-01-12",
-      author: "Admin",
-      views: 0
-    }
-  ]);
+  // Empty pages data - will be connected to CMS database when implemented
+  const [pagesData, setPagesData] = useState<any[]>([]);
 
-  const [mediaData, setMediaData] = useState([
-    {
-      id: 1,
-      name: "hero-banner.jpg",
-      type: "Image",
-      size: "2.4 MB",
-      dimensions: "1920x1080",
-      uploadDate: "2024-01-15",
-      usedIn: ["Home Page", "About Page"]
-    },
-    {
-      id: 2,
-      name: "canteen-video.mp4",
-      type: "Video",
-      size: "15.6 MB",
-      duration: "2:30",
-      uploadDate: "2024-01-12",
-      usedIn: ["Home Page"]
-    },
-    {
-      id: 3,
-      name: "food-gallery-1.jpg",
-      type: "Image",
-      size: "1.8 MB",
-      dimensions: "1200x800",
-      uploadDate: "2024-01-10",
-      usedIn: ["Menu Page", "Gallery"]
-    },
-    {
-      id: 4,
-      name: "logo.png",
-      type: "Image",
-      size: "256 KB",
-      dimensions: "512x512",
-      uploadDate: "2024-01-05",
-      usedIn: ["Header", "Footer", "Login"]
-    }
-  ]);
+  const [mediaData, setMediaData] = useState<any[]>([]);
 
-  const [bannersData, setBannersData] = useState([
-    {
-      id: 1,
-      title: "Weekend Special Offer",
-      description: "Get 20% off on all combo meals",
-      status: "Active",
-      startDate: "2024-01-13",
-      endDate: "2024-01-21",
-      clicks: 456,
-      conversions: 78
-    },
-    {
-      id: 2,
-      title: "New Menu Launch",
-      description: "Try our delicious new continental dishes",
-      status: "Scheduled",
-      startDate: "2024-01-20",
-      endDate: "2024-01-27",
-      clicks: 0,
-      conversions: 0
-    },
-    {
-      id: 3,
-      title: "Student Discount",
-      description: "Special rates for college students",
-      status: "Expired",
-      startDate: "2024-01-01",
-      endDate: "2024-01-10",
-      clicks: 1250,
-      conversions: 234
-    }
-  ]);
+  const [bannersData, setBannersData] = useState<any[]>([]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
