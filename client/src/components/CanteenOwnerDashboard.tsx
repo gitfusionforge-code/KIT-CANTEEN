@@ -67,16 +67,7 @@ export default function CanteenOwnerDashboard() {
   const [newItem, setNewItem] = useState({ name: "", price: "", category: "", stock: "", barcode: "" });
   const [editingItem, setEditingItem] = useState(null);
   const [isScannerActive, setIsScannerActive] = useState(false);
-  
-  // Manual order creation state
-  const [isCreatingOrder, setIsCreatingOrder] = useState(false);
-  const [newOrder, setNewOrder] = useState({
-    customerName: "",
-    studentId: "",
-    items: [],
-    paymentMethod: "pending"
-  });
-  const [selectedItems, setSelectedItems] = useState([]);
+
 
   const stats = [
     { title: "Today's Orders", value: orders.length.toString(), icon: ShoppingBag, trend: "+12%" },
@@ -217,55 +208,7 @@ export default function CanteenOwnerDashboard() {
     }
   };
 
-  // Manual order creation handlers
-  const handleAddItemToOrder = (menuItem, quantity = 1) => {
-    const existingItem = selectedItems.find(item => item.id === menuItem.id);
-    if (existingItem) {
-      setSelectedItems(selectedItems.map(item => 
-        item.id === menuItem.id 
-          ? { ...item, quantity: item.quantity + quantity }
-          : item
-      ));
-    } else {
-      setSelectedItems([...selectedItems, { ...menuItem, quantity }]);
-    }
-  };
 
-  const handleRemoveItemFromOrder = (itemId) => {
-    setSelectedItems(selectedItems.filter(item => item.id !== itemId));
-  };
-
-  const handleUpdateItemQuantity = (itemId, quantity) => {
-    if (quantity <= 0) {
-      handleRemoveItemFromOrder(itemId);
-      return;
-    }
-    setSelectedItems(selectedItems.map(item => 
-      item.id === itemId ? { ...item, quantity } : item
-    ));
-  };
-
-  const calculateOrderTotal = () => {
-    return selectedItems.reduce((total, item) => total + (item.price * item.quantity), 0);
-  };
-
-  const handleCreateManualOrder = () => {
-    if (!newOrder.customerName || selectedItems.length === 0) {
-      toast.error("Please add customer name and at least one item");
-      return;
-    }
-
-    const orderNumber = `#C${String(Date.now()).slice(-3)}`;
-    const orderItems = selectedItems.map(item => `${item.quantity}x ${item.name}`).join(', ');
-    const total = calculateOrderTotal();
-
-    // Reset form
-    setNewOrder({ customerName: "", studentId: "", items: [], paymentMethod: "pending" });
-    setSelectedItems([]);
-    setIsCreatingOrder(false);
-    
-    toast.success(`Order ${orderNumber} created successfully!`);
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -468,155 +411,7 @@ export default function CanteenOwnerDashboard() {
                     <div className="space-y-4">
                       <div className="flex justify-between items-center">
                         <h3 className="text-lg font-medium">Counter Orders</h3>
-                        <div className="flex space-x-2">
-                          <Dialog open={isCreatingOrder} onOpenChange={setIsCreatingOrder}>
-                            <DialogTrigger asChild>
-                              <Button>
-                                <Plus className="w-4 h-4 mr-2" />
-                                Manual Order
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                              <DialogHeader>
-                                <DialogTitle>Create Manual Order</DialogTitle>
-                              </DialogHeader>
-                              <div className="space-y-6">
-                                {/* Customer Details */}
-                                <div className="space-y-4">
-                                  <h3 className="font-medium">Customer Details</h3>
-                                  <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                      <Label htmlFor="customer-name">Customer Name *</Label>
-                                      <Input
-                                        id="customer-name"
-                                        value={newOrder.customerName}
-                                        onChange={(e) => setNewOrder({...newOrder, customerName: e.target.value})}
-                                        placeholder="Enter customer name"
-                                      />
-                                    </div>
-                                    <div>
-                                      <Label htmlFor="student-id">Student ID (Optional)</Label>
-                                      <Input
-                                        id="student-id"
-                                        value={newOrder.studentId}
-                                        onChange={(e) => setNewOrder({...newOrder, studentId: e.target.value})}
-                                        placeholder="e.g. 21CS1234"
-                                      />
-                                    </div>
-                                  </div>
-                                </div>
 
-                                {/* Menu Items Selection */}
-                                <div className="space-y-4">
-                                  <h3 className="font-medium">Add Items</h3>
-                                  <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto border rounded p-3">
-                                    {menuItems.filter(item => item.available).map((item) => (
-                                      <div key={item.id} className="flex items-center justify-between p-2 border rounded">
-                                        <div>
-                                          <span className="font-medium">{item.name}</span>
-                                          <span className="text-sm text-muted-foreground ml-2">₹{item.price}</span>
-                                        </div>
-                                        <Button
-                                          size="sm"
-                                          variant="outline"
-                                          onClick={() => handleAddItemToOrder(item)}
-                                        >
-                                          <Plus className="w-3 h-3" />
-                                        </Button>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-
-                                {/* Selected Items */}
-                                {selectedItems.length > 0 && (
-                                  <div className="space-y-4">
-                                    <h3 className="font-medium">Order Items</h3>
-                                    <div className="space-y-2">
-                                      {selectedItems.map((item) => (
-                                        <div key={item.id} className="flex items-center justify-between p-3 bg-accent/50 rounded">
-                                          <div>
-                                            <span className="font-medium">{item.name}</span>
-                                            <span className="text-sm text-muted-foreground ml-2">₹{item.price} each</span>
-                                          </div>
-                                          <div className="flex items-center space-x-2">
-                                            <Button
-                                              size="sm"
-                                              variant="outline"
-                                              onClick={() => handleUpdateItemQuantity(item.id, item.quantity - 1)}
-                                            >
-                                              -
-                                            </Button>
-                                            <span className="w-8 text-center">{item.quantity}</span>
-                                            <Button
-                                              size="sm"
-                                              variant="outline"
-                                              onClick={() => handleUpdateItemQuantity(item.id, item.quantity + 1)}
-                                            >
-                                              +
-                                            </Button>
-                                            <Button
-                                              size="sm"
-                                              variant="destructive"
-                                              onClick={() => handleRemoveItemFromOrder(item.id)}
-                                            >
-                                              <Trash2 className="w-3 h-3" />
-                                            </Button>
-                                          </div>
-                                        </div>
-                                      ))}
-                                    </div>
-                                    
-                                    {/* Order Total */}
-                                    <div className="border-t pt-4">
-                                      <div className="flex justify-between items-center">
-                                        <span className="text-lg font-semibold">Total:</span>
-                                        <span className="text-xl font-bold">₹{calculateOrderTotal()}</span>
-                                      </div>
-                                    </div>
-
-                                    {/* Payment Method */}
-                                    <div>
-                                      <Label>Payment Method</Label>
-                                      <Select value={newOrder.paymentMethod} onValueChange={(value) => setNewOrder({...newOrder, paymentMethod: value})}>
-                                        <SelectTrigger>
-                                          <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          <SelectItem value="pending">Pending Payment</SelectItem>
-                                          <SelectItem value="cash">Cash</SelectItem>
-                                          <SelectItem value="card">Card</SelectItem>
-                                          <SelectItem value="upi">UPI</SelectItem>
-                                        </SelectContent>
-                                      </Select>
-                                    </div>
-                                  </div>
-                                )}
-
-                                {/* Action Buttons */}
-                                <div className="flex space-x-2">
-                                  <Button
-                                    variant="outline"
-                                    onClick={() => {
-                                      setIsCreatingOrder(false);
-                                      setSelectedItems([]);
-                                      setNewOrder({ customerName: "", studentId: "", items: [], paymentMethod: "pending" });
-                                    }}
-                                  >
-                                    Cancel
-                                  </Button>
-                                  <Button
-                                    onClick={handleCreateManualOrder}
-                                    disabled={!newOrder.customerName || selectedItems.length === 0}
-                                    className="flex-1"
-                                  >
-                                    Create Order (₹{calculateOrderTotal()})
-                                  </Button>
-                                </div>
-                              </div>
-                            </DialogContent>
-                          </Dialog>
-                        </div>
                       </div>
                       
                       {/* Offline Orders List */}
