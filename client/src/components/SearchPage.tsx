@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Search, Star } from "lucide-react";
 
 export default function SearchPage() {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
 
   const allItems = [
@@ -33,7 +33,7 @@ export default function SearchPage() {
       {/* Header */}
       <div className="bg-primary text-primary-foreground px-4 py-4 sticky top-0 z-10">
         <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="icon" className="text-white" onClick={() => navigate('/home')}>
+          <Button variant="ghost" size="icon" className="text-white" onClick={() => setLocation('/home')}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div className="flex-1 relative">
@@ -80,7 +80,7 @@ export default function SearchPage() {
                 <Card
                   key={item.id}
                   className="cursor-pointer hover:shadow-md transition-shadow"
-                  onClick={() => navigate(`/dish/${item.id}`, { state: { from: '/search' } })}
+                  onClick={() => setLocation(`/dish/${item.id}`)}
                 >
                   <CardContent className="p-4">
                     <div className="flex justify-between items-start">
@@ -121,7 +121,7 @@ export default function SearchPage() {
             <p className="text-muted-foreground">
               Try searching for something else or browse our menu
             </p>
-            <Button className="mt-4" onClick={() => navigate("/home")}>
+            <Button className="mt-4" onClick={() => setLocation("/home")}>
               Browse Menu
             </Button>
           </div>

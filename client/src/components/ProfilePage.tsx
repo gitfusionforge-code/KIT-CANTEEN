@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,7 +8,7 @@ import { ArrowLeft, Edit, Clock, Star, LogOut, ChevronRight } from "lucide-react
 import BottomNavigation from "./BottomNavigation";
 
 export default function ProfilePage() {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const [isEditing, setIsEditing] = useState(false);
   const [userInfo, setUserInfo] = useState({
     name: "Rahul Kumar",
@@ -56,7 +56,7 @@ export default function ProfilePage() {
 
   const handleLogout = () => {
     // In real app, this would clear auth state
-    navigate("/login");
+    setLocation("/login");
   };
 
   return (
@@ -64,7 +64,7 @@ export default function ProfilePage() {
       {/* Header */}
       <div className="bg-primary px-4 pt-12 pb-6">
         <div className="flex items-center justify-between">
-          <Button variant="ghost" size="icon" className="text-white" onClick={() => navigate('/home')}>
+          <Button variant="ghost" size="icon" className="text-white" onClick={() => setLocation('/home')}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <h1 className="text-xl font-bold text-white">Profile</h1>
@@ -223,56 +223,56 @@ export default function ProfilePage() {
             <div className="space-y-3">
               <button 
                 className="w-full flex items-center justify-between p-3 text-left hover:bg-accent/50 rounded-lg transition-colors"
-                onClick={() => navigate("/favorites")}
+                onClick={() => setLocation("/favorites")}
               >
                 <span>My Favorites</span>
                 <ChevronRight className="w-5 h-5 text-muted-foreground" />
               </button>
               <button 
                 className="w-full flex items-center justify-between p-3 text-left hover:bg-accent/50 rounded-lg transition-colors"
-                onClick={() => navigate("/notifications")}
+                onClick={() => setLocation("/notifications")}
               >
                 <span>Notifications</span>
                 <ChevronRight className="w-5 h-5 text-muted-foreground" />
               </button>
               <button 
                 className="w-full flex items-center justify-between p-3 text-left hover:bg-accent/50 rounded-lg transition-colors"
-                onClick={() => navigate("/payment-methods")}
+                onClick={() => setLocation("/payment-methods")}
               >
                 <span>Payment Methods</span>
                 <ChevronRight className="w-5 h-5 text-muted-foreground" />
               </button>
               <button 
                 className="w-full flex items-center justify-between p-3 text-left hover:bg-accent/50 rounded-lg transition-colors"
-                onClick={() => navigate("/help-support")}
+                onClick={() => setLocation("/help-support")}
               >
                 <span>Help & Support</span>
                 <ChevronRight className="w-5 h-5 text-muted-foreground" />
               </button>
               <button 
                 className="w-full flex items-center justify-between p-3 text-left hover:bg-accent/50 rounded-lg transition-colors"
-                onClick={() => navigate("/feedback")}
+                onClick={() => setLocation("/feedback")}
               >
                 <span>Feedback</span>
                 <ChevronRight className="w-5 h-5 text-muted-foreground" />
               </button>
               <button 
                 className="w-full flex items-center justify-between p-3 text-left hover:bg-accent/50 rounded-lg transition-colors"
-                onClick={() => navigate("/about")}
+                onClick={() => setLocation("/about")}
               >
                 <span>About</span>
                 <ChevronRight className="w-5 h-5 text-muted-foreground" />
               </button>
               <button 
                 className="w-full flex items-center justify-between p-3 text-left hover:bg-accent/50 rounded-lg transition-colors"
-                onClick={() => navigate("/privacy-policy")}
+                onClick={() => setLocation("/privacy-policy")}
               >
                 <span>Privacy Policy</span>
                 <ChevronRight className="w-5 h-5 text-muted-foreground" />
               </button>
               <button 
                 className="w-full flex items-center justify-between p-3 text-left hover:bg-accent/50 rounded-lg transition-colors"
-                onClick={() => navigate("/terms-conditions")}
+                onClick={() => setLocation("/terms-conditions")}
               >
                 <span>Terms of Service</span>
                 <ChevronRight className="w-5 h-5 text-muted-foreground" />

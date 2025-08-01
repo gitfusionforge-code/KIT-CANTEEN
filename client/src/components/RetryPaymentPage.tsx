@@ -1,17 +1,17 @@
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, AlertCircle, RefreshCw, ShoppingCart } from "lucide-react";
 
 export default function RetryPaymentPage() {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
 
   const handleRetryPayment = () => {
-    navigate('/checkout');
+    setLocation('/checkout');
   };
 
   const handleReturnToCart = () => {
-    navigate('/cart');
+    setLocation('/cart');
   };
 
   return (
@@ -19,7 +19,7 @@ export default function RetryPaymentPage() {
       {/* Header */}
       <div className="bg-white border-b px-4 py-4 sticky top-0 z-10">
         <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/cart')}>
+          <Button variant="ghost" size="icon" onClick={() => setLocation('/cart')}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <h1 className="text-xl font-bold">Payment Failed</h1>

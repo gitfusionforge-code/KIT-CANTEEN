@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -8,7 +8,7 @@ import { ArrowLeft, Clock, MapPin, CreditCard, Wallet, Timer } from "lucide-reac
 import { toast } from "@/hooks/use-toast";
 
 export default function CheckoutPage() {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const [paymentMethod, setPaymentMethod] = useState("upi");
   const [estimatedTime, setEstimatedTime] = useState("15-20 mins");
   const [isTimerActive, setIsTimerActive] = useState(false);
@@ -55,7 +55,7 @@ export default function CheckoutPage() {
       variant: "destructive",
     });
     
-    navigate('/retry-payment');
+    setLocation('/retry-payment');
   };
 
   const startPaymentTimer = () => {
@@ -93,7 +93,7 @@ export default function CheckoutPage() {
           title: "Payment Successful",
           description: "Your order has been confirmed!",
         });
-        navigate("/order-status/12345");
+        setLocation("/order-status/12345");
       },
       prefill: {
         name: "Student Name",
@@ -125,7 +125,7 @@ export default function CheckoutPage() {
       {/* Header */}
       <div className="bg-white border-b px-4 py-4 sticky top-0 z-10">
         <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/cart')}>
+          <Button variant="ghost" size="icon" onClick={() => setLocation('/cart')}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <h1 className="text-xl font-bold">Checkout</h1>

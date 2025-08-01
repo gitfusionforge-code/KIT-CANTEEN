@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Heart, Star, ShoppingCart, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function FavoritesPage() {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [favorites, setFavorites] = useState([
     { id: 1, name: "Veg Thali", price: 85, rating: 4.5, category: "Main Course", isVeg: true },
@@ -35,7 +35,7 @@ export default function FavoritesPage() {
       {/* Header */}
       <div className="bg-primary text-primary-foreground px-4 py-4 sticky top-0 z-10">
         <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="icon" className="text-white" onClick={() => navigate('/home')}>
+          <Button variant="ghost" size="icon" className="text-white" onClick={() => setLocation('/home')}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div className="flex items-center space-x-2">
@@ -130,7 +130,7 @@ export default function FavoritesPage() {
             <p className="text-muted-foreground mb-6">
               Start adding items to your favorites by tapping the heart icon on any dish
             </p>
-            <Button onClick={() => navigate('/home')}>
+            <Button onClick={() => setLocation('/home')}>
               Browse Menu
             </Button>
           </div>

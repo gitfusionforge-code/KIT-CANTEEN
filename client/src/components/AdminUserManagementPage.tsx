@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -19,7 +19,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 
 export default function AdminUserManagementPage() {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("all-users");
   const [searchTerm, setSearchTerm] = useState("");
@@ -140,7 +140,7 @@ export default function AdminUserManagementPage() {
             <Button 
               variant="ghost" 
               size="icon"
-              onClick={() => navigate("/admin")}
+              onClick={() => setLocation("/admin")}
             >
               <ArrowLeft className="w-4 h-4" />
             </Button>
@@ -524,7 +524,7 @@ export default function AdminUserManagementPage() {
                     <Button 
                       variant="outline" 
                       className="h-auto p-4 flex flex-col items-center space-y-2"
-                      onClick={() => navigate("/admin/user-management/send-email")}
+                      onClick={() => setLocation("/admin/user-management/send-email")}
                     >
                       <Mail className="w-6 h-6" />
                       <span className="text-sm">Send Email</span>
@@ -532,7 +532,7 @@ export default function AdminUserManagementPage() {
                     <Button 
                       variant="outline" 
                       className="h-auto p-4 flex flex-col items-center space-y-2"
-                      onClick={() => navigate("/admin/user-management/add-loyalty-points")}
+                      onClick={() => setLocation("/admin/user-management/add-loyalty-points")}
                     >
                       <Gift className="w-6 h-6" />
                       <span className="text-sm">Add Loyalty Points</span>
@@ -540,7 +540,7 @@ export default function AdminUserManagementPage() {
                     <Button 
                       variant="outline" 
                       className="h-auto p-4 flex flex-col items-center space-y-2"
-                      onClick={() => navigate("/admin/user-management/apply-discount")}
+                      onClick={() => setLocation("/admin/user-management/apply-discount")}
                     >
                       <CreditCard className="w-6 h-6" />
                       <span className="text-sm">Apply Discount</span>
@@ -548,7 +548,7 @@ export default function AdminUserManagementPage() {
                     <Button 
                       variant="outline" 
                       className="h-auto p-4 flex flex-col items-center space-y-2"
-                      onClick={() => navigate("/admin/user-management/send-warning")}
+                      onClick={() => setLocation("/admin/user-management/send-warning")}
                     >
                       <AlertTriangle className="w-6 h-6" />
                       <span className="text-sm">Send Warning</span>
@@ -563,8 +563,8 @@ export default function AdminUserManagementPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    <Button variant="outline" onClick={() => navigate("/admin/user-management/export-data")}>Export User Data</Button>
-                    <Button variant="outline" onClick={() => navigate("/admin/user-management/import-users")}>Import Users</Button>
+                    <Button variant="outline" onClick={() => setLocation("/admin/user-management/export-data")}>Export User Data</Button>
+                    <Button variant="outline" onClick={() => setLocation("/admin/user-management/import-users")}>Import Users</Button>
                     <Button variant="outline" onClick={() => {
                       toast({
                         title: "Database Backup",

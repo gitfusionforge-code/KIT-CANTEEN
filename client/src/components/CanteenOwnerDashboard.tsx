@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -35,7 +35,7 @@ import {
 } from "lucide-react";
 
 export default function CanteenOwnerDashboard() {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("overview");
   
   // Categories state

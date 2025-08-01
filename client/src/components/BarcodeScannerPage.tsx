@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,7 @@ import { ArrowLeft, CheckCircle, Plus, Trash2, ShoppingCart } from "lucide-react
 import { toast } from "sonner";
 
 export default function BarcodeScannerPage() {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const [orderId, setOrderId] = useState("");
   
   // Manual order creation state
@@ -35,7 +35,7 @@ export default function BarcodeScannerPage() {
     
     toast.success(`Processing Order ID: ${orderId}`);
     // Navigate to order status or processing page
-    navigate(`/order-status/${orderId}`);
+    setLocation(`/order-status/${orderId}`);
   };
 
   // Manual order creation handlers
