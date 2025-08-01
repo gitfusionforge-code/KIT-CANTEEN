@@ -94,6 +94,76 @@ export default function OrderStatusPage() {
       </div>
 
       <div className="px-4 py-6 space-y-6">
+        {/* Order Barcode */}
+        <Card className="shadow-card">
+          <CardContent className="p-4">
+            <h3 className="font-semibold mb-3 flex items-center">
+              <Package className="w-5 h-5 mr-2 text-primary" />
+              Order Barcode
+            </h3>
+            <div className="bg-accent/50 rounded-lg p-4 text-center">
+              {/* Linear Barcode */}
+              <div className="bg-white p-4 rounded-lg inline-block mb-3">
+                <svg width="200" height="60" viewBox="0 0 200 60" className="mx-auto">
+                  <rect width="200" height="60" fill="white"/>
+                  {/* Barcode pattern - representing order ID */}
+                  <rect x="10" y="10" width="2" height="40" fill="black"/>
+                  <rect x="14" y="10" width="1" height="40" fill="black"/>
+                  <rect x="17" y="10" width="3" height="40" fill="black"/>
+                  <rect x="22" y="10" width="1" height="40" fill="black"/>
+                  <rect x="25" y="10" width="2" height="40" fill="black"/>
+                  <rect x="29" y="10" width="1" height="40" fill="black"/>
+                  <rect x="32" y="10" width="4" height="40" fill="black"/>
+                  <rect x="38" y="10" width="1" height="40" fill="black"/>
+                  <rect x="41" y="10" width="2" height="40" fill="black"/>
+                  <rect x="45" y="10" width="1" height="40" fill="black"/>
+                  <rect x="48" y="10" width="3" height="40" fill="black"/>
+                  <rect x="53" y="10" width="2" height="40" fill="black"/>
+                  <rect x="57" y="10" width="1" height="40" fill="black"/>
+                  <rect x="60" y="10" width="2" height="40" fill="black"/>
+                  <rect x="64" y="10" width="1" height="40" fill="black"/>
+                  <rect x="67" y="10" width="3" height="40" fill="black"/>
+                  <rect x="72" y="10" width="1" height="40" fill="black"/>
+                  <rect x="75" y="10" width="2" height="40" fill="black"/>
+                  <rect x="79" y="10" width="4" height="40" fill="black"/>
+                  <rect x="85" y="10" width="1" height="40" fill="black"/>
+                  <rect x="88" y="10" width="2" height="40" fill="black"/>
+                  <rect x="92" y="10" width="1" height="40" fill="black"/>
+                  <rect x="95" y="10" width="3" height="40" fill="black"/>
+                  <rect x="100" y="10" width="1" height="40" fill="black"/>
+                  <rect x="103" y="10" width="2" height="40" fill="black"/>
+                  <rect x="107" y="10" width="1" height="40" fill="black"/>
+                  <rect x="110" y="10" width="4" height="40" fill="black"/>
+                  <rect x="116" y="10" width="2" height="40" fill="black"/>
+                  <rect x="120" y="10" width="1" height="40" fill="black"/>
+                  <rect x="123" y="10" width="3" height="40" fill="black"/>
+                  <rect x="128" y="10" width="1" height="40" fill="black"/>
+                  <rect x="131" y="10" width="2" height="40" fill="black"/>
+                  <rect x="135" y="10" width="1" height="40" fill="black"/>
+                  <rect x="138" y="10" width="3" height="40" fill="black"/>
+                  <rect x="143" y="10" width="2" height="40" fill="black"/>
+                  <rect x="147" y="10" width="1" height="40" fill="black"/>
+                  <rect x="150" y="10" width="4" height="40" fill="black"/>
+                  <rect x="156" y="10" width="1" height="40" fill="black"/>
+                  <rect x="159" y="10" width="2" height="40" fill="black"/>
+                  <rect x="163" y="10" width="1" height="40" fill="black"/>
+                  <rect x="166" y="10" width="3" height="40" fill="black"/>
+                  <rect x="171" y="10" width="1" height="40" fill="black"/>
+                  <rect x="174" y="10" width="2" height="40" fill="black"/>
+                  <rect x="178" y="10" width="1" height="40" fill="black"/>
+                  <rect x="181" y="10" width="3" height="40" fill="black"/>
+                  <rect x="186" y="10" width="2" height="40" fill="black"/>
+                  <rect x="190" y="10" width="1" height="40" fill="black"/>
+                </svg>
+              </div>
+              <p className="font-bold text-lg mb-1">Order ID: {orderDetails.id}</p>
+              <p className="text-sm text-muted-foreground">
+                Show this barcode to canteen staff for pickup
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Current Status */}
         <Card className="shadow-card">
           <CardContent className="p-6 text-center">
@@ -176,76 +246,6 @@ export default function OrderStatusPage() {
           </CardContent>
         </Card>
 
-        {/* Order Barcode */}
-        <Card className="shadow-card">
-          <CardContent className="p-4">
-            <h3 className="font-semibold mb-3 flex items-center">
-              <Package className="w-5 h-5 mr-2 text-primary" />
-              Order Barcode
-            </h3>
-            <div className="bg-accent/50 rounded-lg p-4 text-center">
-              {/* Linear Barcode */}
-              <div className="bg-white p-4 rounded-lg inline-block mb-3">
-                <svg width="200" height="60" viewBox="0 0 200 60" className="mx-auto">
-                  <rect width="200" height="60" fill="white"/>
-                  {/* Barcode pattern - representing order ID */}
-                  <rect x="10" y="10" width="2" height="40" fill="black"/>
-                  <rect x="14" y="10" width="1" height="40" fill="black"/>
-                  <rect x="17" y="10" width="3" height="40" fill="black"/>
-                  <rect x="22" y="10" width="1" height="40" fill="black"/>
-                  <rect x="25" y="10" width="2" height="40" fill="black"/>
-                  <rect x="29" y="10" width="1" height="40" fill="black"/>
-                  <rect x="32" y="10" width="4" height="40" fill="black"/>
-                  <rect x="38" y="10" width="1" height="40" fill="black"/>
-                  <rect x="41" y="10" width="2" height="40" fill="black"/>
-                  <rect x="45" y="10" width="1" height="40" fill="black"/>
-                  <rect x="48" y="10" width="3" height="40" fill="black"/>
-                  <rect x="53" y="10" width="2" height="40" fill="black"/>
-                  <rect x="57" y="10" width="1" height="40" fill="black"/>
-                  <rect x="60" y="10" width="2" height="40" fill="black"/>
-                  <rect x="64" y="10" width="1" height="40" fill="black"/>
-                  <rect x="67" y="10" width="3" height="40" fill="black"/>
-                  <rect x="72" y="10" width="1" height="40" fill="black"/>
-                  <rect x="75" y="10" width="2" height="40" fill="black"/>
-                  <rect x="79" y="10" width="4" height="40" fill="black"/>
-                  <rect x="85" y="10" width="1" height="40" fill="black"/>
-                  <rect x="88" y="10" width="2" height="40" fill="black"/>
-                  <rect x="92" y="10" width="1" height="40" fill="black"/>
-                  <rect x="95" y="10" width="3" height="40" fill="black"/>
-                  <rect x="100" y="10" width="1" height="40" fill="black"/>
-                  <rect x="103" y="10" width="2" height="40" fill="black"/>
-                  <rect x="107" y="10" width="1" height="40" fill="black"/>
-                  <rect x="110" y="10" width="4" height="40" fill="black"/>
-                  <rect x="116" y="10" width="2" height="40" fill="black"/>
-                  <rect x="120" y="10" width="1" height="40" fill="black"/>
-                  <rect x="123" y="10" width="3" height="40" fill="black"/>
-                  <rect x="128" y="10" width="1" height="40" fill="black"/>
-                  <rect x="131" y="10" width="2" height="40" fill="black"/>
-                  <rect x="135" y="10" width="1" height="40" fill="black"/>
-                  <rect x="138" y="10" width="3" height="40" fill="black"/>
-                  <rect x="143" y="10" width="2" height="40" fill="black"/>
-                  <rect x="147" y="10" width="1" height="40" fill="black"/>
-                  <rect x="150" y="10" width="4" height="40" fill="black"/>
-                  <rect x="156" y="10" width="1" height="40" fill="black"/>
-                  <rect x="159" y="10" width="2" height="40" fill="black"/>
-                  <rect x="163" y="10" width="1" height="40" fill="black"/>
-                  <rect x="166" y="10" width="3" height="40" fill="black"/>
-                  <rect x="171" y="10" width="1" height="40" fill="black"/>
-                  <rect x="174" y="10" width="2" height="40" fill="black"/>
-                  <rect x="178" y="10" width="1" height="40" fill="black"/>
-                  <rect x="181" y="10" width="3" height="40" fill="black"/>
-                  <rect x="186" y="10" width="2" height="40" fill="black"/>
-                  <rect x="190" y="10" width="1" height="40" fill="black"/>
-                </svg>
-              </div>
-              <p className="font-bold text-lg mb-1">Order ID: {orderDetails.id}</p>
-              <p className="text-sm text-muted-foreground">
-                Show this barcode to canteen staff for pickup
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Pickup Location */}
         <Card className="shadow-card">
           <CardContent className="p-4">
@@ -256,7 +256,7 @@ export default function OrderStatusPage() {
             <div className="bg-accent/50 rounded-lg p-3">
               <p className="font-medium">{orderDetails.pickupLocation}</p>
               <p className="text-sm text-muted-foreground mt-1">
-                Present the QR code above for quick order verification
+                Present the barcode above for quick order verification
               </p>
             </div>
           </CardContent>
