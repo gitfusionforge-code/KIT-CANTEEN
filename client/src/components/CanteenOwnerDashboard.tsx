@@ -69,6 +69,29 @@ export default function CanteenOwnerDashboard() {
   const [isScannerActive, setIsScannerActive] = useState(false);
   const [stockUpdateItem, setStockUpdateItem] = useState<any>(null);
   const [newStockAmount, setNewStockAmount] = useState("");
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [notifications, setNotifications] = useState([
+    { id: 1, type: "order", message: "New order #1234 received", time: "2 min ago", read: false },
+    { id: 2, type: "stock", message: "Vada Pav stock is running low (5 remaining)", time: "15 min ago", read: false },
+    { id: 3, type: "order", message: "Order #1232 ready for pickup", time: "30 min ago", read: true },
+    { id: 4, type: "system", message: "Daily sales report generated", time: "1 hour ago", read: true }
+  ]);
+  const [settings, setSettings] = useState({
+    canteenName: "KIT Main Canteen",
+    workingHours: { open: "08:00", close: "20:00" },
+    notifications: {
+      newOrders: true,
+      lowStock: true,
+      orderReady: true,
+      dailyReports: false
+    },
+    operationalSettings: {
+      autoAcceptOrders: true,
+      maxOrdersPerHour: 50,
+      preparationTime: 15
+    }
+  });
 
 
   const stats = [
@@ -234,6 +257,42 @@ export default function CanteenOwnerDashboard() {
     toast.success(`Stock updated for ${stockUpdateItem.name}`);
   };
 
+  // Notification handlers
+  const markNotificationAsRead = (notificationId: number) => {
+    setNotifications(notifications.map(notif => 
+      notif.id === notificationId ? { ...notif, read: true } : notif
+    ));
+  };
+
+  const markAllNotificationsAsRead = () => {
+    setNotifications(notifications.map(notif => ({ ...notif, read: true })));
+  };
+
+  const deleteNotification = (notificationId: number) => {
+    setNotifications(notifications.filter(notif => notif.id !== notificationId));
+  };
+
+  // Settings handlers
+  const handleSettingsUpdate = (section: string, key: string, value: any) => {
+    setSettings(prev => ({
+      ...prev,
+      [section]: {
+        ...prev[section as keyof typeof prev],
+        [key]: value
+      }
+    }));
+    toast.success("Settings updated successfully");
+  };
+
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case "order": return ShoppingBag;
+      case "stock": return Package;
+      case "system": return Settings;
+      default: return Bell;
+    }
+  };
+
 
 
 
@@ -261,11 +320,28 @@ export default function CanteenOwnerDashboard() {
               <ScanLine className="w-4 h-4 mr-2" />
               Enter Order
             </Button>
-            <Button variant="outline" size="sm">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setShowNotifications(true)}
+              className="relative"
+            >
               <Bell className="w-4 h-4 mr-2" />
               Notifications
+              {notifications.filter(n => !n.read).length > 0 && (
+                <Badge 
+                  variant="destructive" 
+                  className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs"
+                >
+                  {notifications.filter(n => !n.read).length}
+                </Badge>
+              )}
             </Button>
-            <Button variant="outline" size="sm">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setShowSettings(true)}
+            >
               <Settings className="w-4 h-4 mr-2" />
               Settings
             </Button>
@@ -861,6 +937,210 @@ export default function CanteenOwnerDashboard() {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Notifications Dialog */}
+      <Dialog open={showNotifications} onOpenChange={setShowNotifications}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              Notifications
+              <div className="flex space-x-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={markAllNotificationsAsRead}
+                  disabled={notifications.filter(n => !n.read).length === 0}
+                >
+                  Mark All Read
+                </Button>
+              </div>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2 max-h-96 overflow-y-auto">
+            {notifications.length === 0 ? (
+              <p className="text-center text-muted-foreground py-8">No notifications</p>
+            ) : (
+              notifications.map((notification) => {
+                const IconComponent = getNotificationIcon(notification.type);
+                return (
+                  <div
+                    key={notification.id}
+                    className={`p-3 rounded-lg border transition-colors ${
+                      notification.read ? 'bg-muted/30' : 'bg-accent/50'
+                    }`}
+                  >
+                    <div className="flex items-start space-x-3">
+                      <IconComponent className="w-4 h-4 mt-0.5 text-primary" />
+                      <div className="flex-1 space-y-1">
+                        <p className="text-sm font-medium">{notification.message}</p>
+                        <p className="text-xs text-muted-foreground">{notification.time}</p>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        {!notification.read && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => markNotificationAsRead(notification.id)}
+                            className="h-6 w-6 p-0"
+                          >
+                            ✓
+                          </Button>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => deleteNotification(notification.id)}
+                          className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
+                        >
+                          ×
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Settings Dialog */}
+      <Dialog open={showSettings} onOpenChange={setShowSettings}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Canteen Settings</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6">
+            {/* Basic Information */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Basic Information</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="canteen-name">Canteen Name</Label>
+                  <Input
+                    id="canteen-name"
+                    value={settings.canteenName}
+                    onChange={(e) => handleSettingsUpdate('', 'canteenName', e.target.value)}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="open-time">Opening Time</Label>
+                    <Input
+                      id="open-time"
+                      type="time"
+                      value={settings.workingHours.open}
+                      onChange={(e) => handleSettingsUpdate('workingHours', 'open', e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="close-time">Closing Time</Label>
+                    <Input
+                      id="close-time"
+                      type="time"
+                      value={settings.workingHours.close}
+                      onChange={(e) => handleSettingsUpdate('workingHours', 'close', e.target.value)}
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Notification Preferences */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Notification Preferences</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="new-orders">New Orders</Label>
+                  <Button
+                    variant={settings.notifications.newOrders ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => handleSettingsUpdate('notifications', 'newOrders', !settings.notifications.newOrders)}
+                  >
+                    {settings.notifications.newOrders ? "ON" : "OFF"}
+                  </Button>
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="low-stock">Low Stock Alerts</Label>
+                  <Button
+                    variant={settings.notifications.lowStock ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => handleSettingsUpdate('notifications', 'lowStock', !settings.notifications.lowStock)}
+                  >
+                    {settings.notifications.lowStock ? "ON" : "OFF"}
+                  </Button>
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="order-ready">Order Ready</Label>
+                  <Button
+                    variant={settings.notifications.orderReady ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => handleSettingsUpdate('notifications', 'orderReady', !settings.notifications.orderReady)}
+                  >
+                    {settings.notifications.orderReady ? "ON" : "OFF"}
+                  </Button>
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="daily-reports">Daily Reports</Label>
+                  <Button
+                    variant={settings.notifications.dailyReports ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => handleSettingsUpdate('notifications', 'dailyReports', !settings.notifications.dailyReports)}
+                  >
+                    {settings.notifications.dailyReports ? "ON" : "OFF"}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Operational Settings */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Operational Settings</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="auto-accept">Auto Accept Orders</Label>
+                  <Button
+                    variant={settings.operationalSettings.autoAcceptOrders ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => handleSettingsUpdate('operationalSettings', 'autoAcceptOrders', !settings.operationalSettings.autoAcceptOrders)}
+                  >
+                    {settings.operationalSettings.autoAcceptOrders ? "ON" : "OFF"}
+                  </Button>
+                </div>
+                <div>
+                  <Label htmlFor="max-orders">Max Orders Per Hour</Label>
+                  <Input
+                    id="max-orders"
+                    type="number"
+                    value={settings.operationalSettings.maxOrdersPerHour}
+                    onChange={(e) => handleSettingsUpdate('operationalSettings', 'maxOrdersPerHour', parseInt(e.target.value))}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="prep-time">Default Preparation Time (minutes)</Label>
+                  <Input
+                    id="prep-time"
+                    type="number"
+                    value={settings.operationalSettings.preparationTime}
+                    onChange={(e) => handleSettingsUpdate('operationalSettings', 'preparationTime', parseInt(e.target.value))}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          <div className="flex justify-end space-x-2 pt-4">
+            <Button variant="outline" onClick={() => setShowSettings(false)}>
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
