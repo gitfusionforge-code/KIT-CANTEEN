@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "wouter";
 import { Home, ShoppingCart, Clock, User, UtensilsCrossed } from "lucide-react";
 
 interface BottomNavigationProps {
@@ -6,7 +6,7 @@ interface BottomNavigationProps {
 }
 
 export default function BottomNavigation({ currentPage }: BottomNavigationProps) {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
 
   const navigationItems = [
     { id: "home", label: "Home", icon: Home, route: "/home" },
@@ -24,7 +24,7 @@ export default function BottomNavigation({ currentPage }: BottomNavigationProps)
           return (
             <button
               key={item.id}
-              onClick={() => navigate(item.route)}
+              onClick={() => setLocation(item.route)}
               className={`flex-1 flex flex-col items-center py-3 px-2 transition-colors ${
                 isActive 
                   ? "text-primary" 

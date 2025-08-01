@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Search, MapPin, Filter, Utensils, Coffee, Cookie, Pizza, Star, Clock, Flame, ThumbsUp, Users, Zap, ChefHat, Heart } from "lucide-react";
 import BottomNavigation from "./BottomNavigation";
 export default function HomeScreen() {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const {
     toast
   } = useToast();
@@ -112,7 +112,7 @@ export default function HomeScreen() {
         {/* Search bar */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input placeholder="Search food or snacks..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} onFocus={() => navigate('/search')} className="pl-10 bg-white border-0 h-11 text-base cursor-pointer" readOnly />
+          <Input placeholder="Search food or snacks..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} onFocus={() => setLocation('/search')} className="pl-10 bg-white border-0 h-11 text-base cursor-pointer" readOnly />
         </div>
       </div>
 
@@ -128,7 +128,7 @@ export default function HomeScreen() {
               <div>
                 <h1 className="text-2xl font-bold mb-2">Welcome to KIT Canteen!</h1>
                 <p className="text-white/90 mb-4">Delicious meals, quick delivery</p>
-                <Button variant="ghost" size="hero" className="glass-effect text-white border-white/30 hover:bg-white/20" onClick={() => navigate("/menu")}>
+                <Button variant="ghost" size="hero" className="glass-effect text-white border-white/30 hover:bg-white/20" onClick={() => setLocation("/menu")}>
                   <Utensils className="w-5 h-5 mr-2" />
                   Explore Menu
                 </Button>
@@ -155,7 +155,7 @@ export default function HomeScreen() {
           <div className="grid grid-cols-4 gap-3">
             {categories.map((category, index) => <div key={category.name} className="flex flex-col items-center p-3 rounded-xl hover-scale transition-all duration-300 cursor-pointer animate-fade-in hover:bg-accent/50" style={{
             animationDelay: `${index * 0.1}s`
-          }} onClick={() => navigate(category.route)}>
+          }} onClick={() => setLocation(category.route)}>
                 <div className={`w-12 h-12 ${category.color} rounded-full flex items-center justify-center mb-2 shadow-md`}>
                   <category.icon className="w-6 h-6 text-white" />
                 </div>
@@ -171,7 +171,7 @@ export default function HomeScreen() {
               <Flame className="w-5 h-5 mr-2 text-orange-500" />
               Trending Now
             </h2>
-            <Button variant="ghost" size="sm" className="text-primary" onClick={() => navigate("/trending")}>
+            <Button variant="ghost" size="sm" className="text-primary" onClick={() => setLocation("/trending")}>
               View all
             </Button>
           </div>
@@ -220,7 +220,7 @@ export default function HomeScreen() {
         <div className="animate-slide-up">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-bold">Quick Picks</h2>
-            <Button variant="ghost" size="sm" className="text-primary" onClick={() => navigate("/quick-picks")}>
+            <Button variant="ghost" size="sm" className="text-primary" onClick={() => setLocation("/quick-picks")}>
               View all
             </Button>
           </div>
@@ -289,7 +289,7 @@ export default function HomeScreen() {
           <Heart className="w-12 h-12 mx-auto mb-3 animate-bounce-in" />
           <h3 className="text-xl font-bold mb-2">Love What You See?</h3>
           <p className="text-white/90 mb-4">Join thousands of happy customers at KIT Canteen</p>
-          <Button variant="ghost" size="hero" className="glass-effect text-white border-white/30 hover:bg-white/20" onClick={() => navigate("/favorites")}>
+          <Button variant="ghost" size="hero" className="glass-effect text-white border-white/30 hover:bg-white/20" onClick={() => setLocation("/favorites")}>
             <Heart className="w-5 h-5 mr-2" />
             Add to Favorites
           </Button>
