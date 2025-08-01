@@ -65,8 +65,10 @@ export default function CanteenOwnerDashboard() {
   ]);
 
   const [newItem, setNewItem] = useState({ name: "", price: "", category: "", stock: "", barcode: "" });
-  const [editingItem, setEditingItem] = useState(null);
+  const [editingItem, setEditingItem] = useState<any>(null);
   const [isScannerActive, setIsScannerActive] = useState(false);
+  const [stockUpdateItem, setStockUpdateItem] = useState<any>(null);
+  const [newStockAmount, setNewStockAmount] = useState("");
 
 
   const stats = [
@@ -76,7 +78,7 @@ export default function CanteenOwnerDashboard() {
     { title: "Avg Rating", value: "4.8", icon: Star, trend: "+0.2" }
   ];
 
-  const handleOrderStatusUpdate = (orderId, newStatus) => {
+  const handleOrderStatusUpdate = (orderId: any, newStatus: any) => {
     setOrders(orders.map(order => 
       order.id === orderId ? { ...order, status: newStatus } : order
     ));
@@ -139,7 +141,7 @@ export default function CanteenOwnerDashboard() {
     document.body.classList.remove('scanner-active');
   };
 
-  const handleEditMenuItem = (item) => {
+  const handleEditMenuItem = (item: any) => {
     setEditingItem(item);
   };
 
@@ -151,12 +153,12 @@ export default function CanteenOwnerDashboard() {
     toast.success("Menu item updated successfully");
   };
 
-  const handleDeleteMenuItem = (itemId) => {
+  const handleDeleteMenuItem = (itemId: any) => {
     setMenuItems(menuItems.filter(item => item.id !== itemId));
     toast.success("Menu item deleted successfully");
   };
 
-  const toggleItemAvailability = (itemId) => {
+  const toggleItemAvailability = (itemId: any) => {
     setMenuItems(menuItems.map(item => 
       item.id === itemId ? { ...item, available: !item.available } : item
     ));
@@ -178,7 +180,7 @@ export default function CanteenOwnerDashboard() {
     toast.success("Category added successfully");
   };
 
-  const handleDeleteCategory = (categoryToDelete) => {
+  const handleDeleteCategory = (categoryToDelete: any) => {
     if (menuItems.some(item => item.category === categoryToDelete)) {
       toast.error("Cannot delete category - items are using it");
       return;
@@ -188,7 +190,7 @@ export default function CanteenOwnerDashboard() {
     toast.success("Category deleted successfully");
   };
 
-  const getOrderStatusColor = (status) => {
+  const getOrderStatusColor = (status: any) => {
     switch (status) {
       case "pending": return "bg-warning";
       case "preparing": return "bg-primary";
@@ -198,13 +200,56 @@ export default function CanteenOwnerDashboard() {
     }
   };
 
-  const getOrderStatusText = (status) => {
+  const getOrderStatusText = (status: any) => {
     switch (status) {
       case "pending": return "Pending";
       case "preparing": return "Preparing";
       case "ready": return "Ready";
       case "completed": return "Completed";
       default: return status;
+    }
+  };
+
+  // Stock management handlers
+  const handleUpdateStock = (item: any) => {
+    setStockUpdateItem(item);
+    setNewStockAmount(item.stock.toString());
+  };
+
+  const handleSaveStockUpdate = () => {
+    if (!newStockAmount || isNaN(parseInt(newStockAmount))) {
+      toast.error("Please enter a valid stock amount");
+      return;
+    }
+
+    const updatedStock = parseInt(newStockAmount);
+    setMenuItems(menuItems.map(item => 
+      item.id === stockUpdateItem.id 
+        ? { ...item, stock: updatedStock, available: updatedStock > 0 }
+        : item
+    ));
+    
+    setStockUpdateItem(null);
+    setNewStockAmount("");
+    toast.success(`Stock updated for ${stockUpdateItem.name}`);
+  };
+
+  const handleQuickStockUpdate = (itemId: any, change: number) => {
+    setMenuItems(menuItems.map(item => {
+      if (item.id === itemId) {
+        const newStock = Math.max(0, item.stock + change);
+        return { 
+          ...item, 
+          stock: newStock, 
+          available: newStock > 0 
+        };
+      }
+      return item;
+    }));
+    
+    const item = menuItems.find(i => i.id === itemId);
+    if (item) {
+      toast.success(`${item.name} stock ${change > 0 ? 'increased' : 'decreased'}`);
     }
   };
 
@@ -726,9 +771,30 @@ export default function CanteenOwnerDashboard() {
                             </p>
                           )}
                         </div>
-                        <Button size="sm" variant="outline">
-                          Update Stock
-                        </Button>
+                        <div className="flex items-center space-x-2">
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => handleQuickStockUpdate(item.id, -1)}
+                            disabled={item.stock === 0}
+                          >
+                            -
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => handleQuickStockUpdate(item.id, 1)}
+                          >
+                            +
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => handleUpdateStock(item)}
+                          >
+                            Update Stock
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -776,6 +842,55 @@ export default function CanteenOwnerDashboard() {
               <Button onClick={handleUpdateMenuItem} className="w-full">
                 Update Item
               </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Stock Update Dialog */}
+      {stockUpdateItem && (
+        <Dialog open={!!stockUpdateItem} onOpenChange={() => setStockUpdateItem(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Update Stock - {stockUpdateItem.name}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="current-stock">Current Stock</Label>
+                <Input
+                  id="current-stock"
+                  value={stockUpdateItem.stock}
+                  disabled
+                  className="bg-muted"
+                />
+              </div>
+              <div>
+                <Label htmlFor="new-stock">New Stock Amount</Label>
+                <Input
+                  id="new-stock"
+                  type="number"
+                  value={newStockAmount}
+                  onChange={(e) => setNewStockAmount(e.target.value)}
+                  placeholder="Enter new stock amount"
+                  min="0"
+                />
+              </div>
+              <div className="text-sm text-muted-foreground">
+                {parseInt(newStockAmount) === 0 && (
+                  <p className="text-destructive">⚠️ Setting stock to 0 will make this item unavailable</p>
+                )}
+                {parseInt(newStockAmount) < 10 && parseInt(newStockAmount) > 0 && (
+                  <p className="text-warning">⚠️ Low stock warning will be displayed</p>
+                )}
+              </div>
+              <div className="flex space-x-2">
+                <Button variant="outline" onClick={() => setStockUpdateItem(null)} className="flex-1">
+                  Cancel
+                </Button>
+                <Button onClick={handleSaveStockUpdate} className="flex-1">
+                  Update Stock
+                </Button>
+              </div>
             </div>
           </DialogContent>
         </Dialog>
