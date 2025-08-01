@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Router, Route, Switch } from "wouter";
 import SplashScreen from "./components/SplashScreen";
 import LoginScreen from "./components/LoginScreen";
 import HomeScreen from "./components/HomeScreen";
@@ -66,64 +66,107 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<SplashScreen />} />
-          <Route path="/login" element={<LoginScreen />} />
-          <Route path="/home" element={<HomeScreen />} />
-          <Route path="/menu/:category" element={<MenuListingPage />} />
-          <Route path="/dish/:dishId" element={<DishDetailPage />} />
-          <Route path="/cart" element={<CartPage />} />
-          <Route path="/checkout" element={<CheckoutPage />} />
-          <Route path="/retry-payment" element={<RetryPaymentPage />} />
-          <Route path="/order-status/:orderId" element={<OrderStatusPage />} />
-          <Route path="/orders" element={<OrdersPage />} />
-          <Route path="/order-detail/:orderId" element={<OrderDetailPage />} />
-          <Route path="/canteen-order-detail/:orderId" element={<CanteenOrderDetailPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/notifications" element={<NotificationsPage />} />
-          <Route path="/payment-methods" element={<PaymentMethodsPage />} />
-          <Route path="/search" element={<SearchPage />} />
-          <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-          <Route path="/terms-conditions" element={<TermsConditionsPage />} />
-          <Route path="/canteen-owner" element={<CanteenOwnerDashboard />} />
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/edit-admin-access/:userId" element={<AdminLayout><EditAdminAccessPage /></AdminLayout>} />
-          <Route path="/add-new-admin" element={<AdminLayout><AddNewAdminPage /></AdminLayout>} />
-          <Route path="/admin/analytics" element={<AdminLayout><AdminAnalyticsPage /></AdminLayout>} />
-          <Route path="/admin/order-management" element={<AdminLayout><AdminOrderManagementPage /></AdminLayout>} />
-          <Route path="/admin/menu-management" element={<AdminLayout><AdminMenuManagementPage /></AdminLayout>} />
-          <Route path="/admin/reports" element={<AdminLayout><AdminReportsPage /></AdminLayout>} />
-          <Route path="/admin/user-management" element={<AdminLayout><AdminUserManagementPage /></AdminLayout>} />
-          <Route path="/admin/system-settings" element={<AdminLayout><AdminSystemSettingsPage /></AdminLayout>} />
-          
-          <Route path="/admin/payment-management" element={<AdminLayout><AdminPaymentManagementPage /></AdminLayout>} />
-          <Route path="/admin/notification-management" element={<AdminLayout><AdminNotificationManagementPage /></AdminLayout>} />
-          <Route path="/admin/content-management" element={<AdminLayout><AdminContentManagementPage /></AdminLayout>} />
-          <Route path="/admin/feedback-management" element={<AdminLayout><AdminFeedbackManagementPage /></AdminLayout>} />
-          <Route path="/admin/review-management" element={<AdminLayout><AdminReviewManagementPage /></AdminLayout>} />
-          <Route path="/admin/admin-access" element={<AdminLayout><AdminAccessPage /></AdminLayout>} />
-          <Route path="/admin/database" element={<AdminLayout><AdminDatabasePage /></AdminLayout>} />
-          <Route path="/quick-picks" element={<ViewAllQuickPicksPage />} />
-          <Route path="/help-support" element={<HelpSupportPage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/favorites" element={<FavoritesPage />} />
-          <Route path="/feedback" element={<FeedbackPage />} />
-          <Route path="/admin/home-content" element={<AdminLayout><AdminHomeContentEditor /></AdminLayout>} />
-          <Route path="/admin/user-management/send-email" element={<AdminLayout><SendEmailPage /></AdminLayout>} />
-          <Route path="/admin/user-management/add-loyalty-points" element={<AdminLayout><AddLoyaltyPointsPage /></AdminLayout>} />
-          <Route path="/admin/user-management/apply-discount" element={<AdminLayout><ApplyDiscountPage /></AdminLayout>} />
-          <Route path="/admin/user-management/send-warning" element={<AdminLayout><SendWarningPage /></AdminLayout>} />
-          <Route path="/admin/user-management/export-data" element={<AdminLayout><ExportUserDataPage /></AdminLayout>} />
-          <Route path="/admin/user-management/import-users" element={<AdminLayout><ImportUsersPage /></AdminLayout>} />
-          <Route path="/reorder" element={<ReorderPage />} />
-          <Route path="/rate-review" element={<RateReviewPage />} />
-          <Route path="/barcode-scanner" element={<BarcodeScannerPage />} />
-          <Route path="/index" element={<Index />} />
+      <Router>
+        <Switch>
+          <Route path="/" component={SplashScreen} />
+          <Route path="/login" component={LoginScreen} />
+          <Route path="/home" component={HomeScreen} />
+          <Route path="/menu/:category" component={MenuListingPage} />
+          <Route path="/dish/:dishId" component={DishDetailPage} />
+          <Route path="/cart" component={CartPage} />
+          <Route path="/checkout" component={CheckoutPage} />
+          <Route path="/retry-payment" component={RetryPaymentPage} />
+          <Route path="/order-status/:orderId" component={OrderStatusPage} />
+          <Route path="/orders" component={OrdersPage} />
+          <Route path="/order-detail/:orderId" component={OrderDetailPage} />
+          <Route path="/canteen-order-detail/:orderId" component={CanteenOrderDetailPage} />
+          <Route path="/profile" component={ProfilePage} />
+          <Route path="/notifications" component={NotificationsPage} />
+          <Route path="/payment-methods" component={PaymentMethodsPage} />
+          <Route path="/search" component={SearchPage} />
+          <Route path="/privacy-policy" component={PrivacyPolicyPage} />
+          <Route path="/terms-conditions" component={TermsConditionsPage} />
+          <Route path="/canteen-owner" component={CanteenOwnerDashboard} />
+          <Route path="/admin" component={AdminDashboard} />
+          <Route path="/edit-admin-access/:userId">
+            <AdminLayout><EditAdminAccessPage /></AdminLayout>
+          </Route>
+          <Route path="/add-new-admin">
+            <AdminLayout><AddNewAdminPage /></AdminLayout>
+          </Route>
+          <Route path="/admin/analytics">
+            <AdminLayout><AdminAnalyticsPage /></AdminLayout>
+          </Route>
+          <Route path="/admin/order-management">
+            <AdminLayout><AdminOrderManagementPage /></AdminLayout>
+          </Route>
+          <Route path="/admin/menu-management">
+            <AdminLayout><AdminMenuManagementPage /></AdminLayout>
+          </Route>
+          <Route path="/admin/reports">
+            <AdminLayout><AdminReportsPage /></AdminLayout>
+          </Route>
+          <Route path="/admin/user-management">
+            <AdminLayout><AdminUserManagementPage /></AdminLayout>
+          </Route>
+          <Route path="/admin/system-settings">
+            <AdminLayout><AdminSystemSettingsPage /></AdminLayout>
+          </Route>
+          <Route path="/admin/payment-management">
+            <AdminLayout><AdminPaymentManagementPage /></AdminLayout>
+          </Route>
+          <Route path="/admin/notification-management">
+            <AdminLayout><AdminNotificationManagementPage /></AdminLayout>
+          </Route>
+          <Route path="/admin/content-management">
+            <AdminLayout><AdminContentManagementPage /></AdminLayout>
+          </Route>
+          <Route path="/admin/feedback-management">
+            <AdminLayout><AdminFeedbackManagementPage /></AdminLayout>
+          </Route>
+          <Route path="/admin/review-management">
+            <AdminLayout><AdminReviewManagementPage /></AdminLayout>
+          </Route>
+          <Route path="/admin/admin-access">
+            <AdminLayout><AdminAccessPage /></AdminLayout>
+          </Route>
+          <Route path="/admin/database">
+            <AdminLayout><AdminDatabasePage /></AdminLayout>
+          </Route>
+          <Route path="/quick-picks" component={ViewAllQuickPicksPage} />
+          <Route path="/help-support" component={HelpSupportPage} />
+          <Route path="/about" component={AboutPage} />
+          <Route path="/favorites" component={FavoritesPage} />
+          <Route path="/feedback" component={FeedbackPage} />
+          <Route path="/admin/home-content">
+            <AdminLayout><AdminHomeContentEditor /></AdminLayout>
+          </Route>
+          <Route path="/admin/user-management/send-email">
+            <AdminLayout><SendEmailPage /></AdminLayout>
+          </Route>
+          <Route path="/admin/user-management/add-loyalty-points">
+            <AdminLayout><AddLoyaltyPointsPage /></AdminLayout>
+          </Route>
+          <Route path="/admin/user-management/apply-discount">
+            <AdminLayout><ApplyDiscountPage /></AdminLayout>
+          </Route>
+          <Route path="/admin/user-management/send-warning">
+            <AdminLayout><SendWarningPage /></AdminLayout>
+          </Route>
+          <Route path="/admin/user-management/export-data">
+            <AdminLayout><ExportUserDataPage /></AdminLayout>
+          </Route>
+          <Route path="/admin/user-management/import-users">
+            <AdminLayout><ImportUsersPage /></AdminLayout>
+          </Route>
+          <Route path="/reorder" component={ReorderPage} />
+          <Route path="/rate-review" component={RateReviewPage} />
+          <Route path="/barcode-scanner" component={BarcodeScannerPage} />
+          <Route path="/index" component={Index} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+          <Route component={NotFound} />
+        </Switch>
+      </Router>
     </TooltipProvider>
   </QueryClientProvider>
 );

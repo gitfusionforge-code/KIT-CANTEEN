@@ -1,16 +1,16 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "wouter";
 
 export default function SplashScreen() {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      navigate("/login");
+      setLocation("/login");
     }, 2000);
 
     return () => clearTimeout(timer);
-  }, [navigate]);
+  }, [setLocation]);
 
   return (
     <div className="min-h-screen bg-primary flex flex-col items-center justify-center relative overflow-hidden">
