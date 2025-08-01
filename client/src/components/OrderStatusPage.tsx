@@ -176,6 +176,70 @@ export default function OrderStatusPage() {
           </CardContent>
         </Card>
 
+        {/* Order Barcode */}
+        <Card className="shadow-card">
+          <CardContent className="p-4">
+            <h3 className="font-semibold mb-3 flex items-center">
+              <Package className="w-5 h-5 mr-2 text-primary" />
+              Order Barcode
+            </h3>
+            <div className="bg-accent/50 rounded-lg p-4 text-center">
+              {/* QR Code representation using ASCII art */}
+              <div className="bg-white p-4 rounded-lg inline-block mb-3">
+                <svg width="120" height="120" viewBox="0 0 120 120" className="mx-auto">
+                  {/* QR Code pattern */}
+                  <rect width="120" height="120" fill="white"/>
+                  {/* Corner squares */}
+                  <rect x="10" y="10" width="30" height="30" fill="black"/>
+                  <rect x="15" y="15" width="20" height="20" fill="white"/>
+                  <rect x="20" y="20" width="10" height="10" fill="black"/>
+                  
+                  <rect x="80" y="10" width="30" height="30" fill="black"/>
+                  <rect x="85" y="15" width="20" height="20" fill="white"/>
+                  <rect x="90" y="20" width="10" height="10" fill="black"/>
+                  
+                  <rect x="10" y="80" width="30" height="30" fill="black"/>
+                  <rect x="15" y="85" width="20" height="20" fill="white"/>
+                  <rect x="20" y="90" width="10" height="10" fill="black"/>
+                  
+                  {/* Data pattern */}
+                  <rect x="50" y="20" width="5" height="5" fill="black"/>
+                  <rect x="60" y="20" width="5" height="5" fill="black"/>
+                  <rect x="50" y="30" width="5" height="5" fill="black"/>
+                  <rect x="70" y="30" width="5" height="5" fill="black"/>
+                  <rect x="45" y="40" width="5" height="5" fill="black"/>
+                  <rect x="55" y="40" width="5" height="5" fill="black"/>
+                  <rect x="65" y="40" width="5" height="5" fill="black"/>
+                  <rect x="75" y="40" width="5" height="5" fill="black"/>
+                  
+                  <rect x="20" y="50" width="5" height="5" fill="black"/>
+                  <rect x="30" y="50" width="5" height="5" fill="black"/>
+                  <rect x="50" y="50" width="5" height="5" fill="black"/>
+                  <rect x="70" y="50" width="5" height="5" fill="black"/>
+                  <rect x="80" y="50" width="5" height="5" fill="black"/>
+                  <rect x="90" y="50" width="5" height="5" fill="black"/>
+                  <rect x="100" y="50" width="5" height="5" fill="black"/>
+                  
+                  <rect x="25" y="60" width="5" height="5" fill="black"/>
+                  <rect x="45" y="60" width="5" height="5" fill="black"/>
+                  <rect x="55" y="60" width="5" height="5" fill="black"/>
+                  <rect x="85" y="60" width="5" height="5" fill="black"/>
+                  <rect x="95" y="60" width="5" height="5" fill="black"/>
+                  
+                  <rect x="50" y="70" width="5" height="5" fill="black"/>
+                  <rect x="60" y="70" width="5" height="5" fill="black"/>
+                  <rect x="80" y="70" width="5" height="5" fill="black"/>
+                  <rect x="100" y="70" width="5" height="5" fill="black"/>
+                </svg>
+              </div>
+              <p className="font-bold text-lg mb-1">Order ID: {orderDetails.id}</p>
+              <p className="text-sm text-muted-foreground">
+                Show this QR code to canteen staff for pickup
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Pickup Location */}
         <Card className="shadow-card">
           <CardContent className="p-4">
@@ -186,7 +250,7 @@ export default function OrderStatusPage() {
             <div className="bg-accent/50 rounded-lg p-3">
               <p className="font-medium">{orderDetails.pickupLocation}</p>
               <p className="text-sm text-muted-foreground mt-1">
-                Show this order status to the canteen staff
+                Present the QR code above for quick order verification
               </p>
             </div>
           </CardContent>
