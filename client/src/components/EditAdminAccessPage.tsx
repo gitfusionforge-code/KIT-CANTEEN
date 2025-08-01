@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useParams } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,7 @@ import { ArrowLeft, Save, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function EditAdminAccessPage() {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const { userId } = useParams();
   const { toast } = useToast();
 
@@ -33,7 +33,7 @@ export default function EditAdminAccessPage() {
       title: "Success",
       description: "Admin access updated successfully",
     });
-    navigate("/admin/admin-access");
+    setLocation("/admin/admin-access");
   };
 
   const handleDelete = () => {
@@ -42,7 +42,7 @@ export default function EditAdminAccessPage() {
       title: "Success", 
       description: "Admin user deleted successfully",
     });
-    navigate("/admin/admin-access");
+    setLocation("/admin/admin-access");
   };
 
   const togglePermission = (permission: string) => {
@@ -63,7 +63,7 @@ export default function EditAdminAccessPage() {
             <Button 
               variant="ghost" 
               size="icon"
-              onClick={() => navigate("/admin/admin-access")}
+              onClick={() => setLocation("/admin/admin-access")}
             >
               <ArrowLeft className="w-4 h-4" />
             </Button>
@@ -143,7 +143,7 @@ export default function EditAdminAccessPage() {
               </Button>
               <Button 
                 variant="outline" 
-                onClick={() => navigate("/admin/admin-access")}
+                onClick={() => setLocation("/admin/admin-access")}
               >
                 Cancel
               </Button>

@@ -1,10 +1,10 @@
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Shield, Eye, Database, Lock } from "lucide-react";
 
 export default function PrivacyPolicyPage() {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
 
   const sections = [
     {
@@ -55,7 +55,7 @@ export default function PrivacyPolicyPage() {
       {/* Header */}
       <div className="bg-primary px-4 pt-12 pb-6">
         <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="icon" className="text-white" onClick={() => navigate('/profile')}>
+          <Button variant="ghost" size="icon" className="text-white" onClick={() => setLocation('/profile')}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <h1 className="text-xl font-bold text-white">Privacy Policy</h1>
