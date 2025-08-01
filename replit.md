@@ -5,6 +5,7 @@ KIT-Canteen is a modern food ordering application designed for college campuses.
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
+Environment variables: Always store credentials in .env file when possible for better organization.
 
 # Recent Changes
 
@@ -29,6 +30,8 @@ Preferred communication style: Simple, everyday language.
   - Created comprehensive database schema with tables: users, categories, menuItems, orders, notifications
   - Implemented complete DatabaseStorage class with full CRUD operations
   - Added proper relationships between tables using Drizzle ORM
+  - Fixed DATABASE_URL connection issue by provisioning PostgreSQL database
+  - Database credentials managed through Replit environment variables (security requirement)
   - Real-time data persistence replaces mock data throughout application
 - **Enhanced Inventory Management**: Fixed and completed inventory system
   - Removed quick +/- adjustment buttons per user request
