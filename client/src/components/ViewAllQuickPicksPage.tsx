@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import BottomNavigation from "./BottomNavigation";
 
 export default function ViewAllQuickPicksPage() {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [cart, setCart] = useState<{[key: string]: number}>({});
@@ -55,7 +55,7 @@ export default function ViewAllQuickPicksPage() {
             <Button 
               variant="ghost" 
               size="icon"
-              onClick={() => navigate("/home")}
+              onClick={() => setLocation("/home")}
               className="text-white hover:bg-white/20"
             >
               <ArrowLeft className="w-5 h-5" />
@@ -90,7 +90,7 @@ export default function ViewAllQuickPicksPage() {
             <Button 
               variant="cart" 
               size="sm"
-              onClick={() => navigate("/cart")}
+              onClick={() => setLocation("/cart")}
               className="animate-fade-in"
             >
               Cart ({getTotalItems()})

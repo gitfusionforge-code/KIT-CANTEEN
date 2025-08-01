@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,7 @@ import { ArrowLeft, Percent, Tag } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function ApplyDiscountPage() {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [discountData, setDiscountData] = useState({
     userGroup: "all",
@@ -38,7 +38,7 @@ export default function ApplyDiscountPage() {
       title: "Discount Applied",
       description: `${discountData.discountValue}${discountData.discountType === 'percentage' ? '%' : '₹'} discount applied to ${userGroups.find(g => g.value === discountData.userGroup)?.label}`,
     });
-    navigate("/admin/user-management");
+    setLocation("/admin/user-management");
   };
 
   return (
@@ -49,7 +49,7 @@ export default function ApplyDiscountPage() {
             <Button 
               variant="ghost" 
               size="icon"
-              onClick={() => navigate("/admin/user-management")}
+              onClick={() => setLocation("/admin/user-management")}
             >
               <ArrowLeft className="w-4 h-4" />
             </Button>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 
 export default function AdminPaymentManagementPage() {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedPayment, setSelectedPayment] = useState<any>(null);
@@ -174,7 +174,7 @@ export default function AdminPaymentManagementPage() {
         <div className="flex items-center space-x-4">
           <Button 
             variant="ghost" 
-            onClick={() => navigate("/admin")}
+            onClick={() => setLocation("/admin")}
             className="p-2"
           >
             <ArrowLeft className="h-4 w-4" />

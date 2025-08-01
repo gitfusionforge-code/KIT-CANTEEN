@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,7 @@ import { ArrowLeft, AlertTriangle, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function SendWarningPage() {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [warningData, setWarningData] = useState({
     userGroup: "individual",
@@ -48,7 +48,7 @@ export default function SendWarningPage() {
       title: "Warning Sent",
       description: `Warning sent successfully with ${warningData.severity} severity`,
     });
-    navigate("/admin/user-management");
+    setLocation("/admin/user-management");
   };
 
   return (
@@ -59,7 +59,7 @@ export default function SendWarningPage() {
             <Button 
               variant="ghost" 
               size="icon"
-              onClick={() => navigate("/admin/user-management")}
+              onClick={() => setLocation("/admin/user-management")}
             >
               <ArrowLeft className="w-4 h-4" />
             </Button>

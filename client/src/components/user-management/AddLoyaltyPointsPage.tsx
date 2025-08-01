@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,7 @@ import { ArrowLeft, Gift, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function AddLoyaltyPointsPage() {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [pointsData, setPointsData] = useState({
     userGroup: "all",
@@ -33,7 +33,7 @@ export default function AddLoyaltyPointsPage() {
       title: "Loyalty Points Added",
       description: `${pointsData.points} points added to ${userGroups.find(g => g.value === pointsData.userGroup)?.label}`,
     });
-    navigate("/admin/user-management");
+    setLocation("/admin/user-management");
   };
 
   return (
@@ -44,7 +44,7 @@ export default function AddLoyaltyPointsPage() {
             <Button 
               variant="ghost" 
               size="icon"
-              onClick={() => navigate("/admin/user-management")}
+              onClick={() => setLocation("/admin/user-management")}
             >
               <ArrowLeft className="w-4 h-4" />
             </Button>
@@ -150,7 +150,7 @@ export default function AddLoyaltyPointsPage() {
           </Card>
 
           <div className="flex space-x-4">
-            <Button variant="outline" onClick={() => navigate("/admin/user-management")}>
+            <Button variant="outline" onClick={() => setLocation("/admin/user-management")}>
               Cancel
             </Button>
             <Button 

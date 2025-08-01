@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,7 @@ import { ArrowLeft, Plus, Minus, Tag } from "lucide-react";
 import BottomNavigation from "./BottomNavigation";
 
 export default function CartPage() {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const [promoCode, setPromoCode] = useState("");
   const [cartItems, setCartItems] = useState([
     { id: 1, name: "Veg Thali", price: 85, quantity: 2, isVeg: true },
@@ -33,7 +33,7 @@ export default function CartPage() {
       {/* Header */}
       <div className="bg-white border-b px-4 py-4 sticky top-0 z-10">
         <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/home')}>
+          <Button variant="ghost" size="icon" onClick={() => setLocation('/home')}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <h1 className="text-xl font-bold">Cart ({cartItems.length} items)</h1>
@@ -49,7 +49,7 @@ export default function CartPage() {
           <p className="text-muted-foreground text-center mb-6">
             Add some delicious food to get started
           </p>
-          <Button variant="food" onClick={() => navigate("/home")}>
+          <Button variant="food" onClick={() => setLocation("/home")}>
             Browse Menu
           </Button>
         </div>
@@ -144,7 +144,7 @@ export default function CartPage() {
               variant="food"
               size="mobile"
               className="w-full"
-              onClick={() => navigate("/checkout")}
+              onClick={() => setLocation("/checkout")}
             >
               Place Order • ₹{total}
             </Button>

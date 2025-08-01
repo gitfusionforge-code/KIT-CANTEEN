@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -16,7 +16,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 
 export default function AdminSystemSettingsPage() {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
 
   const [generalSettings, setGeneralSettings] = useState({
@@ -89,7 +89,7 @@ export default function AdminSystemSettingsPage() {
             <Button 
               variant="ghost" 
               size="icon"
-              onClick={() => navigate("/admin")}
+              onClick={() => setLocation("/admin")}
             >
               <ArrowLeft className="w-4 h-4" />
             </Button>

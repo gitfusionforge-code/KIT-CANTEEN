@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -11,7 +11,7 @@ import { ArrowLeft, Upload, FileText, CheckCircle, AlertTriangle, X } from "luci
 import { useToast } from "@/hooks/use-toast";
 
 export default function ImportUsersPage() {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [importConfig, setImportConfig] = useState({
     fileFormat: "csv",
@@ -88,7 +88,7 @@ export default function ImportUsersPage() {
             <Button 
               variant="ghost" 
               size="icon"
-              onClick={() => navigate("/admin/user-management")}
+              onClick={() => setLocation("/admin/user-management")}
             >
               <ArrowLeft className="w-4 h-4" />
             </Button>
@@ -271,7 +271,7 @@ export default function ImportUsersPage() {
           )}
 
           <div className="flex space-x-4">
-            <Button variant="outline" onClick={() => navigate("/admin/user-management")}>
+            <Button variant="outline" onClick={() => setLocation("/admin/user-management")}>
               {importResults ? "Done" : "Cancel"}
             </Button>
             {!importResults && (

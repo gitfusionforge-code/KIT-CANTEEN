@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -130,7 +130,7 @@ const initialAutomationSettings = [
 ];
 
 export default function AdminNotificationManagementPage() {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("templates");
   const [automationEnabled, setAutomationEnabled] = useState(true);
@@ -310,7 +310,7 @@ export default function AdminNotificationManagementPage() {
         <div className="flex items-center space-x-4">
           <Button 
             variant="ghost" 
-            onClick={() => navigate("/admin")}
+            onClick={() => setLocation("/admin")}
             className="p-2"
           >
             <ArrowLeft className="h-4 w-4" />
