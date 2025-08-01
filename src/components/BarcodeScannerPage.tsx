@@ -107,7 +107,14 @@ export default function BarcodeScannerPage() {
             Back
           </Button>
           <h1 className="text-lg font-semibold">Order Entry</h1>
-          <div className="w-16" />
+          <Button 
+            onClick={() => setIsCreatingManualOrder(!isCreatingManualOrder)}
+            variant="outline"
+            size="sm"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            {isCreatingManualOrder ? "Cancel" : "Manual Order"}
+          </Button>
         </div>
       </div>
 
@@ -154,15 +161,6 @@ export default function BarcodeScannerPage() {
             <CardTitle>Create Manual Order</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Button 
-              onClick={() => setIsCreatingManualOrder(!isCreatingManualOrder)}
-              variant="outline"
-              className="w-full"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              {isCreatingManualOrder ? "Cancel Manual Order" : "Create New Manual Order"}
-            </Button>
-
             {isCreatingManualOrder && (
               <div className="space-y-6 border-t pt-4">
                 {/* Customer Details */}
