@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useRoute } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,8 +8,9 @@ import { useToast } from "@/hooks/use-toast";
 import BottomNavigation from "./BottomNavigation";
 
 export default function MenuListingPage() {
-  const navigate = useNavigate();
-  const { category } = useParams();
+  const [, setLocation] = useLocation();
+  const [match, params] = useRoute("/menu/:category");
+  const category = params?.category;
   const { toast } = useToast();
   const [filter, setFilter] = useState<"all" | "veg" | "non-veg">("all");
   const [cart, setCart] = useState<{[key: string]: number}>({});
@@ -70,7 +71,7 @@ export default function MenuListingPage() {
       <div className="bg-white border-b px-4 py-4 sticky top-0 z-10">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate('/home')}>
+            <Button variant="ghost" size="icon" onClick={() => setLocation('/home')}>
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <h1 className="text-xl font-bold capitalize">{category}</h1>
