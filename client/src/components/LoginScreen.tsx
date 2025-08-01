@@ -57,8 +57,13 @@ export default function LoginScreen() {
     } catch (error: any) {
       console.error("Google sign-in error:", error);
       
-      // If popup is blocked, fallback to redirect
-      if (error.code === 'auth/popup-blocked') {
+      if (error.code === 'auth/unauthorized-domain') {
+        toast({ 
+          title: "Domain Authorization Required", 
+          description: "Please add this domain to Firebase Console authorized domains",
+          variant: "destructive" 
+        });
+      } else if (error.code === 'auth/popup-blocked') {
         toast({ 
           title: "Popup blocked", 
           description: "Redirecting to Google sign-in page...",
@@ -73,6 +78,11 @@ export default function LoginScreen() {
             variant: "destructive" 
           });
         }
+      } else if (error.code === 'auth/popup-closed-by-user') {
+        toast({ 
+          title: "Sign-in cancelled", 
+          description: "You closed the sign-in window",
+        });
       } else {
         toast({ 
           title: "Sign-in failed", 

@@ -45,7 +45,7 @@ Environment variables: Always store credentials in .env file when possible for b
   - **COMPREHENSIVE DATA CLEANSING COMPLETE**: 100% elimination of hardcoded sample data achieved across entire codebase
 - **Authentication System**: Complete authentication solution implemented
   - Traditional email/password login and registration with database integration
-  - **Firebase Google Authentication**: Full Google sign-in integration with redirect flow
+  - **Firebase Google Authentication**: Full Google sign-in integration with redirect flow (requires domain authorization in Firebase Console)
   - Real form validation and API integration
   - Guest access functionality maintained
   - Secure environment variable configuration for Firebase credentials
