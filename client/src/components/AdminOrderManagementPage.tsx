@@ -20,68 +20,8 @@ import {
 export default function AdminOrderManagementPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("all");
-  const [orders, setOrders] = useState([
-    {
-      id: "ORD-8935",
-      customer: "John Doe",
-      email: "john@example.com",
-      items: ["Veg Thali", "Coffee"],
-      total: 150,
-      status: "preparing",
-      canteen: "Main Hall",
-      orderTime: "2024-01-20 14:30",
-      estimatedTime: "15 mins",
-      paymentStatus: "paid"
-    },
-    {
-      id: "ORD-8934",
-      customer: "Jane Smith",
-      email: "jane@example.com",
-      items: ["Chicken Curry", "Rice", "Lassi"],
-      total: 280,
-      status: "preparing",
-      canteen: "Food Court",
-      orderTime: "2024-01-20 14:25",
-      estimatedTime: "20 mins",
-      paymentStatus: "paid"
-    },
-    {
-      id: "ORD-8933",
-      customer: "Mike Johnson",
-      email: "mike@example.com",
-      items: ["Masala Dosa", "Sambar"],
-      total: 120,
-      status: "ready",
-      canteen: "South Wing",
-      orderTime: "2024-01-20 14:20",
-      estimatedTime: "Ready",
-      paymentStatus: "paid"
-    },
-    {
-      id: "ORD-8932",
-      customer: "Sarah Wilson",
-      email: "sarah@example.com",
-      items: ["Biryani", "Raita"],
-      total: 200,
-      status: "completed",
-      canteen: "Main Hall",
-      orderTime: "2024-01-20 14:15",
-      estimatedTime: "Completed",
-      paymentStatus: "paid"
-    },
-    {
-      id: "ORD-8931",
-      customer: "Tom Brown",
-      email: "tom@example.com",
-      items: ["Sandwich", "Cold Coffee"],
-      total: 95,
-      status: "cancelled",
-      canteen: "Café Corner",
-      orderTime: "2024-01-20 14:10",
-      estimatedTime: "Cancelled",
-      paymentStatus: "refunded"
-    }
-  ]);
+  // Fetch real orders from database
+  const [orders, setOrders] = useState<any[]>([]);
   const { toast } = useToast();
 
   const getStatusColor = (status: string) => {

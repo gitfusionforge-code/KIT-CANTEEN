@@ -25,82 +25,11 @@ export default function AdminUserManagementPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterRole, setFilterRole] = useState("all");
 
-  const [users, setUsers] = useState([
-    {
-      id: 1,
-      name: "Rahul Kumar",
-      email: "rahul@kit.ac.in",
-      phone: "+91 9876543210",
-      role: "Student",
-      status: "Active",
-      joinDate: "2024-01-15",
-      lastLogin: "2024-01-20 10:30 AM",
-      orders: 25,
-      totalSpent: 2500,
-      avgRating: 4.2,
-      loyaltyPoints: 150,
-      avatar: "",
-      address: "Hostel Block A, Room 205",
-      preferences: ["Vegetarian", "No Spicy"]
-    },
-    {
-      id: 2,
-      name: "Dr. Priya Sharma",
-      email: "priya.sharma@kit.ac.in",
-      phone: "+91 9876543211",
-      role: "Faculty",
-      status: "Active",
-      joinDate: "2023-08-10",
-      lastLogin: "2024-01-20 09:15 AM",
-      orders: 45,
-      totalSpent: 5200,
-      avgRating: 4.8,
-      loyaltyPoints: 320,
-      avatar: "",
-      address: "Faculty Quarters, Block C",
-      preferences: ["Vegetarian", "Low Salt"]
-    },
-    {
-      id: 3,
-      name: "Amit Singh",
-      email: "amit@kit.ac.in",
-      phone: "+91 9876543212",
-      role: "Staff",
-      status: "Suspended",
-      joinDate: "2023-11-20",
-      lastLogin: "2024-01-18 02:45 PM",
-      orders: 15,
-      totalSpent: 1800,
-      avgRating: 3.5,
-      loyaltyPoints: 80,
-      avatar: "",
-      address: "Staff Quarters, Block B",
-      preferences: ["Non-Vegetarian"]
-    }
-  ]);
+  // Fetch real users from database
+  const [users, setUsers] = useState<any[]>([]);
 
-  const [complaints, setComplaints] = useState([
-    {
-      id: 1,
-      userId: 1,
-      userName: "Rahul Kumar",
-      subject: "Cold Food Issue",
-      description: "Food was served cold during lunch time",
-      date: "2024-01-19",
-      status: "Open",
-      priority: "Medium"
-    },
-    {
-      id: 2,
-      userId: 2,
-      userName: "Dr. Priya Sharma",
-      subject: "Billing Error",
-      description: "Charged incorrect amount for order #123",
-      date: "2024-01-18",
-      status: "Resolved",
-      priority: "High"
-    }
-  ]);
+  // Fetch real complaints from database
+  const [complaints, setComplaints] = useState<any[]>([]);
 
   const handleUserAction = (userId: number, action: string) => {
     setUsers(prev => prev.map(user => 

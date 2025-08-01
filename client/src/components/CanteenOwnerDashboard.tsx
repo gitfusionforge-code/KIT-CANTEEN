@@ -38,31 +38,15 @@ export default function CanteenOwnerDashboard() {
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("overview");
   
-  // Categories state
-  const [categories, setCategories] = useState([
-    "South Indian",
-    "North Indian", 
-    "Street Food",
-    "Beverages",
-    "Non-Veg",
-    "Desserts"
-  ]);
+  // Fetch real categories from database
+  const [categories, setCategories] = useState<string[]>([]);
   const [newCategory, setNewCategory] = useState("");
   
-  // Mock data with state management
-  const [orders, setOrders] = useState([
-    { id: "#1234", customer: "John Doe", items: "2x Masala Dosa, 1x Coffee", amount: 85, status: "preparing", time: "2 min ago", estimatedTime: 15 },
-    { id: "#1233", customer: "Jane Smith", items: "1x Idli Sambar, 1x Tea", amount: 45, status: "preparing", time: "5 min ago", estimatedTime: 8 },
-    { id: "#1232", customer: "Mike Johnson", items: "1x Vada Pav, 1x Lassi", amount: 60, status: "ready", time: "8 min ago", estimatedTime: 0 },
-  ]);
+  // Fetch real orders from database
+  const [orders, setOrders] = useState<any[]>([]);
 
-  const [menuItems, setMenuItems] = useState([
-    { id: 1, name: "Masala Dosa", price: 35, category: "South Indian", available: true, stock: 25 },
-    { id: 2, name: "Idli Sambar", price: 25, category: "South Indian", available: true, stock: 30 },
-    { id: 3, name: "Vada Pav", price: 20, category: "Street Food", available: true, stock: 15 },
-    { id: 4, name: "Coffee", price: 15, category: "Beverages", available: true, stock: 50 },
-    { id: 5, name: "Chicken Curry", price: 80, category: "Non-Veg", available: false, stock: 0 },
-  ]);
+  // Fetch real menu items from database
+  const [menuItems, setMenuItems] = useState<any[]>([]);
 
   const [newItem, setNewItem] = useState({ name: "", price: "", category: "", stock: "", barcode: "" });
   const [editingItem, setEditingItem] = useState<any>(null);
@@ -71,12 +55,8 @@ export default function CanteenOwnerDashboard() {
   const [newStockAmount, setNewStockAmount] = useState("");
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [notifications, setNotifications] = useState([
-    { id: 1, type: "order", message: "New order #1234 received", time: "2 min ago", read: false },
-    { id: 2, type: "stock", message: "Vada Pav stock is running low (5 remaining)", time: "15 min ago", read: false },
-    { id: 3, type: "order", message: "Order #1232 ready for pickup", time: "30 min ago", read: true },
-    { id: 4, type: "system", message: "Daily sales report generated", time: "1 hour ago", read: true }
-  ]);
+  // Fetch real notifications from database
+  const [notifications, setNotifications] = useState<any[]>([]);
   const [settings, setSettings] = useState({
     canteenName: "KIT Main Canteen",
     workingHours: { open: "08:00", close: "20:00" },

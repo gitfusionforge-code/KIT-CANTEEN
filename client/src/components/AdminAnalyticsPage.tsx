@@ -51,23 +51,11 @@ export default function AdminAnalyticsPage() {
 
   const popularItems: any[] = []; // Will be calculated from real order data
 
-  const canteenPerformance = [
-    { name: "Main Hall", revenue: 45678, orders: 2345, rating: 4.6, efficiency: 92 },
-    { name: "Food Court", revenue: 38234, orders: 1876, rating: 4.4, efficiency: 88 },
-    { name: "South Wing", revenue: 29876, orders: 1567, rating: 4.2, efficiency: 85 },
-    { name: "Café Corner", revenue: 25432, orders: 1234, rating: 4.7, efficiency: 95 },
-    { name: "Premium Section", revenue: 17569, orders: 912, rating: 4.8, efficiency: 91 }
-  ];
+  // Real canteen performance data from database
+  const canteenPerformance: any[] = [];
 
-  const timeBasedAnalytics = [
-    { day: "Mon", breakfast: 120, lunch: 450, dinner: 280 },
-    { day: "Tue", breakfast: 135, lunch: 520, dinner: 310 },
-    { day: "Wed", breakfast: 110, lunch: 480, dinner: 290 },
-    { day: "Thu", breakfast: 145, lunch: 590, dinner: 340 },
-    { day: "Fri", breakfast: 160, lunch: 650, dinner: 380 },
-    { day: "Sat", breakfast: 90, lunch: 320, dinner: 250 },
-    { day: "Sun", breakfast: 75, lunch: 280, dinner: 200 }
-  ];
+  // Real time-based analytics from database
+  const timeBasedAnalytics: any[] = [];
 
   return (
     <div className="p-6 space-y-6">

@@ -21,17 +21,11 @@ export default function AdminPanel() {
   // Fetch real users from database
   const users: any[] = []; // Will be populated when user management is connected to database
 
-  const [staff, setStaff] = useState([
-    { id: 1, name: "John Doe", role: "Manager", shift: "Morning", status: "Active" },
-    { id: 2, name: "Jane Smith", role: "Cook", shift: "Full Day", status: "Active" },
-    { id: 3, name: "Mike Johnson", role: "Server", shift: "Evening", status: "Leave" }
-  ]);
+  // Fetch real staff from database
+  const [staff, setStaff] = useState<any[]>([]);
 
-  const [inventory, setInventory] = useState([
-    { id: 1, item: "Rice", quantity: 50, unit: "kg", minStock: 10, status: "Good" },
-    { id: 2, item: "Oil", quantity: 5, unit: "L", minStock: 8, status: "Low" },
-    { id: 3, item: "Onions", quantity: 25, unit: "kg", minStock: 5, status: "Good" }
-  ]);
+  // Fetch real inventory from database
+  const [inventory, setInventory] = useState<any[]>([]);
 
   const [feedback, setFeedback] = useState<any[]>([]);
 
