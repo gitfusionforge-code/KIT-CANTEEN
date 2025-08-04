@@ -276,7 +276,7 @@ export default function AdminMenuManagementPage() {
 
       {/* Edit Dialog */}
       <Dialog open={!!editingItem} onOpenChange={() => setEditingItem(null)}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle>Edit Menu Item</DialogTitle>
             <DialogDescription>
@@ -284,7 +284,7 @@ export default function AdminMenuManagementPage() {
             </DialogDescription>
           </DialogHeader>
           
-          <div className="space-y-4">
+          <div className="space-y-4 overflow-y-auto flex-1 pr-2">
             {/* Name */}
             <div className="space-y-2">
               <Label htmlFor="name">Name</Label>
@@ -360,9 +360,9 @@ export default function AdminMenuManagementPage() {
             </div>
 
             {/* Add-ons Section */}
-            <div className="space-y-2">
+            <div className="space-y-2 border border-dashed border-gray-300 p-4 rounded-lg bg-gray-50">
               <div className="flex items-center justify-between">
-                <Label>Add-ons</Label>
+                <Label className="text-lg font-semibold">Add-ons</Label>
                 <Button
                   type="button"
                   variant="outline"
@@ -406,22 +406,22 @@ export default function AdminMenuManagementPage() {
                 <p className="text-sm text-muted-foreground">No add-ons configured</p>
               )}
             </div>
+          </div>
 
-            {/* Action Buttons */}
-            <div className="flex justify-end space-x-2 pt-4">
-              <Button
-                variant="outline"
-                onClick={() => setEditingItem(null)}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={saveEditedItem}
-                disabled={!editForm.name || !editForm.price}
-              >
-                Save Changes
-              </Button>
-            </div>
+          {/* Action Buttons - Fixed at bottom */}
+          <div className="flex justify-end space-x-2 pt-4 border-t bg-background">
+            <Button
+              variant="outline"
+              onClick={() => setEditingItem(null)}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={saveEditedItem}
+              disabled={!editForm.name || !editForm.price}
+            >
+              Save Changes
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
