@@ -17,6 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
 import type { MenuItem, Category, Order } from "@shared/schema";
 import SyncStatus from "./SyncStatus";
+import TestLogoutButton from "./TestLogoutButton";
 import { useAuthSync } from "@/hooks/useDataSync";
 import { 
   ChefHat, 

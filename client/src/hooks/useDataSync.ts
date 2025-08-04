@@ -101,6 +101,14 @@ export function useDataSync() {
 export function useAuthSync() {
   const user = JSON.parse(localStorage.getItem('user') || 'null');
   
+  // Debug logging for authentication state
+  console.log("useAuthSync Debug:", {
+    localStorage_user: localStorage.getItem('user'),
+    parsed_user: user,
+    isAuthenticated: !!user,
+    userRole: user?.role
+  });
+  
   return {
     user,
     isAuthenticated: !!user,
