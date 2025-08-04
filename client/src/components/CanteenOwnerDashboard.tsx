@@ -80,7 +80,7 @@ export default function CanteenOwnerDashboard() {
         throw new Error(`Failed to fetch menu items: ${response.status}`);
       }
       const data = await response.json();
-      console.log("Menu items fetched:", data);
+      // console.log("Menu items fetched:", data);
       return data;
     },
     staleTime: 0,
@@ -88,15 +88,8 @@ export default function CanteenOwnerDashboard() {
     refetchOnWindowFocus: true,
   });
 
-  // Debug logging
-  console.log("CanteenOwner Debug:", { 
-    menuItems, 
-    menuItemsCount: menuItems.length, 
-    menuItemsLoading, 
-    menuItemsError,
-    categories,
-    categoriesCount: categories.length 
-  });
+  // Optional debug logging (removed for production)
+  // console.log("CanteenOwner Debug:", { menuItems, categories });
 
   const [newCategory, setNewCategory] = useState("");
 
@@ -187,18 +180,35 @@ export default function CanteenOwnerDashboard() {
   // Delete menu item mutation with enhanced sync
   const deleteMenuItemMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest(`/api/menu/${id}`, { method: 'DELETE' });
+      // console.log("Deleting menu item:", id);
+      const response = await fetch(`/api/menu/${id}`, { 
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to delete menu item: ${response.status}`);
+      }
+      
+      return { success: true };
     },
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
+      // console.log("Menu item deleted successfully:", variables);
       // Comprehensive synchronization
       queryClient.invalidateQueries({ queryKey: ['/api/menu'] });
       queryClient.invalidateQueries({ queryKey: ['/api/categories'] });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/analytics'] });
       queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+      
+      // Force refetch to ensure UI updates
       refetchMenuItems();
-      toast.success("Menu item deleted successfully - synced across all dashboards");
+      
+      toast.success("Menu item deleted successfully");
     },
-    onError: () => {
+    onError: (error, variables) => {
+      console.error("Failed to delete menu item:", error, variables);
       toast.error("Failed to delete menu item");
     }
   });
@@ -300,6 +310,11 @@ export default function CanteenOwnerDashboard() {
   };
 
   const handleDeleteMenuItem = (itemId: any) => {
+    // Prevent multiple simultaneous deletes
+    if (deleteMenuItemMutation.isPending) {
+      toast.error("Delete in progress, please wait...");
+      return;
+    }
     deleteMenuItemMutation.mutate(itemId);
   };
 
@@ -891,6 +906,7 @@ export default function CanteenOwnerDashboard() {
                           size="sm" 
                           variant="destructive" 
                           onClick={() => handleDeleteMenuItem(item.id)}
+                          disabled={deleteMenuItemMutation.isPending}
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
