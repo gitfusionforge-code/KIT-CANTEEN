@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,6 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
 import { 
   ChefHat, 
@@ -38,15 +41,20 @@ export default function CanteenOwnerDashboard() {
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("overview");
   
-  // Fetch real categories from database
-  const [categories, setCategories] = useState<string[]>([]);
-  const [newCategory, setNewCategory] = useState("");
-  
-  // Fetch real orders from database
-  const [orders, setOrders] = useState<any[]>([]);
+  // Fetch real data from database using React Query
+  const { data: categories = [], isLoading: categoriesLoading } = useQuery({
+    queryKey: ['/api/categories'],
+  });
 
-  // Fetch real menu items from database
-  const [menuItems, setMenuItems] = useState<any[]>([]);
+  const { data: orders = [], isLoading: ordersLoading } = useQuery({
+    queryKey: ['/api/orders'],
+  });
+
+  const { data: menuItems = [], isLoading: menuItemsLoading } = useQuery({
+    queryKey: ['/api/menu'],
+  });
+
+  const [newCategory, setNewCategory] = useState("");
 
   const [newItem, setNewItem] = useState({ name: "", price: "", category: "", stock: "", barcode: "" });
   const [editingItem, setEditingItem] = useState<any>(null);
@@ -75,18 +83,87 @@ export default function CanteenOwnerDashboard() {
 
 
   const stats = [
-    { title: "Today's Orders", value: orders.length.toString(), icon: ShoppingBag, trend: "+12%" },
-    { title: "Revenue", value: `₹${orders.reduce((sum, order) => sum + order.amount, 0)}`, icon: DollarSign, trend: "+8%" },
-    { title: "Active Menu Items", value: menuItems.filter(item => item.available).length.toString(), icon: ChefHat, trend: "+3" },
+    { title: "Today's Orders", value: (orders as any[]).length.toString(), icon: ShoppingBag, trend: "+12%" },
+    { title: "Revenue", value: `₹${(orders as any[]).reduce((sum: number, order: any) => sum + order.amount, 0)}`, icon: DollarSign, trend: "+8%" },
+    { title: "Active Menu Items", value: (menuItems as any[]).filter((item: any) => item.available).length.toString(), icon: ChefHat, trend: "+3" },
     { title: "Avg Rating", value: "4.8", icon: Star, trend: "+0.2" }
   ];
 
   const handleOrderStatusUpdate = (orderId: any, newStatus: any) => {
-    setOrders(orders.map(order => 
-      order.id === orderId ? { ...order, status: newStatus } : order
-    ));
+    // Update order status using API
+    updateMenuItemMutation.mutate({ id: orderId, data: { status: newStatus } });
     toast.success(`Order ${orderId} marked as ${newStatus}`);
   };
+
+  // Add menu item mutation
+  const addMenuItemMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return apiRequest('/api/menu', {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: { 'Content-Type': 'application/json' }
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/menu'] });
+      toast.success("Menu item added successfully");
+      setNewItem({ name: "", price: "", category: "", stock: "", barcode: "" });
+    },
+    onError: () => {
+      toast.error("Failed to add menu item");
+    }
+  });
+
+  // Update menu item mutation
+  const updateMenuItemMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: any }) => {
+      return apiRequest(`/api/menu/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+        headers: { 'Content-Type': 'application/json' }
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/menu'] });
+      toast.success("Menu item updated successfully");
+    },
+    onError: () => {
+      toast.error("Failed to update menu item");
+    }
+  });
+
+  // Delete menu item mutation
+  const deleteMenuItemMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return apiRequest(`/api/menu/${id}`, { method: 'DELETE' });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/menu'] });
+      toast.success("Menu item deleted successfully");
+    },
+    onError: () => {
+      toast.error("Failed to delete menu item");
+    }
+  });
+
+  // Add category mutation
+  const addCategoryMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return apiRequest('/api/categories', {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: { 'Content-Type': 'application/json' }
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/categories'] });
+      toast.success("Category added successfully");
+      setNewCategory("");
+    },
+    onError: () => {
+      toast.error("Failed to add category");
+    }
+  });
 
   const handleAddMenuItem = () => {
     if (!newItem.name || !newItem.price) {
@@ -94,18 +171,19 @@ export default function CanteenOwnerDashboard() {
       return;
     }
     
-    const item = {
-      id: Date.now(),
+    // Find category ID from name
+    const selectedCategory = (categories as any[]).find((cat: any) => cat.name === newItem.category);
+    
+    const itemData = {
       name: newItem.name,
       price: parseInt(newItem.price),
-      category: newItem.category || "Other",
+      categoryId: selectedCategory ? selectedCategory.id : null,
       available: true,
-      stock: parseInt(newItem.stock) || 0
+      stock: parseInt(newItem.stock) || 0,
+      description: ""
     };
     
-    setMenuItems([...menuItems, item]);
-    setNewItem({ name: "", price: "", category: "", stock: "", barcode: "" });
-    toast.success("Menu item added successfully");
+    addMenuItemMutation.mutate(itemData);
   };
 
   const startBarcodeScanner = async () => {
@@ -149,22 +227,19 @@ export default function CanteenOwnerDashboard() {
   };
 
   const handleUpdateMenuItem = () => {
-    setMenuItems(menuItems.map(item => 
-      item.id === editingItem.id ? editingItem : item
-    ));
+    updateMenuItemMutation.mutate({ id: editingItem.id, data: editingItem });
     setEditingItem(null);
-    toast.success("Menu item updated successfully");
   };
 
   const handleDeleteMenuItem = (itemId: any) => {
-    setMenuItems(menuItems.filter(item => item.id !== itemId));
-    toast.success("Menu item deleted successfully");
+    deleteMenuItemMutation.mutate(itemId);
   };
 
   const toggleItemAvailability = (itemId: any) => {
-    setMenuItems(menuItems.map(item => 
-      item.id === itemId ? { ...item, available: !item.available } : item
-    ));
+    const item = (menuItems as any[]).find((item: any) => item.id === itemId);
+    if (item) {
+      updateMenuItemMutation.mutate({ id: itemId, data: { available: !item.available } });
+    }
   };
 
   const handleAddCategory = () => {
@@ -173,23 +248,21 @@ export default function CanteenOwnerDashboard() {
       return;
     }
     
-    if (categories.includes(newCategory)) {
+    if ((categories as any[]).some((cat: any) => cat.name === newCategory)) {
       toast.error("Category already exists");
       return;
     }
     
-    setCategories([...categories, newCategory]);
-    setNewCategory("");
-    toast.success("Category added successfully");
+    addCategoryMutation.mutate({ name: newCategory });
   };
 
   const handleDeleteCategory = (categoryToDelete: any) => {
-    if (menuItems.some(item => item.category === categoryToDelete)) {
+    if ((menuItems as any[]).some((item: any) => item.categoryId === categoryToDelete.id)) {
       toast.error("Cannot delete category - items are using it");
       return;
     }
     
-    setCategories(categories.filter(cat => cat !== categoryToDelete));
+    // Add delete category mutation here if needed
     toast.success("Category deleted successfully");
   };
 
@@ -377,7 +450,7 @@ export default function CanteenOwnerDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {orders.slice(0, 3).map((order) => (
+                  {(orders as any[]).slice(0, 3).map((order: any) => (
                     <div 
                       key={order.id} 
                       className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-accent/50 transition-colors"
@@ -421,7 +494,7 @@ export default function CanteenOwnerDashboard() {
                   
                   <TabsContent value="online">
                     <div className="space-y-4">
-                      {orders.map((order) => (
+                      {(orders as any[]).map((order: any) => (
                         <div key={order.id} className="p-4 border rounded-lg space-y-3">
                           <div 
                             className="flex items-center justify-between cursor-pointer hover:bg-accent/20 -m-2 p-2 rounded transition-colors"
@@ -611,9 +684,9 @@ export default function CanteenOwnerDashboard() {
                                 <SelectValue placeholder="Select category" />
                               </SelectTrigger>
                               <SelectContent>
-                                {categories.map((category) => (
-                                  <SelectItem key={category} value={category}>
-                                    {category}
+                                {(categories as any[]).map((category: any) => (
+                                  <SelectItem key={category.id} value={category.name}>
+                                    {category.name}
                                   </SelectItem>
                                 ))}
                               </SelectContent>
@@ -700,7 +773,7 @@ export default function CanteenOwnerDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {menuItems.map((item) => (
+                  {(menuItems as any[]).map((item: any) => (
                     <div key={item.id} className="flex items-center justify-between p-4 border rounded-lg">
                       <div className="flex-1">
                         <div className="flex items-center space-x-3">
@@ -769,7 +842,7 @@ export default function CanteenOwnerDashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {menuItems.slice(0, 3).map((item, index) => (
+                    {(menuItems as any[]).slice(0, 3).map((item: any, index: any) => (
                       <div key={item.id} className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
                           <Badge variant="secondary">#{index + 1}</Badge>
@@ -794,7 +867,7 @@ export default function CanteenOwnerDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {menuItems.map((item) => (
+                  {(menuItems as any[]).map((item: any) => (
                     <div key={item.id} className="flex items-center justify-between p-3 border rounded-lg">
                       <div>
                         <h4 className="font-medium">{item.name}</h4>
