@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
+import { useCart } from "@/hooks/useCart";
 import { ArrowLeft, Plus, Minus, Trash2, ShoppingCart, Loader2 } from "lucide-react";
 import BottomNavigation from "./BottomNavigation";
 import type { MenuItem } from "@shared/schema";
@@ -18,8 +18,7 @@ interface CartItem {
 
 export default function CartPage() {
   const [, setLocation] = useLocation();
-  const { toast } = useToast();
-  const [cart, setCart] = useState<CartItem[]>([]);
+  const { cart, updateQuantity, removeFromCart, getTotalPrice, getTotalItems, clearCart } = useCart();
 
   // Fetch menu items in case we need to display them
   const { data: menuItems = [], isLoading } = useQuery<MenuItem[]>({
@@ -33,42 +32,16 @@ export default function CartPage() {
     },
   });
 
-  const updateQuantity = (itemId: number, newQuantity: number) => {
-    if (newQuantity <= 0) {
-      setCart(prev => prev.filter(item => item.menuItem.id !== itemId));
-      return;
-    }
-    
-    setCart(prev => prev.map(item => 
-      item.menuItem.id === itemId 
-        ? { ...item, quantity: newQuantity }
-        : item
-    ));
+  const handleUpdateQuantity = (itemId: number, newQuantity: number) => {
+    updateQuantity(itemId, newQuantity);
   };
 
-  const removeItem = (itemId: number) => {
-    setCart(prev => prev.filter(item => item.menuItem.id !== itemId));
-    toast({
-      title: "Item Removed",
-      description: "Item has been removed from your cart",
-    });
-  };
-
-  const getTotalPrice = () => {
-    return cart.reduce((total, item) => total + (item.menuItem.price * item.quantity), 0);
-  };
-
-  const getTotalItems = () => {
-    return cart.reduce((total, item) => total + item.quantity, 0);
+  const handleRemoveItem = (itemId: number) => {
+    removeFromCart(itemId);
   };
 
   const proceedToCheckout = () => {
     if (cart.length === 0) {
-      toast({
-        title: "Cart Empty",
-        description: "Please add items to your cart before proceeding",
-        variant: "destructive"
-      });
       return;
     }
     setLocation("/checkout");
@@ -151,24 +124,24 @@ export default function CartPage() {
             {/* Cart Items */}
             <div className="space-y-3">
               {cart.map((item) => (
-                <Card key={item.menuItem.id}>
+                <Card key={item.id}>
                   <CardContent className="p-4">
                     <div className="flex items-center space-x-4">
                       <div className="w-16 h-16 bg-gradient-to-br from-orange-400 to-red-500 rounded-lg flex-shrink-0 flex items-center justify-center">
                         <span className="text-white text-lg">🍽️</span>
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-semibold">{item.menuItem.name}</h3>
+                        <h3 className="font-semibold">{item.name}</h3>
                         <p className="text-sm text-muted-foreground">
-                          {item.menuItem.description || "Delicious food item"}
+                          Delicious food item
                         </p>
-                        <p className="text-lg font-bold">₹{item.menuItem.price}</p>
+                        <p className="text-lg font-bold">₹{item.price}</p>
                       </div>
                       <div className="flex items-center space-x-2">
                         <Button
                           variant="outline"
                           size="icon"
-                          onClick={() => updateQuantity(item.menuItem.id, item.quantity - 1)}
+                          onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
                         >
                           <Minus className="w-4 h-4" />
                         </Button>
@@ -176,14 +149,14 @@ export default function CartPage() {
                         <Button
                           variant="outline"
                           size="icon"
-                          onClick={() => updateQuantity(item.menuItem.id, item.quantity + 1)}
+                          onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
                         >
                           <Plus className="w-4 h-4" />
                         </Button>
                         <Button
                           variant="outline"
                           size="icon"
-                          onClick={() => removeItem(item.menuItem.id)}
+                          onClick={() => handleRemoveItem(item.id)}
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>

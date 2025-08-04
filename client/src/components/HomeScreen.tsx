@@ -5,17 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
+import { useCart } from "@/hooks/useCart";
 import { Search, MapPin, Filter, Utensils, Coffee, Cookie, Pizza, Star, Clock, Flame, ThumbsUp, Users, Zap, ChefHat, Heart, Loader2 } from "lucide-react";
 import BottomNavigation from "./BottomNavigation";
 import type { MenuItem, Category } from "@shared/schema";
 
 export default function HomeScreen() {
   const [, setLocation] = useLocation();
-  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("delivery");
   const [searchQuery, setSearchQuery] = useState("");
-  const [cart, setCart] = useState<{ [key: string]: number }>({});
+  const { addToCart, getCartQuantity } = useCart();
 
   // Enhanced queries with real-time synchronization
   const { data: categories = [], isLoading: categoriesLoading } = useQuery<Category[]>({
@@ -219,18 +218,16 @@ export default function HomeScreen() {
                       <p className="text-lg font-bold">₹{item.price}</p>
                       <Button
                         size="sm"
-                        onClick={() => {
-                          setCart(prev => ({
-                            ...prev,
-                            [item.id]: (prev[item.id] || 0) + 1
-                          }));
-                          toast({
-                            title: "Added to Cart",
-                            description: `${item.name} added to your cart`,
-                          });
-                        }}
+                        onClick={() => addToCart({
+                          id: parseInt(item.id),
+                          name: item.name,
+                          price: item.price
+                        })}
                       >
-                        ADD
+                        {getCartQuantity(parseInt(item.id)) > 0 
+                          ? `ADD (${getCartQuantity(parseInt(item.id))})` 
+                          : 'ADD'
+                        }
                       </Button>
                     </div>
                   </CardContent>
@@ -269,18 +266,16 @@ export default function HomeScreen() {
                       <p className="text-lg font-bold">₹{item.price}</p>
                       <Button
                         size="sm"
-                        onClick={() => {
-                          setCart(prev => ({
-                            ...prev,
-                            [item.id]: (prev[item.id] || 0) + 1
-                          }));
-                          toast({
-                            title: "Added to Cart",
-                            description: `${item.name} added to your cart`,
-                          });
-                        }}
+                        onClick={() => addToCart({
+                          id: parseInt(item.id),
+                          name: item.name,
+                          price: item.price
+                        })}
                       >
-                        ADD
+                        {getCartQuantity(parseInt(item.id)) > 0 
+                          ? `ADD (${getCartQuantity(parseInt(item.id))})` 
+                          : 'ADD'
+                        }
                       </Button>
                     </div>
                   </CardContent>

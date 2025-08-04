@@ -4,16 +4,15 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
+import { useCart } from "@/hooks/useCart";
 import { ArrowLeft, Search, Star, Clock, Plus, Loader2, ChefHat, Filter } from "lucide-react";
 import BottomNavigation from "./BottomNavigation";
 import type { MenuItem, Category } from "@shared/schema";
 
 export default function ViewAllQuickPicksPage() {
   const [, setLocation] = useLocation();
-  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
-  const [cart, setCart] = useState<{[key: string]: number}>({});
+  const { addToCart, getCartQuantity } = useCart();
 
   // Fetch real data from database
   const { data: categories = [], isLoading: categoriesLoading } = useQuery<Category[]>({
@@ -55,20 +54,15 @@ export default function ViewAllQuickPicksPage() {
     item.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const addToCart = (item: typeof quickPickItems[0]) => {
-    setCart(prev => ({
-      ...prev,
-      [item.id]: (prev[item.id] || 0) + 1
-    }));
-    toast({
-      title: "Added to Cart",
-      description: `${item.name} added to your cart`,
+  const handleAddToCart = (item: typeof quickPickItems[0]) => {
+    addToCart({
+      id: parseInt(item.id),
+      name: item.name,
+      price: item.price
     });
   };
 
-  const getCartQuantity = (itemId: string) => cart[itemId] || 0;
 
-  const getTotalItems = () => Object.values(cart).reduce((sum, qty) => sum + qty, 0);
 
   if (isLoading) {
     return (
@@ -142,15 +136,13 @@ export default function ViewAllQuickPicksPage() {
             <p className="text-sm text-muted-foreground">
               {filteredItems.length} items available
             </p>
-            {getTotalItems() > 0 && (
-              <Button 
-                size="sm" 
-                onClick={() => setLocation("/cart")}
-                className="bg-primary hover:bg-primary/90"
-              >
-                View Cart ({getTotalItems()})
-              </Button>
-            )}
+            <Button 
+              size="sm" 
+              onClick={() => setLocation("/cart")}
+              className="bg-primary hover:bg-primary/90"
+            >
+              View Cart
+            </Button>
           </div>
         </div>
 
@@ -197,18 +189,21 @@ export default function ViewAllQuickPicksPage() {
                           Available now
                         </span>
                         <div className="flex items-center space-x-2">
-                          {getCartQuantity(item.id) > 0 && (
+                          {getCartQuantity(parseInt(item.id)) > 0 && (
                             <span className="text-sm font-medium">
-                              {getCartQuantity(item.id)} in cart
+                              {getCartQuantity(parseInt(item.id))} in cart
                             </span>
                           )}
                           <Button
                             size="sm"
-                            onClick={() => addToCart(item)}
+                            onClick={() => handleAddToCart(item)}
                             className="bg-primary hover:bg-primary/90"
                           >
                             <Plus className="w-4 h-4 mr-1" />
-                            ADD
+                            {getCartQuantity(parseInt(item.id)) > 0 
+                              ? `ADD (${getCartQuantity(parseInt(item.id))})` 
+                              : 'ADD'
+                            }
                           </Button>
                         </div>
                       </div>

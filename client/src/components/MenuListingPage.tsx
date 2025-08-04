@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Filter, Star, Plus, Loader2 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { useCart } from "@/hooks/useCart";
 import BottomNavigation from "./BottomNavigation";
 import type { MenuItem, Category } from "@shared/schema";
 
@@ -13,9 +13,8 @@ export default function MenuListingPage() {
   const [, setLocation] = useLocation();
   const [match, params] = useRoute("/menu/:category");
   const category = params?.category;
-  const { toast } = useToast();
   const [filter, setFilter] = useState<"all" | "veg" | "non-veg">("all");
-  const [cart, setCart] = useState<{[key: string]: number}>({});
+  const { addToCart, getCartQuantity, decreaseQuantity } = useCart();
 
   // Fetch categories and menu items from database
   const { data: categories = [], isLoading: categoriesLoading } = useQuery<Category[]>({
@@ -63,18 +62,13 @@ export default function MenuListingPage() {
     return true;
   });
 
-  const addToCart = (item: typeof items[0]) => {
-    setCart(prev => ({
-      ...prev,
-      [item.id]: (prev[item.id] || 0) + 1
-    }));
-    toast({
-      title: "Added to Cart",
-      description: `${item.name} added to your cart`,
+  const handleAddToCart = (item: typeof items[0]) => {
+    addToCart({
+      id: item.id,
+      name: item.name,
+      price: item.price
     });
   };
-
-  const getCartQuantity = (itemId: number) => cart[itemId] || 0;
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -176,10 +170,7 @@ export default function MenuListingPage() {
                               variant="outline" 
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setCart(prev => ({
-                                  ...prev,
-                                  [item.id]: Math.max(0, (prev[item.id] || 0) - 1)
-                                }));
+                                decreaseQuantity(item.id);
                               }}
                               className="w-8 h-8 p-0"
                             >
@@ -191,7 +182,7 @@ export default function MenuListingPage() {
                               variant="outline" 
                               onClick={(e) => {
                                 e.stopPropagation();
-                                addToCart(item);
+                                handleAddToCart(item);
                               }}
                               className="w-8 h-8 p-0"
                             >
@@ -200,12 +191,12 @@ export default function MenuListingPage() {
                           </div>
                         ) : (
                           <Button
-                            variant="food"
+                            variant="default"
                             size="sm"
                             disabled={!item.available || item.stock === 0}
                             onClick={(e) => {
                               e.stopPropagation();
-                              addToCart(item);
+                              handleAddToCart(item);
                             }}
                           >
                             <Plus className="w-4 h-4 mr-1" />
