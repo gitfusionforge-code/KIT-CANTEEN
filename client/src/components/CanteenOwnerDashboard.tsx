@@ -37,7 +37,8 @@ import {
   XCircle,
   AlertTriangle,
   BarChart3,
-  ScanLine
+  ScanLine,
+  X
 } from "lucide-react";
 
 export default function CanteenOwnerDashboard() {
@@ -95,6 +96,7 @@ export default function CanteenOwnerDashboard() {
 
   const [newItem, setNewItem] = useState({ name: "", price: "", category: "", stock: "", barcode: "", description: "", addOns: [] as any[] });
   const [editingItem, setEditingItem] = useState<any>(null);
+  const [editAddOns, setEditAddOns] = useState<Array<{ name: string; price: string }>>([]);
   const [isScannerActive, setIsScannerActive] = useState(false);
   const [stockUpdateItem, setStockUpdateItem] = useState<any>(null);
   const [newStockAmount, setNewStockAmount] = useState("");
@@ -301,13 +303,39 @@ export default function CanteenOwnerDashboard() {
     document.body.classList.remove('scanner-active');
   };
 
-  const handleEditMenuItem = (item: any) => {
-    setEditingItem(item);
+  const handleUpdateMenuItem = () => {
+    const updatedData = {
+      ...editingItem,
+      addOns: JSON.stringify(editAddOns.filter(addon => addon.name && addon.price))
+    };
+    updateMenuItemMutation.mutate({ id: editingItem.id, data: updatedData });
+    setEditingItem(null);
+    setEditAddOns([]);
   };
 
-  const handleUpdateMenuItem = () => {
-    updateMenuItemMutation.mutate({ id: editingItem.id, data: editingItem });
-    setEditingItem(null);
+  const openEditDialog = (item: MenuItem) => {
+    setEditingItem(item);
+    // Parse existing add-ons
+    try {
+      const existingAddOns = JSON.parse(item.addOns || "[]");
+      setEditAddOns(existingAddOns.length > 0 ? existingAddOns : []);
+    } catch {
+      setEditAddOns([]);
+    }
+  };
+
+  const addNewEditAddOn = () => {
+    setEditAddOns([...editAddOns, { name: "", price: "" }]);
+  };
+
+  const updateEditAddOn = (index: number, field: "name" | "price", value: string) => {
+    const updatedAddOns = [...editAddOns];
+    updatedAddOns[index][field] = value;
+    setEditAddOns(updatedAddOns);
+  };
+
+  const removeEditAddOn = (index: number) => {
+    setEditAddOns(editAddOns.filter((_, i) => i !== index));
   };
 
   const handleDeleteMenuItem = (itemId: any) => {
@@ -991,7 +1019,7 @@ export default function CanteenOwnerDashboard() {
                           checked={item.available}
                           onCheckedChange={() => toggleItemAvailability(item.id)}
                         />
-                        <Button size="sm" variant="outline" onClick={() => handleEditMenuItem(item)}>
+                        <Button size="sm" variant="outline" onClick={() => openEditDialog(item)}>
                           <Edit3 className="w-4 h-4" />
                         </Button>
                         <Button 
@@ -1104,11 +1132,11 @@ export default function CanteenOwnerDashboard() {
       {/* Edit Item Dialog */}
       {editingItem && (
         <Dialog open={!!editingItem} onOpenChange={() => setEditingItem(null)}>
-          <DialogContent>
+          <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
             <DialogHeader>
               <DialogTitle>Edit Menu Item</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
+            <div className="space-y-4 overflow-y-auto flex-1 pr-2">
               <div>
                 <Label htmlFor="edit-name">Item Name</Label>
                 <Input
@@ -1135,6 +1163,97 @@ export default function CanteenOwnerDashboard() {
                   onChange={(e) => setEditingItem({...editingItem, stock: parseInt(e.target.value)})}
                 />
               </div>
+
+              {/* Category */}
+              <div>
+                <Label htmlFor="edit-category">Category</Label>
+                <Select 
+                  value={editingItem.categoryId?.toString()} 
+                  onValueChange={(value) => setEditingItem({...editingItem, categoryId: parseInt(value)})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((category) => (
+                      <SelectItem key={category.id} value={category.id.toString()}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Description */}
+              <div>
+                <Label htmlFor="edit-description">Description</Label>
+                <Textarea
+                  id="edit-description"
+                  value={editingItem.description || ""}
+                  onChange={(e) => setEditingItem({...editingItem, description: e.target.value})}
+                  placeholder="Item description"
+                  rows={3}
+                />
+              </div>
+
+              {/* Available */}
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="edit-available"
+                  checked={editingItem.available}
+                  onCheckedChange={(checked) => setEditingItem({...editingItem, available: checked})}
+                />
+                <Label htmlFor="edit-available">Available</Label>
+              </div>
+
+              {/* Add-ons Section */}
+              <div className="space-y-2 border border-dashed border-gray-300 p-4 rounded-lg bg-gray-50">
+                <div className="flex items-center justify-between">
+                  <Label className="text-lg font-semibold">Add-ons</Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={addNewEditAddOn}
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Add Add-on
+                  </Button>
+                </div>
+                
+                <div className="space-y-2">
+                  {editAddOns.map((addon, index) => (
+                    <div key={index} className="flex items-center space-x-2 p-3 border rounded-lg bg-white">
+                      <Input
+                        placeholder="Add-on name"
+                        value={addon.name}
+                        onChange={(e) => updateEditAddOn(index, "name", e.target.value)}
+                        className="flex-1"
+                      />
+                      <Input
+                        placeholder="Price"
+                        type="number"
+                        value={addon.price}
+                        onChange={(e) => updateEditAddOn(index, "price", e.target.value)}
+                        className="w-24"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => removeEditAddOn(index)}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+                
+                {editAddOns.length === 0 && (
+                  <p className="text-sm text-muted-foreground">No add-ons configured</p>
+                )}
+              </div>
+
               <Button onClick={handleUpdateMenuItem} className="w-full">
                 Update Item
               </Button>
