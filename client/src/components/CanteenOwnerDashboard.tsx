@@ -936,47 +936,13 @@ export default function CanteenOwnerDashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Scanner Controls */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Camera Scanner */}
+                {/* Manual Entry Only */}
+                <div className="max-w-md mx-auto">
                   <div className="space-y-4">
-                    <h3 className="text-lg font-medium">Camera Scanner</h3>
-                    <div className="space-y-4 p-4 border rounded-lg">
-                      {!isScanning ? (
-                        <Button 
-                          onClick={startCameraScanner}
-                          className="w-full"
-                          size="lg"
-                        >
-                          <ScanLine className="w-5 h-5 mr-2" />
-                          Start Camera Scanner
-                        </Button>
-                      ) : (
-                        <div className="text-center space-y-4">
-                          <div className="animate-pulse">
-                            <ScanLine className="w-12 h-12 mx-auto text-primary" />
-                            <p className="text-lg font-medium">Scanning...</p>
-                            <p className="text-sm text-muted-foreground">Point camera at barcode</p>
-                          </div>
-                          <Button 
-                            onClick={stopScanner}
-                            variant="outline"
-                            className="w-full"
-                          >
-                            <X className="w-4 h-4 mr-2" />
-                            Stop Scanner
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Manual Entry */}
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-medium">Manual Entry</h3>
-                    <div className="space-y-4 p-4 border rounded-lg">
+                    <h3 className="text-lg font-medium text-center">Barcode Entry</h3>
+                    <div className="space-y-4 p-6 border rounded-lg">
                       <div>
-                        <Label htmlFor="manual-barcode">Enter Barcode</Label>
+                        <Label htmlFor="manual-barcode">Enter Delivery Barcode</Label>
                         <Input
                           id="manual-barcode"
                           value={manualBarcode}
@@ -989,6 +955,7 @@ export default function CanteenOwnerDashboard() {
                       <Button 
                         onClick={() => handleBarcodeSubmit(manualBarcode)}
                         className="w-full"
+                        size="lg"
                         disabled={!manualBarcode.trim() || scanBarcodeMutation.isPending}
                       >
                         {scanBarcodeMutation.isPending ? (
