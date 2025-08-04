@@ -9,6 +9,22 @@ Environment variables: Always store credentials in .env file when possible for b
 
 # Recent Changes
 
+## August 2025 - Critical Bug Fixes & System Stability
+- **React Hooks Error Fix**: Resolved critical "Invalid hook call" error in admin dashboard
+  - Fixed useCallback dependency issue in use-mobile.tsx hook
+  - Simplified mobile detection logic to prevent React rules violation
+  - Admin interface now loads properly without breaking React component tree
+- **Storage Interface Bug Fix**: Added missing getOrderByBarcode method to IStorage interface
+  - Fixed type mismatch in updateOrder method signature 
+  - Resolved runtime errors in barcode scanning functionality
+- **Memory Leak Prevention**: Enhanced timer cleanup in CheckoutPage component
+  - Added proper useEffect cleanup for payment timers
+  - Prevented potential memory leaks from setTimeout operations
+- **Environment Variable Validation**: Added Firebase configuration validation
+  - Implemented checks for required VITE_FIREBASE_* environment variables
+  - Created comprehensive .env.example template for proper setup
+- **Production Code Cleanup**: Removed debug console.log statements from ProtectedRoute
+
 ## August 2025 - Performance Optimization & Code Cleanup
 - **Performance Improvements**: Optimized React Query caching strategies
   - Reduced stale time from 30 seconds to 5-10 minutes for categories and menu items
