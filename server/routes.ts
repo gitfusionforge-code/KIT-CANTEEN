@@ -117,10 +117,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/menu/:id", async (req, res) => {
     try {
-      const menuItem = await storage.updateMenuItem(parseInt(req.params.id), req.body);
+      console.log("PUT /api/menu/:id - Request body:", req.body);
+      
+      // Validate the request data, but allow partial updates
+      const validatedData = insertMenuItemSchema.partial().parse(req.body);
+      console.log("PUT /api/menu/:id - Validated data:", validatedData);
+      
+      const menuItem = await storage.updateMenuItem(parseInt(req.params.id), validatedData);
       res.json(menuItem);
     } catch (error) {
-      res.status(500).json({ message: "Internal server error" });
+      console.error("Error updating menu item:", error);
+      res.status(500).json({ message: "Internal server error", error: error instanceof Error ? error.message : String(error) });
     }
   });
 
