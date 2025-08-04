@@ -1,31 +1,67 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ArrowLeft, Edit, Clock, Star, LogOut, ChevronRight } from "lucide-react";
 import BottomNavigation from "./BottomNavigation";
+import { queryClient } from "@/lib/queryClient";
 
 export default function ProfilePage() {
   const [, setLocation] = useLocation();
   const [isEditing, setIsEditing] = useState(false);
   const [userInfo, setUserInfo] = useState({
-    name: "Rahul Kumar",
-    email: "rahul.kumar@kit.edu",
-    phone: "+91 98765 43210",
-    studentId: "KIT2023001",
-    course: "B.Tech Computer Science"
+    name: "",
+    email: "",
+    phone: "",
+    studentId: "",
+    course: "",
+    role: ""
   });
 
-  const orderHistory: any[] = []; // Will be populated from user's actual order history when user system is implemented
+  // Get user data from localStorage
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      const user = JSON.parse(userData);
+      setUserInfo({
+        name: user.name || "User",
+        email: user.email || "",
+        phone: user.phone || "",
+        studentId: user.studentId || "",
+        course: user.course || "",
+        role: user.role || "student"
+      });
+    }
+  }, []);
+
+  // Fetch user's orders to calculate stats
+  const { data: orders = [] } = useQuery({
+    queryKey: ['/api/orders'],
+    enabled: !!userInfo.email, // Only fetch when we have user email
+  });
+
+  // Calculate user statistics from orders
+  const userOrders = (orders as any[]).filter((order: any) => 
+    order.customerName === userInfo.name || order.customerId === JSON.parse(localStorage.getItem('user') || '{}').id
+  );
 
   const stats = {
-    totalOrders: 0,
-    totalSpent: 0,
-    favoriteItem: "None",
+    totalOrders: userOrders.length,
+    totalSpent: userOrders.reduce((total: number, order: any) => total + (order.amount || 0), 0),
+    favoriteItem: "None", // Could be calculated from order items
     avgRating: 0
   };
+
+  // Use userOrders as orderHistory for displaying recent orders
+  const orderHistory = userOrders.slice(0, 3).map((order: any) => ({
+    id: order.orderNumber || order.id,
+    date: new Date(order.createdAt || Date.now()).toLocaleDateString(),
+    total: order.amount || 0,
+    status: order.status || 'completed'
+  }));
 
   const handleSave = () => {
     setIsEditing(false);
@@ -33,7 +69,14 @@ export default function ProfilePage() {
   };
 
   const handleLogout = () => {
-    // In real app, this would clear auth state
+    // Clear user data from localStorage
+    localStorage.removeItem('user');
+    localStorage.removeItem('isAuthenticated');
+    
+    // Clear React Query cache
+    queryClient.clear();
+    
+    // Redirect to login
     setLocation("/login");
   };
 
@@ -60,13 +103,13 @@ export default function ProfilePage() {
         <div className="flex items-center space-x-4 mt-6">
           <Avatar className="w-20 h-20">
             <AvatarFallback className="bg-white text-primary text-2xl font-bold">
-              {userInfo.name.split(' ').map(n => n[0]).join('')}
+              {userInfo.name ? userInfo.name.split(' ').map(n => n[0]).join('') : 'U'}
             </AvatarFallback>
           </Avatar>
           <div className="text-white">
-            <h2 className="text-xl font-bold">{userInfo.name}</h2>
-            <p className="text-white/80">{userInfo.course}</p>
-            <p className="text-white/80 text-sm">ID: {userInfo.studentId}</p>
+            <h2 className="text-xl font-bold">{userInfo.name || "User"}</h2>
+            <p className="text-white/80 capitalize">{userInfo.role ? userInfo.role.replace('_', ' ') : 'Student'}</p>
+            <p className="text-white/80 text-sm">{userInfo.email}</p>
           </div>
         </div>
       </div>
