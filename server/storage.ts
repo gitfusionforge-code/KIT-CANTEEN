@@ -33,8 +33,9 @@ export interface IStorage {
   // Orders
   getOrders(): Promise<Order[]>;
   getOrder(id: number): Promise<Order | undefined>;
+  getOrderByBarcode(barcode: string): Promise<Order | undefined>;
   createOrder(order: InsertOrder): Promise<Order>;
-  updateOrder(id: number, order: Partial<InsertOrder>): Promise<Order>;
+  updateOrder(id: number, order: Partial<InsertOrder & { deliveredAt?: Date; barcodeUsed?: boolean }>): Promise<Order>;
   
   // Notifications
   getNotifications(): Promise<Notification[]>;

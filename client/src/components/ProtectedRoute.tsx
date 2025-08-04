@@ -20,13 +20,7 @@ export default function ProtectedRoute({
   const [, setLocation] = useLocation();
   const { user, isAuthenticated, hasRole } = useAuthSync();
 
-  // Debug logging - remove in production
-  console.log("ProtectedRoute Debug:", {
-    user,
-    isAuthenticated,
-    requiredRole,
-    hasRoleResult: requiredRole ? hasRole(requiredRole) : 'N/A'
-  });
+  // Authentication and role checking logic
 
   useEffect(() => {
     // Check if authentication is required

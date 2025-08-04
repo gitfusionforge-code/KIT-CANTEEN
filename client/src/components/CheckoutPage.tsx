@@ -77,7 +77,7 @@ export default function CheckoutPage() {
     },
   });
 
-  // Timer effect
+  // Timer effect with proper cleanup
   useEffect(() => {
     if (isTimerActive && timeLeft > 0) {
       timerRef.current = setTimeout(() => {
@@ -94,6 +94,15 @@ export default function CheckoutPage() {
       }
     };
   }, [isTimerActive, timeLeft]);
+
+  // Cleanup timer on component unmount
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    };
+  }, []);
 
   const handleTimerExpiry = () => {
     setIsTimerActive(false);
