@@ -17,13 +17,19 @@ export default function HomeScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [cart, setCart] = useState<{ [key: string]: number }>({});
 
-  // Fetch real data from database
+  // Enhanced queries with real-time synchronization
   const { data: categories = [], isLoading: categoriesLoading } = useQuery<Category[]>({
     queryKey: ['/api/categories'],
+    staleTime: 1000 * 30,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 
   const { data: menuItems = [], isLoading: menuItemsLoading } = useQuery<MenuItem[]>({
     queryKey: ['/api/menu'],
+    staleTime: 1000 * 30, 
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 
   const isLoading = categoriesLoading || menuItemsLoading;

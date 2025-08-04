@@ -22,18 +22,24 @@ export default function AdminMenuManagementPage() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const { toast } = useToast();
 
-  // Fetch real data from database
+  // Fetch real data from database with enhanced synchronization
   const { data: categories = [], isLoading: categoriesLoading } = useQuery<Category[]>({
     queryKey: ['/api/categories'],
+    staleTime: 1000 * 30,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 
   const { data: menuItems = [], isLoading: menuItemsLoading } = useQuery<MenuItem[]>({
     queryKey: ['/api/menu'],
+    staleTime: 1000 * 30,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 
   const isLoading = categoriesLoading || menuItemsLoading;
 
-  // Update availability mutation
+  // Enhanced mutations with comprehensive synchronization
   const updateMenuItemMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: Partial<MenuItem> }) => {
       return apiRequest(`/api/menu/${id}`, {
@@ -43,7 +49,10 @@ export default function AdminMenuManagementPage() {
       });
     },
     onSuccess: () => {
+      // Invalidate all related queries for real-time sync across dashboards
       queryClient.invalidateQueries({ queryKey: ['/api/menu'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/categories'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/analytics'] });
       toast({ title: "Menu item updated successfully" });
     },
     onError: () => {
@@ -51,13 +60,17 @@ export default function AdminMenuManagementPage() {
     }
   });
 
-  // Delete menu item mutation
+  // Delete menu item mutation with enhanced sync
   const deleteMenuItemMutation = useMutation({
     mutationFn: async (id: number) => {
       return apiRequest(`/api/menu/${id}`, { method: 'DELETE' });
     },
     onSuccess: () => {
+      // Comprehensive cache invalidation for all dashboards
       queryClient.invalidateQueries({ queryKey: ['/api/menu'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/categories'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/analytics'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
       toast({ title: "Menu item deleted successfully" });
     },
     onError: () => {

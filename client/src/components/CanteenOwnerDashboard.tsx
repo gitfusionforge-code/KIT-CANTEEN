@@ -15,6 +15,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { useToast } from "@/hooks/use-toast";
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
+import type { MenuItem, Category, Order } from "@shared/schema";
+import SyncStatus from "./SyncStatus";
+import { useAuthSync } from "@/hooks/useDataSync";
 import { 
   ChefHat, 
   DollarSign, 
@@ -40,9 +43,10 @@ import {
 export default function CanteenOwnerDashboard() {
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("overview");
+  const { user } = useAuthSync();
   
-  // Fetch real data from database using React Query
-  const { data: categories = [], isLoading: categoriesLoading, refetch: refetchCategories, error: categoriesError } = useQuery({
+  // Fetch real data from database using React Query with proper typing
+  const { data: categories = [], isLoading: categoriesLoading, refetch: refetchCategories, error: categoriesError } = useQuery<Category[]>({
     queryKey: ['/api/categories'],
     queryFn: async () => {
       const response = await fetch('/api/categories');
@@ -57,12 +61,15 @@ export default function CanteenOwnerDashboard() {
     refetchOnWindowFocus: true,
   });
 
-  const { data: orders = [], isLoading: ordersLoading } = useQuery({
+  const { data: orders = [], isLoading: ordersLoading } = useQuery<Order[]>({
     queryKey: ['/api/orders'],
   });
 
-  const { data: menuItems = [], isLoading: menuItemsLoading } = useQuery({
+  const { data: menuItems = [], isLoading: menuItemsLoading, refetch: refetchMenuItems } = useQuery<MenuItem[]>({
     queryKey: ['/api/menu'],
+    staleTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 
   const [newCategory, setNewCategory] = useState("");
@@ -94,9 +101,9 @@ export default function CanteenOwnerDashboard() {
 
 
   const stats = [
-    { title: "Today's Orders", value: (orders as any[]).length.toString(), icon: ShoppingBag, trend: "+12%" },
-    { title: "Revenue", value: `₹${(orders as any[]).reduce((sum: number, order: any) => sum + order.amount, 0)}`, icon: DollarSign, trend: "+8%" },
-    { title: "Active Menu Items", value: (menuItems as any[]).filter((item: any) => item.available).length.toString(), icon: ChefHat, trend: "+3" },
+    { title: "Today's Orders", value: orders.length.toString(), icon: ShoppingBag, trend: "+12%" },
+    { title: "Revenue", value: `₹${orders.reduce((sum: number, order: Order) => sum + order.amount, 0)}`, icon: DollarSign, trend: "+8%" },
+    { title: "Active Menu Items", value: menuItems.filter((item: MenuItem) => item.available).length.toString(), icon: ChefHat, trend: "+3" },
     { title: "Avg Rating", value: "4.8", icon: Star, trend: "+0.2" }
   ];
 
@@ -106,7 +113,7 @@ export default function CanteenOwnerDashboard() {
     toast.success(`Order ${orderId} marked as ${newStatus}`);
   };
 
-  // Add menu item mutation
+  // Enhanced mutations with comprehensive synchronization
   const addMenuItemMutation = useMutation({
     mutationFn: async (data: any) => {
       return apiRequest('/api/menu', {
@@ -116,8 +123,12 @@ export default function CanteenOwnerDashboard() {
       });
     },
     onSuccess: () => {
+      // Comprehensive cache invalidation for all dashboards
       queryClient.invalidateQueries({ queryKey: ['/api/menu'] });
-      toast.success("Menu item added successfully");
+      queryClient.invalidateQueries({ queryKey: ['/api/categories'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/analytics'] });
+      refetchMenuItems(); // Force immediate refetch
+      toast.success("Menu item added successfully - synced across all dashboards");
       setNewItem({ name: "", price: "", category: "", stock: "", barcode: "" });
     },
     onError: () => {
@@ -125,7 +136,7 @@ export default function CanteenOwnerDashboard() {
     }
   });
 
-  // Update menu item mutation
+  // Update menu item mutation with enhanced sync
   const updateMenuItemMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: any }) => {
       return apiRequest(`/api/menu/${id}`, {
@@ -135,29 +146,38 @@ export default function CanteenOwnerDashboard() {
       });
     },
     onSuccess: () => {
+      // Comprehensive synchronization
       queryClient.invalidateQueries({ queryKey: ['/api/menu'] });
-      toast.success("Menu item updated successfully");
+      queryClient.invalidateQueries({ queryKey: ['/api/categories'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/analytics'] });
+      refetchMenuItems();
+      toast.success("Menu item updated successfully - synced across all dashboards");
     },
     onError: () => {
       toast.error("Failed to update menu item");
     }
   });
 
-  // Delete menu item mutation
+  // Delete menu item mutation with enhanced sync
   const deleteMenuItemMutation = useMutation({
     mutationFn: async (id: number) => {
       return apiRequest(`/api/menu/${id}`, { method: 'DELETE' });
     },
     onSuccess: () => {
+      // Comprehensive synchronization
       queryClient.invalidateQueries({ queryKey: ['/api/menu'] });
-      toast.success("Menu item deleted successfully");
+      queryClient.invalidateQueries({ queryKey: ['/api/categories'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/analytics'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+      refetchMenuItems();
+      toast.success("Menu item deleted successfully - synced across all dashboards");
     },
     onError: () => {
       toast.error("Failed to delete menu item");
     }
   });
 
-  // Add category mutation
+  // Add category mutation with enhanced sync
   const addCategoryMutation = useMutation({
     mutationFn: async (data: any) => {
       console.log("Adding category:", data);
@@ -168,9 +188,13 @@ export default function CanteenOwnerDashboard() {
       });
     },
     onSuccess: () => {
+      // Comprehensive synchronization across all dashboards
       queryClient.invalidateQueries({ queryKey: ['/api/categories'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/menu'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/analytics'] });
       refetchCategories(); // Force immediate refetch
-      toast.success("Category added successfully");
+      refetchMenuItems(); // Also refetch menu items since they depend on categories
+      toast.success("Category added successfully - synced across all dashboards");
       setNewCategory("");
     },
     onError: (error: any) => {
@@ -318,11 +342,12 @@ export default function CanteenOwnerDashboard() {
     }
 
     const updatedStock = parseInt(newStockAmount);
-    setMenuItems(menuItems.map(item => 
-      item.id === stockUpdateItem.id 
-        ? { ...item, stock: updatedStock, available: updatedStock > 0 }
-        : item
-    ));
+    
+    // Use API to update stock instead of local state
+    updateMenuItemMutation.mutate({ 
+      id: stockUpdateItem.id, 
+      data: { stock: updatedStock, available: updatedStock > 0 }
+    });
     
     setStockUpdateItem(null);
     setNewStockAmount("");
@@ -380,10 +405,11 @@ export default function CanteenOwnerDashboard() {
             </div>
             <div>
               <h1 className="text-lg font-semibold">Canteen Owner Dashboard</h1>
-              <p className="text-sm text-muted-foreground">KIT Canteen</p>
+              <p className="text-sm text-muted-foreground">KIT Canteen - {user?.email}</p>
             </div>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-4">
+            <SyncStatus />
             <Button 
               variant="outline" 
               size="sm"
@@ -807,12 +833,12 @@ export default function CanteenOwnerDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {(menuItems as any[]).map((item: any) => (
+                  {menuItems.map((item: MenuItem) => (
                     <div key={item.id} className="flex items-center justify-between p-4 border rounded-lg">
                       <div className="flex-1">
                         <div className="flex items-center space-x-3">
                           <h4 className="font-medium">{item.name}</h4>
-                          <Badge variant="secondary">{item.category}</Badge>
+                          <Badge variant="secondary">{categories.find(cat => cat.id === item.categoryId)?.name || "Unknown"}</Badge>
                           {!item.available && <Badge variant="destructive">Out of Stock</Badge>}
                         </div>
                         <p className="text-sm text-muted-foreground">
@@ -856,15 +882,15 @@ export default function CanteenOwnerDashboard() {
                   <div className="space-y-4">
                     <div className="flex justify-between">
                       <span>Today's Revenue</span>
-                      <span className="font-semibold text-success">₹{orders.reduce((sum, order) => sum + order.amount, 0)}</span>
+                      <span className="font-semibold text-success">₹{orders.reduce((sum: number, order: Order) => sum + order.amount, 0)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Orders Completed</span>
-                      <span className="font-semibold">{orders.filter(o => o.status === "completed").length}</span>
+                      <span className="font-semibold">{orders.filter((o: Order) => o.status === "completed").length}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Average Order Value</span>
-                      <span className="font-semibold">₹{Math.round(orders.reduce((sum, order) => sum + order.amount, 0) / orders.length)}</span>
+                      <span className="font-semibold">₹{orders.length > 0 ? Math.round(orders.reduce((sum: number, order: Order) => sum + order.amount, 0) / orders.length) : 0}</span>
                     </div>
                   </div>
                 </CardContent>
@@ -876,7 +902,7 @@ export default function CanteenOwnerDashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {(menuItems as any[]).slice(0, 3).map((item: any, index: any) => (
+                    {menuItems.slice(0, 3).map((item: MenuItem, index: number) => (
                       <div key={item.id} className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
                           <Badge variant="secondary">#{index + 1}</Badge>
@@ -901,11 +927,11 @@ export default function CanteenOwnerDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {(menuItems as any[]).map((item: any) => (
+                  {menuItems.map((item: MenuItem) => (
                     <div key={item.id} className="flex items-center justify-between p-3 border rounded-lg">
                       <div>
                         <h4 className="font-medium">{item.name}</h4>
-                        <p className="text-sm text-muted-foreground">{item.category}</p>
+                        <p className="text-sm text-muted-foreground">{categories.find(cat => cat.id === item.categoryId)?.name || "Unknown"}</p>
                       </div>
                       <div className="flex items-center space-x-4">
                         <div className="text-right">
