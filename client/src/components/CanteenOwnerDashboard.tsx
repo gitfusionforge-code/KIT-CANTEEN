@@ -544,17 +544,33 @@ export default function CanteenOwnerDashboard() {
                     >
                       <div className="flex-1">
                         <div className="flex items-center space-x-2">
-                          <span className="font-medium">{order.id}</span>
+                          <span className="font-medium">#{order.orderNumber || order.id}</span>
                           <Badge className={getOrderStatusColor(order.status)}>
                             {getOrderStatusText(order.status)}
                           </Badge>
                         </div>
-                        <p className="text-sm text-muted-foreground">{order.customer}</p>
-                        <p className="text-sm">{order.items}</p>
+                        <p className="text-sm text-muted-foreground">Customer: {order.customerName || 'N/A'}</p>
+                        <p className="text-sm">
+                          {order.items && typeof order.items === 'string' 
+                            ? (() => {
+                                try {
+                                  const parsedItems = JSON.parse(order.items);
+                                  return Array.isArray(parsedItems) 
+                                    ? parsedItems.map((item: any) => `${item.quantity}x ${item.name}`).join(', ')
+                                    : order.items;
+                                } catch {
+                                  return order.items;
+                                }
+                              })()
+                            : 'No items'
+                          }
+                        </p>
                       </div>
                       <div className="text-right">
                         <p className="font-semibold">₹{order.amount}</p>
-                        <p className="text-xs text-muted-foreground">{order.time}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {order.createdAt ? new Date(order.createdAt).toLocaleTimeString() : order.time || 'N/A'}
+                        </p>
                       </div>
                     </div>
                   ))}
@@ -587,7 +603,7 @@ export default function CanteenOwnerDashboard() {
                             onClick={() => setLocation(`/canteen-order-detail/${order.id.replace('#', '')}`)}
                           >
                             <div className="flex items-center space-x-3">
-                              <span className="font-semibold">{order.id}</span>
+                              <span className="font-semibold">#{order.orderNumber || order.id}</span>
                               <Badge className={getOrderStatusColor(order.status)}>
                                 {getOrderStatusText(order.status)}
                               </Badge>
@@ -604,9 +620,25 @@ export default function CanteenOwnerDashboard() {
                             className="cursor-pointer hover:bg-accent/20 -mx-2 px-2 py-1 rounded transition-colors"
                             onClick={() => setLocation(`/canteen-order-detail/${order.id.replace('#', '')}`)}
                           >
-                            <p className="text-sm text-muted-foreground">Customer: {order.customer}</p>
-                            <p className="text-sm">{order.items}</p>
-                            <p className="text-xs text-muted-foreground">{order.time}</p>
+                            <p className="text-sm text-muted-foreground">Customer: {order.customerName || 'N/A'}</p>
+                            <p className="text-sm">
+                              {order.items && typeof order.items === 'string' 
+                                ? (() => {
+                                    try {
+                                      const parsedItems = JSON.parse(order.items);
+                                      return Array.isArray(parsedItems) 
+                                        ? parsedItems.map((item: any) => `${item.quantity}x ${item.name}`).join(', ')
+                                        : order.items;
+                                    } catch {
+                                      return order.items;
+                                    }
+                                  })()
+                                : 'No items'
+                              }
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {order.createdAt ? new Date(order.createdAt).toLocaleTimeString() : order.time || 'N/A'}
+                            </p>
                           </div>
 
                           <div className="flex space-x-2">
