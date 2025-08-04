@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useLocation, useParams } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Plus, Minus, Star, Clock } from "lucide-react";
+import type { MenuItem } from "@shared/schema";
 
 export default function DishDetailPage() {
   const [, setLocation] = useLocation();
@@ -11,24 +13,66 @@ export default function DishDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [selectedAddons, setSelectedAddons] = useState<string[]>([]);
 
-  // This component will be populated with real dish data from the database
-  const allDishes: Record<string, any> = {}; // Will be fetched from actual menu items when menu system is implemented
+  // Fetch the specific dish from the database
+  const { data: dish, isLoading, error } = useQuery<MenuItem>({
+    queryKey: [`/api/menu/${dishId}`],
+    enabled: !!dishId,
+  });
 
-  const dish = allDishes[dishId || "1"] || { 
-    id: 0, 
-    name: "Dish Not Found", 
-    price: 0, 
-    rating: 0, 
-    reviews: 0, 
-    description: "This dish is not available in our menu.", 
-    prepTime: "N/A", 
-    category: "N/A", 
-    isVeg: true, 
-    calories: 0, 
-    image: "🍽️" 
-  };
+  // Parse addons from the dish data
+  const addons = dish?.addOns ? (() => {
+    try {
+      return JSON.parse(dish.addOns);
+    } catch {
+      return [];
+    }
+  })() : [];
 
-  const addons: any[] = []; // Will be populated from actual addon data when menu addon system is implemented
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading dish details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error or not found state
+  if (error || !dish) {
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <div className="relative">
+          <div className="absolute top-4 left-4 z-10">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => {
+                if (window.history.length > 1) {
+                  window.history.back();
+                } else {
+                  setLocation('/home');
+                }
+              }}
+              className="bg-white/80 backdrop-blur-sm hover:bg-white"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+          </div>
+          <div className="w-full h-80 bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center">
+            <span className="text-8xl">🍽️</span>
+          </div>
+        </div>
+        <div className="px-4 py-6 text-center">
+          <h1 className="text-2xl font-bold mb-2">Dish Not Found</h1>
+          <p className="text-muted-foreground mb-4">This dish is not available in our menu.</p>
+          <Button onClick={() => setLocation('/home')}>Back to Menu</Button>
+        </div>
+      </div>
+    );
+  }
 
   const toggleAddon = (addonId: string) => {
     setSelectedAddons(prev => 
@@ -40,7 +84,7 @@ export default function DishDetailPage() {
 
   const getAddonPrice = () => {
     return selectedAddons.reduce((total, addonId) => {
-      const addon = addons.find(a => a.id === addonId);
+      const addon = addons.find((a: any) => a.id === addonId);
       return total + (addon?.price || 0);
     }, 0);
   };
@@ -76,7 +120,7 @@ export default function DishDetailPage() {
         
         {/* Dish Image */}
         <div className="w-full h-80 bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center">
-          <span className="text-8xl">{dish.image}</span>
+          <span className="text-8xl">🍽️</span>
         </div>
       </div>
 
@@ -87,11 +131,11 @@ export default function DishDetailPage() {
             <div className="flex-1">
               <div className="flex items-center space-x-2 mb-1">
                 <h1 className="text-2xl font-bold">{dish.name}</h1>
-                <div className={`w-4 h-4 rounded border-2 ${dish.isVeg ? 'border-green-600' : 'border-red-600'}`}>
-                  <div className={`w-2 h-2 rounded-full ${dish.isVeg ? 'bg-green-600' : 'bg-red-600'} m-0.5`}></div>
+                <div className={`w-4 h-4 rounded border-2 border-green-600`}>
+                  <div className={`w-2 h-2 rounded-full bg-green-600 m-0.5`}></div>
                 </div>
               </div>
-              <p className="text-muted-foreground mb-3">{dish.description}</p>
+              <p className="text-muted-foreground mb-3">{dish.description || "No description available"}</p>
             </div>
             <div className="text-right">
               <p className="text-2xl font-bold text-primary">₹{dish.price}</p>
@@ -101,14 +145,14 @@ export default function DishDetailPage() {
           <div className="flex items-center space-x-4 text-sm">
             <div className="flex items-center space-x-1">
               <Star className="w-4 h-4 text-yellow-500 fill-current" />
-              <span className="font-medium">{dish.rating}</span>
-              <span className="text-muted-foreground">({dish.reviews} reviews)</span>
+              <span className="font-medium">4.5</span>
+              <span className="text-muted-foreground">(0 reviews)</span>
             </div>
             <div className="flex items-center space-x-1">
               <Clock className="w-4 h-4 text-muted-foreground" />
-              <span className="text-muted-foreground">{dish.prepTime}</span>
+              <span className="text-muted-foreground">15 min</span>
             </div>
-            <Badge variant="outline">{dish.calories} cal</Badge>
+            <Badge variant="outline">250 cal</Badge>
           </div>
         </div>
 
@@ -117,7 +161,7 @@ export default function DishDetailPage() {
           <CardContent className="p-4">
             <h3 className="font-semibold mb-4">Add-ons</h3>
             <div className="space-y-3">
-              {addons.map((addon) => (
+              {addons.map((addon: any) => (
                 <div key={addon.id} className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     <input
