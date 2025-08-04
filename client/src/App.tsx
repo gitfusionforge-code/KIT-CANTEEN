@@ -57,6 +57,7 @@ import RateReviewPage from "./components/RateReviewPage";
 import OrderDetailPage from "./components/OrderDetailPage";
 import CanteenOrderDetailPage from "./components/CanteenOrderDetailPage";
 import BarcodeScannerPage from "./components/BarcodeScannerPage";
+import ProtectedRoute from "./components/ProtectedRoute";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 
@@ -76,18 +77,46 @@ const App = () => (
           <Route path="/checkout" component={CheckoutPage} />
           <Route path="/retry-payment" component={RetryPaymentPage} />
           <Route path="/order-status/:orderId" component={OrderStatusPage} />
-          <Route path="/orders" component={OrdersPage} />
-          <Route path="/order-detail/:orderId" component={OrderDetailPage} />
-          <Route path="/canteen-order-detail/:orderId" component={CanteenOrderDetailPage} />
-          <Route path="/profile" component={ProfilePage} />
+          <Route path="/orders">
+            <ProtectedRoute requireAuth={true}>
+              <OrdersPage />
+            </ProtectedRoute>
+          </Route>
+          <Route path="/order-detail/:orderId">
+            <ProtectedRoute requireAuth={true}>
+              <OrderDetailPage />
+            </ProtectedRoute>
+          </Route>
+          <Route path="/canteen-order-detail/:orderId">
+            <ProtectedRoute requiredRole="canteen_owner">
+              <CanteenOrderDetailPage />
+            </ProtectedRoute>
+          </Route>
+          <Route path="/profile">
+            <ProtectedRoute requireAuth={true}>
+              <ProfilePage />
+            </ProtectedRoute>
+          </Route>
           <Route path="/notifications" component={NotificationsPage} />
           <Route path="/payment-methods" component={PaymentMethodsPage} />
           <Route path="/search" component={SearchPage} />
           <Route path="/privacy-policy" component={PrivacyPolicyPage} />
           <Route path="/terms-conditions" component={TermsConditionsPage} />
-          <Route path="/canteen-owner" component={CanteenOwnerDashboard} />
-          <Route path="/canteen-owner-dashboard" component={CanteenOwnerDashboard} />
-          <Route path="/admin" component={AdminDashboard} />
+          <Route path="/canteen-owner">
+            <ProtectedRoute requiredRole="canteen_owner">
+              <CanteenOwnerDashboard />
+            </ProtectedRoute>
+          </Route>
+          <Route path="/canteen-owner-dashboard">
+            <ProtectedRoute requiredRole="canteen_owner">
+              <CanteenOwnerDashboard />
+            </ProtectedRoute>
+          </Route>
+          <Route path="/admin">
+            <ProtectedRoute requiredRoles={["admin", "super_admin"]}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          </Route>
           <Route path="/edit-admin-access/:userId">
             <AdminLayout><EditAdminAccessPage /></AdminLayout>
           </Route>
