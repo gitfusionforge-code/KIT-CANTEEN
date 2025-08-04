@@ -10,6 +10,20 @@ export const queryClient = new QueryClient({
       refetchOnWindowFocus: true, // Refetch when switching between dashboards
       refetchOnMount: true, // Always refetch on component mount
       refetchInterval: 1000 * 60, // Automatic refetch every minute
+      queryFn: async ({ queryKey }) => {
+        const [url] = queryKey as [string];
+        console.log('Fetching from:', url);
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+          console.error(`HTTP error! status: ${response.status}`);
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('Fetched data:', data);
+        return data;
+      },
     },
     mutations: {
       retry: 1,

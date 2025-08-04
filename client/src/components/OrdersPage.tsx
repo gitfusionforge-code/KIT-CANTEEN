@@ -30,16 +30,25 @@ export default function OrdersPage() {
   }, []);
 
   // Fetch real orders from database
-  const { data: allOrders = [], isLoading } = useQuery<Order[]>({
+  const { data: allOrders = [], isLoading, error } = useQuery<Order[]>({
     queryKey: ['/api/orders'],
+    enabled: true, // Explicitly enable the query
+    refetchOnWindowFocus: false,
+    retry: 3,
   });
 
   // Debug: Log all orders
   useEffect(() => {
+    console.log('Orders query state:', { allOrders, isLoading, error, length: allOrders.length });
+    if (error) {
+      console.error('Orders query error:', error);
+    }
     if (allOrders.length > 0) {
       console.log('All orders fetched from API:', allOrders);
+    } else if (!isLoading) {
+      console.log('No orders returned from API (query completed)');
     }
-  }, [allOrders]);
+  }, [allOrders, isLoading, error]);
 
   // Filter orders to show only current user's orders
   const userOrders = allOrders.filter((order: Order) => {
