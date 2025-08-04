@@ -7,6 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import type { MenuItem, Category } from "@shared/schema";
 import { 
@@ -14,12 +17,24 @@ import {
   Edit, 
   Trash2, 
   Search, 
-  Loader2
+  Loader2,
+  X
 } from "lucide-react";
 
 export default function AdminMenuManagementPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
+  const [editForm, setEditForm] = useState({
+    name: "",
+    price: "",
+    categoryId: "",
+    description: "",
+    stock: "",
+    available: true,
+    addOns: "[]"
+  });
+  const [addOns, setAddOns] = useState<Array<{ name: string; price: string }>>([]);
   const { toast } = useToast();
 
   // Fetch real data from database with enhanced synchronization
@@ -84,6 +99,58 @@ export default function AdminMenuManagementPage() {
 
   const deleteItem = (id: number) => {
     deleteMenuItemMutation.mutate(id);
+  };
+
+  const openEditDialog = (item: MenuItem) => {
+    setEditingItem(item);
+    setEditForm({
+      name: item.name,
+      price: item.price.toString(),
+      categoryId: item.categoryId?.toString() || "",
+      description: item.description || "",
+      stock: item.stock.toString(),
+      available: item.available,
+      addOns: item.addOns || "[]"
+    });
+    
+    // Parse existing add-ons
+    try {
+      const existingAddOns = JSON.parse(item.addOns || "[]");
+      setAddOns(existingAddOns.length > 0 ? existingAddOns : []);
+    } catch {
+      setAddOns([]);
+    }
+  };
+
+  const addNewAddOn = () => {
+    setAddOns([...addOns, { name: "", price: "" }]);
+  };
+
+  const updateAddOn = (index: number, field: "name" | "price", value: string) => {
+    const updatedAddOns = [...addOns];
+    updatedAddOns[index][field] = value;
+    setAddOns(updatedAddOns);
+  };
+
+  const removeAddOn = (index: number) => {
+    setAddOns(addOns.filter((_, i) => i !== index));
+  };
+
+  const saveEditedItem = () => {
+    if (!editingItem) return;
+    
+    const updatedData = {
+      name: editForm.name,
+      price: parseInt(editForm.price),
+      categoryId: parseInt(editForm.categoryId),
+      description: editForm.description,
+      stock: parseInt(editForm.stock),
+      available: editForm.available,
+      addOns: JSON.stringify(addOns.filter(addon => addon.name && addon.price))
+    };
+    
+    updateMenuItemMutation.mutate({ id: editingItem.id, data: updatedData });
+    setEditingItem(null);
   };
 
   // Filter menu items
@@ -185,7 +252,11 @@ export default function AdminMenuManagementPage() {
                   </div>
                   
                   <div className="flex space-x-2">
-                    <Button variant="outline" size="sm">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => openEditDialog(item)}
+                    >
                       <Edit className="w-3 h-3" />
                     </Button>
                     <Button 
@@ -202,6 +273,158 @@ export default function AdminMenuManagementPage() {
           ))
         )}
       </div>
+
+      {/* Edit Dialog */}
+      <Dialog open={!!editingItem} onOpenChange={() => setEditingItem(null)}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Menu Item</DialogTitle>
+            <DialogDescription>
+              Update the menu item details including add-ons.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            {/* Name */}
+            <div className="space-y-2">
+              <Label htmlFor="name">Name</Label>
+              <Input
+                id="name"
+                value={editForm.name}
+                onChange={(e) => setEditForm({...editForm, name: e.target.value})}
+                placeholder="Item name"
+              />
+            </div>
+
+            {/* Price */}
+            <div className="space-y-2">
+              <Label htmlFor="price">Price (₹)</Label>
+              <Input
+                id="price"
+                type="number"
+                value={editForm.price}
+                onChange={(e) => setEditForm({...editForm, price: e.target.value})}
+                placeholder="0"
+              />
+            </div>
+
+            {/* Category */}
+            <div className="space-y-2">
+              <Label htmlFor="category">Category</Label>
+              <Select value={editForm.categoryId} onValueChange={(value) => setEditForm({...editForm, categoryId: value})}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.id.toString()}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Description */}
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                value={editForm.description}
+                onChange={(e) => setEditForm({...editForm, description: e.target.value})}
+                placeholder="Item description"
+                rows={3}
+              />
+            </div>
+
+            {/* Stock */}
+            <div className="space-y-2">
+              <Label htmlFor="stock">Stock</Label>
+              <Input
+                id="stock"
+                type="number"
+                value={editForm.stock}
+                onChange={(e) => setEditForm({...editForm, stock: e.target.value})}
+                placeholder="0"
+              />
+            </div>
+
+            {/* Available */}
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="available"
+                checked={editForm.available}
+                onCheckedChange={(checked) => setEditForm({...editForm, available: checked})}
+              />
+              <Label htmlFor="available">Available</Label>
+            </div>
+
+            {/* Add-ons Section */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label>Add-ons</Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={addNewAddOn}
+                >
+                  <Plus className="w-4 h-4 mr-1" />
+                  Add Add-on
+                </Button>
+              </div>
+              
+              <div className="space-y-2">
+                {addOns.map((addon, index) => (
+                  <div key={index} className="flex items-center space-x-2 p-3 border rounded-lg">
+                    <Input
+                      placeholder="Add-on name"
+                      value={addon.name}
+                      onChange={(e) => updateAddOn(index, "name", e.target.value)}
+                      className="flex-1"
+                    />
+                    <Input
+                      placeholder="Price"
+                      type="number"
+                      value={addon.price}
+                      onChange={(e) => updateAddOn(index, "price", e.target.value)}
+                      className="w-24"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => removeAddOn(index)}
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+              
+              {addOns.length === 0 && (
+                <p className="text-sm text-muted-foreground">No add-ons configured</p>
+              )}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex justify-end space-x-2 pt-4">
+              <Button
+                variant="outline"
+                onClick={() => setEditingItem(null)}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={saveEditedItem}
+                disabled={!editForm.name || !editForm.price}
+              >
+                Save Changes
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
