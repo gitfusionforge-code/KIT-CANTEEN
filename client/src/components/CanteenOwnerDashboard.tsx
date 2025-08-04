@@ -63,13 +63,39 @@ export default function CanteenOwnerDashboard() {
 
   const { data: orders = [], isLoading: ordersLoading } = useQuery<Order[]>({
     queryKey: ['/api/orders'],
+    queryFn: async () => {
+      const response = await fetch('/api/orders');
+      if (!response.ok) {
+        throw new Error(`Failed to fetch orders: ${response.status}`);
+      }
+      return response.json();
+    },
   });
 
-  const { data: menuItems = [], isLoading: menuItemsLoading, refetch: refetchMenuItems } = useQuery<MenuItem[]>({
+  const { data: menuItems = [], isLoading: menuItemsLoading, refetch: refetchMenuItems, error: menuItemsError } = useQuery<MenuItem[]>({
     queryKey: ['/api/menu'],
+    queryFn: async () => {
+      const response = await fetch('/api/menu');
+      if (!response.ok) {
+        throw new Error(`Failed to fetch menu items: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log("Menu items fetched:", data);
+      return data;
+    },
     staleTime: 0,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
+  });
+
+  // Debug logging
+  console.log("CanteenOwner Debug:", { 
+    menuItems, 
+    menuItemsCount: menuItems.length, 
+    menuItemsLoading, 
+    menuItemsError,
+    categories,
+    categoriesCount: categories.length 
   });
 
   const [newCategory, setNewCategory] = useState("");
@@ -833,6 +859,13 @@ export default function CanteenOwnerDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
+                  {menuItemsLoading && <div className="text-center py-4">Loading menu items...</div>}
+                  {menuItemsError && <div className="text-center py-4 text-red-500">Error loading menu items: {menuItemsError.message}</div>}
+                  {!menuItemsLoading && !menuItemsError && menuItems.length === 0 && (
+                    <div className="text-center py-8 text-muted-foreground">
+                      No menu items found. Click "Add Item" to create your first menu item!
+                    </div>
+                  )}
                   {menuItems.map((item: MenuItem) => (
                     <div key={item.id} className="flex items-center justify-between p-4 border rounded-lg">
                       <div className="flex-1">
