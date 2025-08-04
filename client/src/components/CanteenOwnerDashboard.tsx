@@ -88,7 +88,6 @@ export default function CanteenOwnerDashboard() {
         throw new Error(`Failed to fetch menu items: ${response.status}`);
       }
       const data = await response.json();
-      // console.log("Menu items fetched:", data);
       return data;
     },
     staleTime: 0,
@@ -96,8 +95,7 @@ export default function CanteenOwnerDashboard() {
     refetchOnWindowFocus: true,
   });
 
-  // Optional debug logging (removed for production)
-  // console.log("CanteenOwner Debug:", { menuItems, categories });
+  // Data is synchronized with real-time updates
 
   const [newCategory, setNewCategory] = useState("");
 
@@ -189,7 +187,6 @@ export default function CanteenOwnerDashboard() {
   // Delete menu item mutation with enhanced sync
   const deleteMenuItemMutation = useMutation({
     mutationFn: async (id: number) => {
-      // console.log("Deleting menu item:", id);
       const response = await fetch(`/api/menu/${id}`, { 
         method: 'DELETE',
         headers: {
@@ -204,7 +201,6 @@ export default function CanteenOwnerDashboard() {
       return { success: true };
     },
     onSuccess: (data, variables) => {
-      // console.log("Menu item deleted successfully:", variables);
       // Comprehensive synchronization
       queryClient.invalidateQueries({ queryKey: ['/api/menu'] });
       queryClient.invalidateQueries({ queryKey: ['/api/categories'] });
@@ -217,7 +213,7 @@ export default function CanteenOwnerDashboard() {
       toast.success("Menu item deleted successfully");
     },
     onError: (error, variables) => {
-      console.error("Failed to delete menu item:", error, variables);
+      // Failed to delete menu item
       toast.error("Failed to delete menu item");
     }
   });
@@ -225,7 +221,6 @@ export default function CanteenOwnerDashboard() {
   // Add category mutation with enhanced sync
   const addCategoryMutation = useMutation({
     mutationFn: async (data: any) => {
-      console.log("Adding category:", data);
       return apiRequest('/api/categories', {
         method: 'POST',
         body: JSON.stringify(data),
@@ -243,7 +238,7 @@ export default function CanteenOwnerDashboard() {
       setNewCategory("");
     },
     onError: (error: any) => {
-      console.error("Category mutation error:", error);
+      // Category mutation failed - handle different error types
       if (error?.message?.includes("already exists") || error?.status === 409) {
         toast.error("Category already exists");
       } else {
@@ -297,7 +292,7 @@ export default function CanteenOwnerDashboard() {
       }
     } catch (error) {
       toast.error("Failed to start barcode scanner");
-      console.error('Barcode scanner error:', error);
+      // Barcode scanner error - show user-friendly message
     } finally {
       stopBarcodeScanner();
     }

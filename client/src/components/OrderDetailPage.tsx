@@ -38,7 +38,7 @@ const BarcodeGenerator = ({ orderId }: { orderId: string }) => {
           textPosition: "bottom"
         });
       } catch (error) {
-        console.error('Barcode generation error:', error);
+        // Barcode generation failed - using fallback display
         // Fallback: display order ID as text
         const canvas = canvasRef.current;
         const ctx = canvas?.getContext('2d');

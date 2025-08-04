@@ -73,8 +73,7 @@ export default function LoginScreen() {
               setLocation('/home');
             }
           } catch (error) {
-            console.error("Error in authentication flow:", error);
-            // Default to student role if API fails
+            // Error in authentication flow - default to student role if API fails
             localStorage.setItem('user', JSON.stringify({
               id: result.user.uid,
               name: result.user.displayName,
@@ -97,7 +96,6 @@ export default function LoginScreen() {
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     try {
-      console.log("Starting Google sign-in...");
       const result = await signInWithGoogle();
       
       if (result.user) {
@@ -115,7 +113,6 @@ export default function LoginScreen() {
             userId = userData.id;
           } else if (response.status === 404) {
             // User doesn't exist, create new user
-            console.log("Creating new user account...");
             
             // Determine role based on email for special accounts
             if (result.user.email === 'kitcanteen1@gmail.com') {
@@ -160,8 +157,7 @@ export default function LoginScreen() {
             setLocation("/home");
           }
         } catch (error) {
-          console.error("Error in authentication flow:", error);
-          // Default to student role if API fails
+          // Error in authentication flow - default to student role if API fails
           localStorage.setItem('user', JSON.stringify({
             id: result.user.uid,
             name: result.user.displayName,
@@ -172,7 +168,7 @@ export default function LoginScreen() {
         }
       }
     } catch (error: any) {
-      console.error("Google sign-in error:", error);
+      // Google sign-in error - handle specific error cases
       
       if (error.code === 'auth/unauthorized-domain') {
         toast({ 
@@ -188,7 +184,7 @@ export default function LoginScreen() {
         try {
           await signInWithGoogleRedirect();
         } catch (redirectError) {
-          console.error("Redirect error:", redirectError);
+          // Redirect error - show user-friendly message
           toast({ 
             title: "Authentication failed", 
             description: "Unable to sign in with Google",

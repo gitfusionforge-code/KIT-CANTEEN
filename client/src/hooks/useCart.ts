@@ -19,7 +19,7 @@ export function useCart() {
       try {
         setCart(JSON.parse(savedCart));
       } catch (error) {
-        console.error('Failed to parse cart from localStorage:', error);
+        // Failed to parse cart from localStorage - clear corrupted data
         localStorage.removeItem('kit-canteen-cart');
       }
     }

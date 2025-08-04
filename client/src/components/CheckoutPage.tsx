@@ -52,7 +52,7 @@ export default function CheckoutPage() {
       
       setLocation(`/order-status/${newOrder.orderNumber || orderNumber}`);
     } catch (error) {
-      console.error("Failed to create order:", error);
+      // Failed to create order - show error message
       toast({
         title: "Order Creation Failed",
         description: "Unable to create order. Please try again.",
@@ -139,9 +139,7 @@ export default function CheckoutPage() {
         setIsTimerActive(false);
         setPaymentInProgress(false);
         
-        console.log("Payment successful:", response);
-
-        // Create order in database
+        // Payment successful - create order in database
         const orderNumber = `ORD${Date.now()}`;
         const orderData = {
           orderNumber,
@@ -163,7 +161,7 @@ export default function CheckoutPage() {
           
           setLocation(`/order-status/${newOrder.orderNumber || orderNumber}`);
         } catch (error) {
-          console.error("Failed to create order:", error);
+          // Failed to create order after payment - critical error
           toast({
             title: "Order Creation Failed",
             description: "Payment successful but order creation failed. Contact support.",
@@ -184,7 +182,7 @@ export default function CheckoutPage() {
       },
       modal: {
         ondismiss: function() {
-          console.log("Payment cancelled");
+          // Payment cancelled by user
           setIsTimerActive(false);
           setPaymentInProgress(false);
           paymentValidRef.current = false;
@@ -209,7 +207,7 @@ export default function CheckoutPage() {
       const rzp = new (window as any).Razorpay(options);
       rzp.open();
     } catch (error) {
-      console.error("Razorpay initialization error:", error);
+      // Razorpay initialization error - show fallback
       toast({
         title: "Payment Error",
         description: "Failed to initialize payment. Please try again.",

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useLocation, useParams } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -29,8 +29,7 @@ const BarcodeGenerator = ({ orderId }: { orderId: string }) => {
           textPosition: "bottom"
         });
       } catch (error) {
-        console.error('Barcode generation error:', error);
-        // Fallback: display order ID as text
+        // Barcode generation failed - fallback to text display
         const canvas = canvasRef.current;
         const ctx = canvas?.getContext('2d');
         if (ctx && canvas) {
@@ -73,17 +72,15 @@ export default function OrderStatusPage() {
 
   const orderStatus = order?.status as "preparing" | "ready" | "completed" || "preparing";
   
-  // Calculate progress based on order status
-  const getProgress = () => {
+  // Calculate progress based on order status - memoized to prevent infinite loops
+  const progress = useMemo(() => {
     switch (orderStatus) {
       case "preparing": return 33;
       case "ready": return 66;
       case "completed": return 100;
       default: return 33;
     }
-  };
-  
-  const [progress, setProgress] = useState(getProgress());
+  }, [orderStatus]);
 
   const orderDetails = order ? {
     id: order.orderNumber,
@@ -93,11 +90,6 @@ export default function OrderStatusPage() {
     actualTime: orderStatus === "ready" ? `${order.estimatedTime || 15} mins` : `${order.estimatedTime || 15} mins`,
     pickupLocation: "KIT College Main Canteen, Ground Floor"
   } : null;
-
-  useEffect(() => {
-    // Update progress when order status changes
-    setProgress(getProgress());
-  }, [orderStatus]);
 
   if (isLoading) {
     return (

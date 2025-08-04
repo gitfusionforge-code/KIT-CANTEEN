@@ -123,9 +123,7 @@ export default function LoginPage() {
 
   const handleGoogleSignIn = async () => {
     try {
-      console.log("Starting Google sign-in...");
       const result = await signInWithGoogle();
-      console.log("Google sign-in result:", result);
       
       if (result?.user) {
         toast({ title: "Google sign-in successful!" });
@@ -139,7 +137,7 @@ export default function LoginPage() {
         setLocation('/home');
       }
     } catch (error: any) {
-      console.error("Google sign-in error:", error);
+      // Google sign-in error - show user-friendly message
       toast({ 
         title: "Google sign-in failed", 
         description: error.message || "Please try again. Make sure popups are enabled.",
