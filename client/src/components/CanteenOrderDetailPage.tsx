@@ -1,4 +1,5 @@
 import { useLocation, useParams } from "wouter";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,61 +14,65 @@ import {
   CreditCard,
   CheckCircle,
   XCircle,
-  ChefHat
+  ChefHat,
+  Loader2
 } from "lucide-react";
+import type { Order } from "@shared/schema";
 
 export default function CanteenOrderDetailPage() {
   const [, setLocation] = useLocation();
   const { orderId } = useParams();
+  const queryClient = useQueryClient();
 
-  // Mock order data - in real app, fetch based on orderId
-  const orderDetails = {
-    id: orderId || "1233",
-    status: "preparing",
-    placedAt: "2:30 PM",
-    estimatedTime: "15 mins",
-    total: 60,
-    subtotal: 55,
-    tax: 3,
-    deliveryFee: 2,
-    items: [
-      {
-        id: 1,
-        name: "Samosa",
-        quantity: 2,
-        price: 20,
-        total: 40,
-        image: "🥟",
-        isVeg: true,
-        specialInstructions: "Extra spicy"
-      },
-      {
-        id: 2,
-        name: "Filter Coffee",
-        quantity: 1,
-        price: 20,
-        total: 20,
-        image: "☕",
-        isVeg: true,
-        specialInstructions: "Less sugar"
+  // Fetch real order data from database
+  const { data: orderDetails, isLoading, error } = useQuery<Order>({
+    queryKey: ['/api/orders', orderId],
+    queryFn: async () => {
+      const response = await fetch(`/api/orders/${orderId}`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch order: ${response.status}`);
       }
-    ],
-    customer: {
-      name: "Rahul Kumar",
-      phone: "+91 98765 43210",
-      location: "Table 5, Ground Floor"
+      return response.json();
     },
-    payment: {
-      method: "UPI",
-      transactionId: "TXN123456789",
-      status: "completed"
+    enabled: !!orderId,
+  });
+
+  // Parse order items from JSON string
+  const parsedItems = orderDetails?.items ? (() => {
+    try {
+      return JSON.parse(orderDetails.items);
+    } catch {
+      return [];
     }
-  };
+  })() : [];
+
+  // Update order status mutation
+  const updateOrderStatusMutation = useMutation({
+    mutationFn: async (newStatus: string) => {
+      const response = await fetch(`/api/orders/${orderId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      });
+      if (!response.ok) {
+        throw new Error('Failed to update order status');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/orders', orderId] });
+      toast.success('Order status updated successfully');
+    },
+    onError: () => {
+      toast.error('Failed to update order status');
+    }
+  });
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "pending": return "bg-warning text-warning-foreground";
-      case "preparing": return "bg-info text-info-foreground";
+      case "preparing": return "bg-blue-500 text-white";
       case "ready": return "bg-success text-success-foreground";
       case "completed": return "bg-muted text-muted-foreground";
       default: return "bg-muted text-muted-foreground";
@@ -75,11 +80,8 @@ export default function CanteenOrderDetailPage() {
   };
 
   const handleStatusUpdate = (newStatus: string) => {
-    toast.success(`Order marked as ${newStatus}`);
-    // In real app, update order status in database
+    updateOrderStatusMutation.mutate(newStatus);
   };
-
-
 
   const handleMarkReady = () => {
     handleStatusUpdate("ready");
@@ -89,6 +91,29 @@ export default function CanteenOrderDetailPage() {
     handleStatusUpdate("completed");
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex items-center space-x-2">
+          <Loader2 className="w-6 h-6 animate-spin" />
+          <span>Loading order details...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !orderDetails) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold mb-2">Order Not Found</h2>
+          <p className="text-muted-foreground mb-4">The order you're looking for doesn't exist.</p>
+          <Button onClick={() => setLocation('/canteen-owner')}>Back to Dashboard</Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -96,7 +121,6 @@ export default function CanteenOrderDetailPage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <Button variant="ghost" size="icon" onClick={() => {
-              // Use browser's back functionality, but with fallback
               if (window.history.length > 1) {
                 window.history.back();
               } else {
@@ -107,7 +131,7 @@ export default function CanteenOrderDetailPage() {
             </Button>
             <div>
               <h1 className="text-xl font-bold">Order Details</h1>
-              <p className="text-sm text-muted-foreground">Order #{orderDetails.id}</p>
+              <p className="text-sm text-muted-foreground">Order #{orderDetails.orderNumber || orderDetails.id}</p>
             </div>
           </div>
           <Badge className={getStatusColor(orderDetails.status)}>
@@ -123,11 +147,11 @@ export default function CanteenOrderDetailPage() {
             <div className="flex items-center justify-between mb-4">
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Order placed at</p>
-                <p className="font-semibold">{orderDetails.placedAt}</p>
+                <p className="font-semibold">{new Date(orderDetails.createdAt).toLocaleString()}</p>
               </div>
               <div className="text-right">
                 <p className="text-sm text-muted-foreground">Estimated time</p>
-                <p className="font-semibold">{orderDetails.estimatedTime}</p>
+                <p className="font-semibold">{orderDetails.estimatedTime || 15} mins</p>
               </div>
             </div>
 
@@ -137,6 +161,7 @@ export default function CanteenOrderDetailPage() {
                 <Button 
                   onClick={handleMarkReady}
                   className="w-full bg-success text-success-foreground hover:bg-success/90"
+                  disabled={updateOrderStatusMutation.isPending}
                 >
                   <ChefHat className="w-4 h-4 mr-2" />
                   Mark as Ready
@@ -147,6 +172,7 @@ export default function CanteenOrderDetailPage() {
                 <Button 
                   onClick={handleCompleteOrder}
                   className="w-full bg-success text-success-foreground hover:bg-success/90"
+                  disabled={updateOrderStatusMutation.isPending}
                 >
                   <CheckCircle className="w-4 h-4 mr-2" />
                   Complete Order
@@ -159,42 +185,33 @@ export default function CanteenOrderDetailPage() {
         {/* Order Items */}
         <Card className="shadow-card">
           <CardContent className="p-4">
-            <h2 className="font-semibold mb-4 flex items-center">
-              <Receipt className="w-5 h-5 mr-2" />
-              Order Items ({orderDetails.items.length})
-            </h2>
-            
-            <div className="space-y-4">
-              {orderDetails.items.map((item) => (
-                <div key={item.id} className="space-y-2">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-orange-100 to-orange-200 rounded-lg flex items-center justify-center text-lg">
-                      {item.image}
-                    </div>
-                    
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2">
-                        <h3 className="font-medium">{item.name}</h3>
-                        <div className={`w-3 h-3 rounded border-2 ${item.isVeg ? 'border-green-600' : 'border-red-600'}`}>
-                          <div className={`w-1.5 h-1.5 rounded-full ${item.isVeg ? 'bg-green-600' : 'bg-red-600'} m-0.5`}></div>
-                        </div>
-                        <span className="text-sm font-bold text-primary">x{item.quantity}</span>
-                      </div>
-                      <p className="text-sm text-muted-foreground">₹{item.price} each</p>
-                    </div>
-                    
-                    <div className="text-right">
-                      <p className="font-semibold">₹{item.total}</p>
-                    </div>
+            <div className="flex items-center justify-between p-4 bg-muted/20 rounded-lg mb-4">
+              <span className="font-medium">Order Items ({parsedItems.length})</span>
+              <Receipt className="w-5 h-5 text-muted-foreground" />
+            </div>
+
+            <div className="space-y-3">
+              {parsedItems.map((item: any, index: number) => (
+                <div key={index} className="flex items-center space-x-4 p-4 border rounded-lg">
+                  <div className="w-12 h-12 rounded-lg bg-accent/50 flex items-center justify-center">
+                    <span className="text-2xl">🍽️</span>
                   </div>
                   
-                  {item.specialInstructions && (
-                    <div className="ml-16 p-2 bg-warning/10 border border-warning/20 rounded">
-                      <p className="text-sm text-warning-foreground">
-                        <strong>Special Instructions:</strong> {item.specialInstructions}
-                      </p>
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2 mb-1">
+                      <h4 className="font-medium">{item.name || 'Unknown Item'}</h4>
+                      <Badge variant="secondary" className="bg-green-100 text-green-700 text-xs">VEG</Badge>
                     </div>
-                  )}
+                    <p className="text-sm text-muted-foreground">₹{item.price || 0} each</p>
+                    {item.specialInstructions && (
+                      <p className="text-sm text-primary mt-1">Special Instructions: {item.specialInstructions}</p>
+                    )}
+                  </div>
+                  
+                  <div className="text-right">
+                    <p className="font-semibold">x{item.quantity || 1}</p>
+                    <p className="text-sm font-bold">₹{(item.price || 0) * (item.quantity || 1)}</p>
+                  </div>
                 </div>
               ))}
             </div>
@@ -212,62 +229,36 @@ export default function CanteenOrderDetailPage() {
             <div className="space-y-3">
               <div className="flex items-center space-x-2">
                 <User className="w-4 h-4 text-muted-foreground" />
-                <span className="font-medium">{orderDetails.customer.name}</span>
+                <span className="font-medium">{orderDetails.customerName || 'N/A'}</span>
               </div>
               <div className="flex items-center space-x-2">
                 <Phone className="w-4 h-4 text-muted-foreground" />
-                <span>{orderDetails.customer.phone}</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Clock className="w-4 h-4 text-muted-foreground" />
-                <span>{orderDetails.customer.location}</span>
+                <span>N/A</span>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Payment Details */}
+        {/* Payment Summary */}
         <Card className="shadow-card">
           <CardContent className="p-4">
             <h2 className="font-semibold mb-4 flex items-center">
               <CreditCard className="w-5 h-5 mr-2" />
-              Payment Details
+              Payment Summary
             </h2>
             
             <div className="space-y-3">
               <div className="flex justify-between">
-                <span>Subtotal</span>
-                <span>₹{orderDetails.subtotal}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Taxes & Charges</span>
-                <span>₹{orderDetails.tax}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Service Fee</span>
-                <span>₹{orderDetails.deliveryFee}</span>
-              </div>
-              
-              <Separator />
-              
-              <div className="flex justify-between font-bold text-lg">
                 <span>Total Amount</span>
-                <span>₹{orderDetails.total}</span>
+                <span className="font-bold text-lg">₹{orderDetails.amount}</span>
               </div>
               
               <Separator />
               
               <div className="flex justify-between items-center">
-                <span>Payment Method</span>
-                <div className="text-right">
-                  <p className="font-medium">{orderDetails.payment.method}</p>
-                  <p className="text-xs text-muted-foreground">{orderDetails.payment.transactionId}</p>
-                </div>
-              </div>
-              <div className="flex justify-between">
                 <span>Payment Status</span>
-                <Badge className="bg-success text-success-foreground">
-                  {orderDetails.payment.status}
+                <Badge variant="secondary" className="bg-green-100 text-green-700">
+                  Paid
                 </Badge>
               </div>
             </div>
