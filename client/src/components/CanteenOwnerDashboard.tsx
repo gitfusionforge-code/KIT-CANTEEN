@@ -943,11 +943,14 @@ export default function CanteenOwnerDashboard() {
                     <div className="space-y-4 p-6 border rounded-lg">
                       <div>
                         <Label htmlFor="manual-barcode">Enter Delivery Barcode</Label>
+                        <p className="text-xs text-muted-foreground mb-2">
+                          Use the delivery barcode (e.g., KC9150595KMUNH), NOT the order number (ORD...)
+                        </p>
                         <Input
                           id="manual-barcode"
                           value={manualBarcode}
                           onChange={(e) => setManualBarcode(e.target.value)}
-                          placeholder="KC123456789ABC"
+                          placeholder="KC9150595KMUNH"
                           className="mt-1"
                           disabled={scanBarcodeMutation.isPending}
                         />

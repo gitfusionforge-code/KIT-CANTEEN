@@ -55,9 +55,18 @@
 ✅ Order delivery verification working
 ✅ Real-time order status updates working
 
-### Test Example
+### Test Examples
+#### Example 1:
 - Order Number: `ORD1754331701447`
 - Delivery Barcode: `KC701981PP1KSG`
 - Status: Successfully delivered ✅
+
+#### Example 2:
+- Order Number: `ORD1754332914519`
+- Delivery Barcode: `KC9150595KMUNH`
+- Status: Successfully delivered ✅
+
+### Important Note:
+**ALWAYS use the delivery barcode (KC format), NOT the order number (ORD format)!**
 
 The system is fully operational and ready for use!
