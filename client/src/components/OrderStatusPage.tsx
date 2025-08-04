@@ -59,9 +59,11 @@ export default function OrderStatusPage() {
   const [, setLocation] = useLocation();
   const { orderId } = useParams();
 
-  // Fetch real order data from API
-  const { data: orders = [], isLoading } = useQuery<Order[]>({
+  // Fetch real order data from API with short cache time for real-time updates
+  const { data: orders = [], isLoading, refetch } = useQuery<Order[]>({
     queryKey: ['/api/orders'],
+    staleTime: 0, // Always fetch fresh data
+    refetchInterval: 5000, // Auto-refresh every 5 seconds
   });
 
   // Find the specific order by ID or order number
@@ -70,7 +72,7 @@ export default function OrderStatusPage() {
     o.orderNumber === orderId
   );
 
-  const orderStatus = order?.status as "preparing" | "ready" | "completed" || "preparing";
+  const orderStatus = order?.status as "preparing" | "ready" | "completed" | "delivered" || "preparing";
   
   // Calculate progress based on order status - memoized to prevent infinite loops
   const progress = useMemo(() => {
@@ -78,6 +80,7 @@ export default function OrderStatusPage() {
       case "preparing": return 33;
       case "ready": return 66;
       case "completed": return 100;
+      case "delivered": return 100;
       default: return 33;
     }
   }, [orderStatus]);
@@ -128,17 +131,25 @@ export default function OrderStatusPage() {
       status: "preparing",
       label: "Preparing",
       icon: ChefHat,
-      completed: orderStatus === "preparing" || orderStatus === "ready" || orderStatus === "completed",
-      time: orderStatus === "preparing" || orderStatus === "ready" || orderStatus === "completed" ? 
+      completed: orderStatus === "preparing" || orderStatus === "ready" || orderStatus === "completed" || orderStatus === "delivered",
+      time: orderStatus === "preparing" || orderStatus === "ready" || orderStatus === "completed" || orderStatus === "delivered" ? 
         order ? new Date(new Date(order.createdAt).getTime() + 3 * 60000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : "" : ""
     },
     {
       status: "ready",
       label: "Ready for Pickup",
       icon: Package,
-      completed: orderStatus === "ready" || orderStatus === "completed",
-      time: orderStatus === "ready" || orderStatus === "completed" ? 
+      completed: orderStatus === "ready" || orderStatus === "completed" || orderStatus === "delivered",
+      time: orderStatus === "ready" || orderStatus === "completed" || orderStatus === "delivered" ? 
         order ? new Date(new Date(order.createdAt).getTime() + (order.estimatedTime || 15) * 60000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : "" : ""
+    },
+    {
+      status: "delivered",
+      label: "Order Delivered",
+      icon: CheckCircle,
+      completed: orderStatus === "delivered",
+      time: orderStatus === "delivered" && order?.deliveredAt ? 
+        new Date(order.deliveredAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ""
     }
   ];
 
@@ -305,15 +316,34 @@ export default function OrderStatusPage() {
 
       {/* Action Buttons */}
       <div className="sticky bottom-0 bg-white border-t p-4 space-y-3">
-        {orderStatus === "ready" ? (
+        {orderStatus === "delivered" ? (
           <Button
             variant="food"
             size="mobile"
             className="w-full"
             onClick={() => setLocation("/home")}
           >
-            Order Complete - Browse Menu
+            Order Delivered - Browse Menu
           </Button>
+        ) : orderStatus === "ready" ? (
+          <div className="flex space-x-3">
+            <Button
+              variant="outline"
+              size="mobile"
+              className="flex-1"
+              onClick={() => setLocation("/home")}
+            >
+              Browse Menu
+            </Button>
+            <Button
+              variant="food"
+              size="mobile"
+              className="flex-1"
+              disabled
+            >
+              Ready for Pickup
+            </Button>
+          </div>
         ) : (
           <div className="flex space-x-3">
             <Button
@@ -328,7 +358,7 @@ export default function OrderStatusPage() {
               variant="food"
               size="mobile"
               className="flex-1"
-              onClick={() => window.location.reload()}
+              onClick={() => refetch()}
             >
               Refresh Status
             </Button>
