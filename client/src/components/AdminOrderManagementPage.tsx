@@ -1,10 +1,13 @@
 import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import type { Order } from "@shared/schema";
 import { 
   Search, 
   Filter, 
@@ -20,9 +23,22 @@ import {
 export default function AdminOrderManagementPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("all");
-  // Fetch real orders from database
-  const [orders, setOrders] = useState<any[]>([]);
   const { toast } = useToast();
+
+  // Fetch real orders from database using React Query
+  const { data: orders = [], isLoading: ordersLoading, refetch: refetchOrders, error: ordersError } = useQuery<Order[]>({
+    queryKey: ['/api/orders'],
+    queryFn: async () => {
+      const response = await fetch('/api/orders');
+      if (!response.ok) {
+        throw new Error(`Failed to fetch orders: ${response.status}`);
+      }
+      return response.json();
+    },
+    staleTime: 1000 * 60, // 1 minute
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+  });
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -46,18 +62,28 @@ export default function AdminOrderManagementPage() {
     }
   };
 
-  const updateOrderStatus = (orderId: string, newStatus: string) => {
-    setOrders(prevOrders => 
-      prevOrders.map(order => 
-        order.id === orderId ? { ...order, status: newStatus } : order
-      )
-    );
-    console.log(`Updating order ${orderId} to ${newStatus}`);
-    toast({
-      title: "Order Updated",
-      description: `Order ${orderId} has been updated to ${newStatus}`,
-    });
-  };
+  const updateOrderStatus = useMutation({
+    mutationFn: async ({ orderId, newStatus }: { orderId: number, newStatus: string }) => {
+      return apiRequest(`/api/orders/${orderId}`, {
+        method: 'PATCH',
+        body: { status: newStatus }
+      });
+    },
+    onSuccess: (_, { orderId, newStatus }) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+      toast({
+        title: "Order Updated",
+        description: `Order ${orderId} has been updated to ${newStatus}`,
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to update order status",
+        variant: "destructive",
+      });
+    }
+  });
 
   const handleExport = () => {
     toast({
@@ -67,6 +93,7 @@ export default function AdminOrderManagementPage() {
   };
 
   const handleRefresh = () => {
+    refetchOrders();
     toast({
       title: "Refreshed",
       description: "Order data has been refreshed",
@@ -88,8 +115,8 @@ export default function AdminOrderManagementPage() {
   };
 
   const filteredOrders = orders.filter(order => {
-    const matchesSearch = order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         order.customer.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         order.customerName.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = selectedStatus === "all" || order.status === selectedStatus;
     return matchesSearch && matchesStatus;
   });
@@ -169,19 +196,19 @@ export default function AdminOrderManagementPage() {
                       {/* Order Header */}
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-3">
-                          <h3 className="font-semibold text-foreground">{order.id}</h3>
+                          <h3 className="font-semibold text-foreground">{order.orderNumber}</h3>
                           <Badge variant={getStatusColor(order.status) as any} className="flex items-center space-x-1">
                             <StatusIcon className="w-3 h-3" />
                             <span className="capitalize">{order.status}</span>
                           </Badge>
-                          <Badge variant="outline">{order.canteen}</Badge>
+                          <Badge variant="outline">Canteen</Badge>
                         </div>
                         <div className="flex items-center space-x-2">
                           <Button 
                             variant="outline" 
                             size="sm" 
                             className="flex items-center space-x-1"
-                            onClick={() => handleViewOrder(order.id)}
+                            onClick={() => handleViewOrder(order.orderNumber)}
                           >
                             <Eye className="w-3 h-3" />
                             <span>View</span>
@@ -193,22 +220,22 @@ export default function AdminOrderManagementPage() {
                       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
                         <div>
                           <p className="text-muted-foreground">Customer</p>
-                          <p className="font-medium">{order.customer}</p>
-                          <p className="text-muted-foreground text-xs">{order.email}</p>
+                          <p className="font-medium">{order.customerName}</p>
+                          <p className="text-muted-foreground text-xs">ID: {order.customerId}</p>
                         </div>
                         <div>
                           <p className="text-muted-foreground">Items</p>
-                          <p className="font-medium">{order.items.join(", ")}</p>
+                          <p className="font-medium">{order.items}</p>
                         </div>
                         <div>
                           <p className="text-muted-foreground">Total</p>
-                          <p className="font-medium text-success">₹{order.total}</p>
-                          <p className="text-muted-foreground text-xs capitalize">{order.paymentStatus}</p>
+                          <p className="font-medium text-success">₹{order.amount}</p>
+                          <p className="text-muted-foreground text-xs">Paid</p>
                         </div>
                         <div>
                           <p className="text-muted-foreground">Time</p>
-                          <p className="font-medium">{order.orderTime}</p>
-                          <p className="text-muted-foreground text-xs">{order.estimatedTime}</p>
+                          <p className="font-medium">{new Date(order.createdAt).toLocaleString()}</p>
+                          <p className="text-muted-foreground text-xs">{order.estimatedTime} mins</p>
                         </div>
                       </div>
 
@@ -219,7 +246,7 @@ export default function AdminOrderManagementPage() {
                             <Button 
                               size="sm" 
                               variant="food"
-                              onClick={() => updateOrderStatus(order.id, "ready")}
+                              onClick={() => updateOrderStatus.mutate({ orderId: order.id, newStatus: "ready" })}
                             >
                               Mark as Ready
                             </Button>
@@ -228,7 +255,7 @@ export default function AdminOrderManagementPage() {
                             <Button 
                               size="sm" 
                               variant="food"
-                              onClick={() => updateOrderStatus(order.id, "completed")}
+                              onClick={() => updateOrderStatus.mutate({ orderId: order.id, newStatus: "completed" })}
                             >
                               Mark as Completed
                             </Button>
