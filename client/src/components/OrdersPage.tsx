@@ -21,7 +21,11 @@ export default function OrdersPage() {
   useEffect(() => {
     const userData = localStorage.getItem('user');
     if (userData) {
-      setCurrentUser(JSON.parse(userData));
+      const user = JSON.parse(userData);
+      console.log('Current user loaded from localStorage:', user);
+      setCurrentUser(user);
+    } else {
+      console.log('No user data found in localStorage');
     }
   }, []);
 
@@ -29,6 +33,13 @@ export default function OrdersPage() {
   const { data: allOrders = [], isLoading } = useQuery<Order[]>({
     queryKey: ['/api/orders'],
   });
+
+  // Debug: Log all orders
+  useEffect(() => {
+    if (allOrders.length > 0) {
+      console.log('All orders fetched from API:', allOrders);
+    }
+  }, [allOrders]);
 
   // Filter orders to show only current user's orders
   const userOrders = allOrders.filter((order: Order) => {
@@ -226,7 +237,7 @@ export default function OrdersPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setLocation(`/order/${order.id}`)}
+                      onClick={() => setLocation(`/order-status/${order.id}`)}
                     >
                       View Details
                     </Button>
