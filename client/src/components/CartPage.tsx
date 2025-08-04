@@ -24,6 +24,13 @@ export default function CartPage() {
   // Fetch menu items in case we need to display them
   const { data: menuItems = [], isLoading } = useQuery<MenuItem[]>({
     queryKey: ['/api/menu'],
+    queryFn: async () => {
+      const response = await fetch('/api/menu');
+      if (!response.ok) {
+        throw new Error(`Failed to fetch menu items: ${response.status}`);
+      }
+      return response.json();
+    },
   });
 
   const updateQuantity = (itemId: number, newQuantity: number) => {

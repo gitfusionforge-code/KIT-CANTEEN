@@ -20,6 +20,13 @@ export default function HomeScreen() {
   // Enhanced queries with real-time synchronization
   const { data: categories = [], isLoading: categoriesLoading } = useQuery<Category[]>({
     queryKey: ['/api/categories'],
+    queryFn: async () => {
+      const response = await fetch('/api/categories');
+      if (!response.ok) {
+        throw new Error(`Failed to fetch categories: ${response.status}`);
+      }
+      return response.json();
+    },
     staleTime: 1000 * 30,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
@@ -27,6 +34,13 @@ export default function HomeScreen() {
 
   const { data: menuItems = [], isLoading: menuItemsLoading } = useQuery<MenuItem[]>({
     queryKey: ['/api/menu'],
+    queryFn: async () => {
+      const response = await fetch('/api/menu');
+      if (!response.ok) {
+        throw new Error(`Failed to fetch menu items: ${response.status}`);
+      }
+      return response.json();
+    },
     staleTime: 1000 * 30, 
     refetchOnMount: true,
     refetchOnWindowFocus: true,

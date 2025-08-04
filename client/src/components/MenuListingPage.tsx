@@ -20,10 +20,24 @@ export default function MenuListingPage() {
   // Fetch categories and menu items from database
   const { data: categories = [], isLoading: categoriesLoading } = useQuery<Category[]>({
     queryKey: ['/api/categories'],
+    queryFn: async () => {
+      const response = await fetch('/api/categories');
+      if (!response.ok) {
+        throw new Error(`Failed to fetch categories: ${response.status}`);
+      }
+      return response.json();
+    },
   });
 
   const { data: menuItems = [], isLoading: menuItemsLoading } = useQuery<MenuItem[]>({
     queryKey: ['/api/menu'],
+    queryFn: async () => {
+      const response = await fetch('/api/menu');
+      if (!response.ok) {
+        throw new Error(`Failed to fetch menu items: ${response.status}`);
+      }
+      return response.json();
+    },
   });
 
   const isLoading = categoriesLoading || menuItemsLoading;
