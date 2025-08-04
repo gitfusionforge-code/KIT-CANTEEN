@@ -942,15 +942,15 @@ export default function CanteenOwnerDashboard() {
                     <h3 className="text-lg font-medium text-center">Barcode Entry</h3>
                     <div className="space-y-4 p-6 border rounded-lg">
                       <div>
-                        <Label htmlFor="manual-barcode">Enter Delivery Barcode</Label>
+                        <Label htmlFor="manual-barcode">Enter Order Number</Label>
                         <p className="text-xs text-muted-foreground mb-2">
-                          Use the delivery barcode (e.g., KC9150595KMUNH), NOT the order number (ORD...)
+                          Scan or enter the order number from the barcode (e.g., ORD1754332914519)
                         </p>
                         <Input
                           id="manual-barcode"
                           value={manualBarcode}
                           onChange={(e) => setManualBarcode(e.target.value)}
-                          placeholder="KC9150595KMUNH"
+                          placeholder="ORD1754332914519"
                           className="mt-1"
                           disabled={scanBarcodeMutation.isPending}
                         />

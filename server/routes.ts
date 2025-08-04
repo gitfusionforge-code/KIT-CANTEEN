@@ -257,8 +257,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // If not found by barcode, try to find by order number
       if (!order && barcode.startsWith('ORD')) {
-        const orders = await storage.getOrders();
-        order = orders.find(o => o.orderNumber === barcode);
+        order = await storage.getOrderByOrderNumber(barcode);
       }
       
       if (!order) {

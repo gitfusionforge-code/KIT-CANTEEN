@@ -15,8 +15,8 @@
 - **Purpose**: Order tracking and identification
 - **Used for**: Customer reference, order management, status checking
 
-#### Delivery Barcode (Alphanumeric)
-- **Format**: `KC701981PP1KSG`
+#### Delivery Barcode (Order Number)
+- **Format**: `ORD1754331477327`
 - **Purpose**: Order pickup verification and delivery confirmation
 - **Used for**: Barcode scanning at pickup counter
 
@@ -67,6 +67,6 @@
 - Status: Successfully delivered ✅
 
 ### Important Note:
-**ALWAYS use the delivery barcode (KC format), NOT the order number (ORD format)!**
+**Now you can use the order number (ORD format) directly as the barcode!**
 
 The system is fully operational and ready for use!

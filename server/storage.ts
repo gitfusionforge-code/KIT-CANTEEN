@@ -160,6 +160,12 @@ export class DatabaseStorage implements IStorage {
     return order || undefined;
   }
 
+  async getOrderByOrderNumber(orderNumber: string): Promise<Order | undefined> {
+    const db = getDb();
+    const [order] = await db.select().from(orders).where(eq(orders.orderNumber, orderNumber));
+    return order || undefined;
+  }
+
   // Notifications
   async getNotifications(): Promise<Notification[]> {
     const db = getDb();
