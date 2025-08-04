@@ -509,9 +509,22 @@ export default function CanteenOwnerDashboard() {
       queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
     },
     onError: (error: Error) => {
-      setScanError(error.message);
+      // Improve error message formatting for better user experience
+      let errorMessage = error.message;
+      
+      if (errorMessage.includes("already been delivered") || errorMessage.includes("already processed")) {
+        errorMessage = "✅ This order has already been delivered";
+      } else if (errorMessage.includes("not ready for pickup")) {
+        errorMessage = "⏳ Order is not ready for pickup yet";
+      } else if (errorMessage.includes("not found")) {
+        errorMessage = "❌ Order number not found";
+      } else if (errorMessage === "HTTP error! status: 400") {
+        errorMessage = "⚠️ Order cannot be processed (may already be delivered)";
+      }
+      
+      setScanError(errorMessage);
       setScanResult(null);
-      toast.error(error.message);
+      toast.error(errorMessage);
     }
   });
 
