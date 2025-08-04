@@ -42,8 +42,19 @@ export default function CanteenOwnerDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   
   // Fetch real data from database using React Query
-  const { data: categories = [], isLoading: categoriesLoading } = useQuery({
+  const { data: categories = [], isLoading: categoriesLoading, refetch: refetchCategories, error: categoriesError } = useQuery({
     queryKey: ['/api/categories'],
+    queryFn: async () => {
+      const response = await fetch('/api/categories');
+      if (!response.ok) {
+        throw new Error('Failed to fetch categories');
+      }
+      const data = await response.json();
+      return data;
+    },
+    staleTime: 0, // Always refetch
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 
   const { data: orders = [], isLoading: ordersLoading } = useQuery({
@@ -158,12 +169,17 @@ export default function CanteenOwnerDashboard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/categories'] });
+      refetchCategories(); // Force immediate refetch
       toast.success("Category added successfully");
       setNewCategory("");
     },
     onError: (error: any) => {
       console.error("Category mutation error:", error);
-      toast.error("Failed to add category");
+      if (error?.message?.includes("already exists") || error?.status === 409) {
+        toast.error("Category already exists");
+      } else {
+        toast.error("Failed to add category");
+      }
     }
   });
 
@@ -687,11 +703,17 @@ export default function CanteenOwnerDashboard() {
                                 <SelectValue placeholder="Select category" />
                               </SelectTrigger>
                               <SelectContent>
-                                {(categories as any[]).map((category: any) => (
-                                  <SelectItem key={category.id} value={category.name}>
-                                    {category.name}
-                                  </SelectItem>
-                                ))}
+                                {categoriesLoading ? (
+                                  <SelectItem value="loading" disabled>Loading categories...</SelectItem>
+                                ) : (categories as any[]).length === 0 ? (
+                                  <SelectItem value="no-categories" disabled>No categories available</SelectItem>
+                                ) : (
+                                  (categories as any[]).map((category: any) => (
+                                    <SelectItem key={category.id} value={category.name}>
+                                      {category.name}
+                                    </SelectItem>
+                                  ))
+                                )}
                               </SelectContent>
                             </Select>
                             <Dialog>
@@ -720,19 +742,25 @@ export default function CanteenOwnerDashboard() {
                                     </Button>
                                   </div>
                                   <div className="space-y-2 max-h-48 overflow-y-auto">
-                                    {(categories as any[]).map((category: any) => (
-                                      <div key={category.id} className="flex items-center justify-between p-2 border rounded">
-                                        <span className="text-sm">{category.name}</span>
-                                        <Button
-                                          size="sm"
-                                          variant="ghost"
-                                          onClick={() => handleDeleteCategory(category)}
-                                          className="h-6 w-6 p-0"
-                                        >
-                                          <Trash2 className="w-3 h-3" />
-                                        </Button>
-                                      </div>
-                                    ))}
+                                    {categoriesLoading ? (
+                                      <div className="text-sm text-muted-foreground p-2">Loading categories...</div>
+                                    ) : (categories as any[]).length === 0 ? (
+                                      <div className="text-sm text-muted-foreground p-2">No categories available</div>
+                                    ) : (
+                                      (categories as any[]).map((category: any) => (
+                                        <div key={category.id} className="flex items-center justify-between p-2 border rounded">
+                                          <span className="text-sm">{category.name}</span>
+                                          <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            onClick={() => handleDeleteCategory(category)}
+                                            className="h-6 w-6 p-0"
+                                          >
+                                            <Trash2 className="w-3 h-3" />
+                                          </Button>
+                                        </div>
+                                      ))
+                                    )}
                                   </div>
                                 </div>
                               </DialogContent>
