@@ -1,7 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { toast } from "sonner";
 import { 
   DollarSign, 
   Users, 
@@ -10,19 +12,33 @@ import {
   AlertTriangle,
   CheckCircle,
   Clock,
-  Star
+  Star,
+  RefreshCcw
 } from "lucide-react";
 import type { Order, User } from "@shared/schema";
 
 export default function AdminOverviewPage() {
   // Fetch real data from database
-  const { data: orders = [] } = useQuery<Order[]>({
+  const { data: orders = [], isLoading: ordersLoading, refetch: refetchOrders } = useQuery<Order[]>({
     queryKey: ['/api/orders'],
   });
 
-  const { data: users = [] } = useQuery<User[]>({
+  const { data: users = [], isLoading: usersLoading, refetch: refetchUsers } = useQuery<User[]>({
     queryKey: ['/api/users'],
   });
+
+  // Refresh all data function
+  const refreshAllData = async () => {
+    try {
+      await Promise.all([
+        refetchOrders(),
+        refetchUsers()
+      ]);
+      toast.success("Data refreshed successfully!");
+    } catch (error) {
+      toast.error("Failed to refresh data");
+    }
+  };
 
   // Calculate real stats from database data
   const stats = {
@@ -52,6 +68,22 @@ export default function AdminOverviewPage() {
 
   return (
     <div className="p-6 space-y-6">
+      {/* Header with Refresh Button */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold">Dashboard Overview</h1>
+          <p className="text-muted-foreground">Monitor your canteen operations</p>
+        </div>
+        <Button 
+          variant="outline" 
+          onClick={refreshAllData}
+          disabled={ordersLoading || usersLoading}
+        >
+          <RefreshCcw className="w-4 h-4 mr-2" />
+          Refresh Data
+        </Button>
+      </div>
+
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card>

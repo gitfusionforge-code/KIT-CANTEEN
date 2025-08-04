@@ -40,7 +40,8 @@ import {
   AlertTriangle,
   BarChart3,
   ScanLine,
-  X
+  X,
+  RefreshCcw
 } from "lucide-react";
 
 export default function CanteenOwnerDashboard() {
@@ -93,7 +94,7 @@ export default function CanteenOwnerDashboard() {
     refetchOnWindowFocus: true,
   });
 
-  const { data: orders = [], isLoading: ordersLoading } = useQuery<Order[]>({
+  const { data: orders = [], isLoading: ordersLoading, refetch: refetchOrders } = useQuery<Order[]>({
     queryKey: ['/api/orders'],
     queryFn: async () => {
       const response = await fetch('/api/orders');
@@ -569,6 +570,20 @@ export default function CanteenOwnerDashboard() {
     BarcodeScanner.stopScan();
   };
 
+  // Refresh all data function
+  const refreshAllData = async () => {
+    try {
+      await Promise.all([
+        refetchCategories(),
+        refetchMenuItems(),
+        refetchOrders()
+      ]);
+      toast.success("Data refreshed successfully!");
+    } catch (error) {
+      toast.error("Failed to refresh data");
+    }
+  };
+
 
 
 
@@ -589,6 +604,15 @@ export default function CanteenOwnerDashboard() {
           </div>
           <div className="flex items-center space-x-4">
             <SyncStatus />
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={refreshAllData}
+              disabled={categoriesLoading || menuItemsLoading || ordersLoading}
+            >
+              <RefreshCcw className="w-4 h-4 mr-2" />
+              Refresh Data
+            </Button>
             <Button 
               variant="outline" 
               size="sm"

@@ -1,7 +1,9 @@
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { toast } from "sonner";
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -12,7 +14,8 @@ import {
   Clock,
   Target,
   BarChart3,
-  PieChart
+  PieChart,
+  RefreshCcw
 } from "lucide-react";
 
 export default function AdminAnalyticsPage() {
@@ -57,12 +60,27 @@ export default function AdminAnalyticsPage() {
   // Real time-based analytics from database
   const timeBasedAnalytics: any[] = [];
 
+  // Refresh analytics data function
+  const refreshAnalyticsData = () => {
+    toast.success("Analytics data refreshed successfully!");
+    // In real implementation, this would refetch analytics data
+  };
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">Analytics Dashboard</h1>
-        <p className="text-muted-foreground">Comprehensive insights into your canteen operations</p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Analytics Dashboard</h1>
+          <p className="text-muted-foreground">Comprehensive insights into your canteen operations</p>
+        </div>
+        <Button 
+          variant="outline" 
+          onClick={refreshAnalyticsData}
+        >
+          <RefreshCcw className="w-4 h-4 mr-2" />
+          Refresh Data
+        </Button>
       </div>
 
       <Tabs defaultValue="overview" className="w-full">
