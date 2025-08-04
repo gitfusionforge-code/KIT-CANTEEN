@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -15,10 +15,27 @@ export default function OrdersPage() {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
+  // Get current user from localStorage
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      setCurrentUser(JSON.parse(userData));
+    }
+  }, []);
 
   // Fetch real orders from database
-  const { data: orders = [], isLoading } = useQuery<Order[]>({
+  const { data: allOrders = [], isLoading } = useQuery<Order[]>({
     queryKey: ['/api/orders'],
+  });
+
+  // Filter orders to show only current user's orders
+  const userOrders = allOrders.filter((order: Order) => {
+    if (!currentUser) return false;
+    return order.customerId === currentUser.id || 
+           order.customerName === currentUser.name ||
+           order.customerName?.toLowerCase().includes(currentUser.name?.toLowerCase() || '');
   });
 
   const getStatusColor = (status: string) => {
@@ -42,8 +59,8 @@ export default function OrdersPage() {
     }
   };
 
-  const filteredOrders = orders.filter(order => {
-    const matchesSearch = order.id.toString().includes(searchTerm.toLowerCase());
+  const filteredOrders = userOrders.filter(order => {
+    const matchesSearch = (order.orderNumber || order.id.toString()).toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === "all" || order.status?.toLowerCase() === filterStatus;
     return matchesSearch && matchesStatus;
   });
@@ -91,7 +108,7 @@ export default function OrdersPage() {
             <div>
               <h1 className="text-xl font-bold text-white">My Orders</h1>
               <p className="text-white/80 text-sm">
-                {orders.length > 0 ? `${orders.length} orders found` : "No orders yet"}
+                {userOrders.length > 0 ? `${userOrders.length} orders found` : "No orders yet"}
               </p>
             </div>
           </div>
@@ -138,10 +155,10 @@ export default function OrdersPage() {
                 <Receipt className="w-8 h-8 text-muted-foreground" />
               </div>
               <h3 className="text-lg font-semibold mb-2">
-                {orders.length === 0 ? "No orders yet" : "No orders found"}
+                {userOrders.length === 0 ? "No orders yet" : "No orders found"}
               </h3>
               <p className="text-muted-foreground mb-4">
-                {orders.length === 0 
+                {userOrders.length === 0 
                   ? "Start ordering delicious food from our menu!"
                   : "Try adjusting your search or filter criteria"
                 }
@@ -158,7 +175,7 @@ export default function OrdersPage() {
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-3">
                     <div>
-                      <h3 className="font-semibold">Order #{order.id}</h3>
+                      <h3 className="font-semibold">Order #{order.orderNumber || order.id}</h3>
                       <p className="text-sm text-muted-foreground">
                         {new Date(order.createdAt).toLocaleDateString()} at{' '}
                         {new Date(order.createdAt).toLocaleTimeString()}

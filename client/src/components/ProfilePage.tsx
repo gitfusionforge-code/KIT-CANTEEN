@@ -43,10 +43,13 @@ export default function ProfilePage() {
     enabled: !!userInfo.email, // Only fetch when we have user email
   });
 
-  // Calculate user statistics from orders
-  const userOrders = (orders as any[]).filter((order: any) => 
-    order.customerName === userInfo.name || order.customerId === JSON.parse(localStorage.getItem('user') || '{}').id
-  );
+  // Calculate user statistics from orders - filter by current user
+  const userOrders = (orders as any[]).filter((order: any) => {
+    const currentUserId = userInfo.email ? JSON.parse(localStorage.getItem('user') || '{}').id : null;
+    return order.customerId === currentUserId || 
+           order.customerName === userInfo.name ||
+           order.customerName?.toLowerCase().includes(userInfo.name?.toLowerCase() || '');
+  });
 
   const stats = {
     totalOrders: userOrders.length,
