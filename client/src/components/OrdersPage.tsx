@@ -21,11 +21,7 @@ export default function OrdersPage() {
   useEffect(() => {
     const userData = localStorage.getItem('user');
     if (userData) {
-      const user = JSON.parse(userData);
-      console.log('Current user loaded from localStorage:', user);
-      setCurrentUser(user);
-    } else {
-      console.log('No user data found in localStorage');
+      setCurrentUser(JSON.parse(userData));
     }
   }, []);
 
@@ -37,51 +33,27 @@ export default function OrdersPage() {
     retry: 3,
   });
 
-  // Debug: Log all orders
-  useEffect(() => {
-    console.log('Orders query state:', { allOrders, isLoading, error, length: allOrders.length });
-    if (error) {
-      console.error('Orders query error:', error);
-    }
-    if (allOrders.length > 0) {
-      console.log('All orders fetched from API:', allOrders);
-    } else if (!isLoading) {
-      console.log('No orders returned from API (query completed)');
-    }
-  }, [allOrders, isLoading, error]);
+
 
   // Filter orders to show only current user's orders
   const userOrders = allOrders.filter((order: Order) => {
     if (!currentUser) return false;
     
-    // Debug logging to understand the matching issue
-    console.log('Filtering order:', {
-      orderId: order.id,
-      orderCustomerId: order.customerId,
-      orderCustomerName: order.customerName,
-      currentUserId: currentUser.id,
-      currentUserName: currentUser.name
-    });
-    
     // Primary match: customer ID
     if (order.customerId === currentUser.id) {
-      console.log('✅ Match by customer ID');
       return true;
     }
     
     // Secondary match: customer name matches user name from profile
     if (currentUser.name && order.customerName === currentUser.name) {
-      console.log('✅ Match by exact name');
       return true;
     }
     
     // Tertiary match: partial name matching (case insensitive)
     if (currentUser.name && order.customerName?.toLowerCase().includes(currentUser.name.toLowerCase())) {
-      console.log('✅ Match by partial name');
       return true;
     }
     
-    console.log('❌ No match found');
     return false;
   });
 

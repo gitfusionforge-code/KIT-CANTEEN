@@ -66,8 +66,33 @@ export default function OrderStatusPage() {
     queryKey: ['/api/orders'],
   });
 
-  // Find the specific order by ID
-  const order = orders.find(o => o.id.toString() === orderId);
+  // Find the specific order by ID or order number
+  const order = orders.find(o => 
+    o.id.toString() === orderId || 
+    o.orderNumber === orderId
+  );
+
+  const orderStatus = order?.status as "placed" | "preparing" | "ready" || "preparing";
+
+  const orderDetails = order ? {
+    id: order.orderNumber,
+    items: JSON.parse(order.items || '[]') as Array<{id: number, name: string, price: number, quantity: number}>,
+    total: order.amount,
+    estimatedTime: `${order.estimatedTime || 15} mins`,
+    actualTime: orderStatus === "ready" ? `${order.estimatedTime || 15} mins` : `${order.estimatedTime || 15} mins`,
+    pickupLocation: "KIT College Main Canteen, Ground Floor"
+  } : null;
+
+  useEffect(() => {
+    // Set progress based on order status
+    if (orderStatus === "placed") {
+      setProgress(33);
+    } else if (orderStatus === "preparing") {
+      setProgress(66);
+    } else if (orderStatus === "ready") {
+      setProgress(100);
+    }
+  }, [orderStatus]);
 
   if (isLoading) {
     return (
@@ -79,7 +104,7 @@ export default function OrderStatusPage() {
     );
   }
 
-  if (!order) {
+  if (!order || !orderDetails) {
     return (
       <div className="min-h-screen bg-background p-4">
         <div className="max-w-2xl mx-auto">
@@ -92,28 +117,6 @@ export default function OrderStatusPage() {
       </div>
     );
   }
-
-  const orderStatus = order.status as "placed" | "preparing" | "ready" || "preparing";
-
-  const orderDetails = {
-    id: order.orderNumber,
-    items: JSON.parse(order.items || '[]') as Array<{id: number, name: string, price: number, quantity: number}>,
-    total: order.amount,
-    estimatedTime: `${order.estimatedTime || 15} mins`,
-    actualTime: orderStatus === "ready" ? `${order.estimatedTime || 15} mins` : `${order.estimatedTime || 15} mins`,
-    pickupLocation: "KIT College Main Canteen, Ground Floor"
-  };
-
-  useEffect(() => {
-    // Set progress based on order status
-    if (orderStatus === "placed") {
-      setProgress(33);
-    } else if (orderStatus === "preparing") {
-      setProgress(66);
-    } else if (orderStatus === "ready") {
-      setProgress(100);
-    }
-  }, [orderStatus]);
 
 
   const statusSteps = [
