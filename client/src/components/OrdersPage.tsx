@@ -33,9 +33,20 @@ export default function OrdersPage() {
   // Filter orders to show only current user's orders
   const userOrders = allOrders.filter((order: Order) => {
     if (!currentUser) return false;
-    return order.customerId === currentUser.id || 
-           order.customerName === currentUser.name ||
-           order.customerName?.toLowerCase().includes(currentUser.name?.toLowerCase() || '');
+    
+    // Debug logging
+    console.log('Filtering order:', order);
+    console.log('Current user:', currentUser);
+    console.log('Order customerId:', order.customerId, 'User ID:', currentUser.id);
+    console.log('Order customerName:', order.customerName, 'User name:', currentUser.name);
+    
+    const matchesId = order.customerId === currentUser.id;
+    const matchesName = order.customerName === currentUser.name;
+    const matchesNamePartial = order.customerName?.toLowerCase().includes(currentUser.name?.toLowerCase() || '');
+    
+    console.log('Matches ID:', matchesId, 'Matches name:', matchesName, 'Matches partial:', matchesNamePartial);
+    
+    return matchesId || matchesName || matchesNamePartial;
   });
 
   const getStatusColor = (status: string) => {
