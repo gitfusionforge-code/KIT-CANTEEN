@@ -59,7 +59,6 @@ const BarcodeGenerator = ({ orderId }: { orderId: string }) => {
 export default function OrderStatusPage() {
   const [, setLocation] = useLocation();
   const { orderId } = useParams();
-  const [progress, setProgress] = useState(60);
 
   // Fetch real order data from API
   const { data: orders = [], isLoading } = useQuery<Order[]>({
@@ -72,7 +71,19 @@ export default function OrderStatusPage() {
     o.orderNumber === orderId
   );
 
-  const orderStatus = order?.status as "placed" | "preparing" | "ready" || "preparing";
+  const orderStatus = order?.status as "preparing" | "ready" | "completed" || "preparing";
+  
+  // Calculate progress based on order status
+  const getProgress = () => {
+    switch (orderStatus) {
+      case "preparing": return 33;
+      case "ready": return 66;
+      case "completed": return 100;
+      default: return 33;
+    }
+  };
+  
+  const [progress, setProgress] = useState(getProgress());
 
   const orderDetails = order ? {
     id: order.orderNumber,
@@ -84,14 +95,8 @@ export default function OrderStatusPage() {
   } : null;
 
   useEffect(() => {
-    // Set progress based on order status
-    if (orderStatus === "placed") {
-      setProgress(33);
-    } else if (orderStatus === "preparing") {
-      setProgress(66);
-    } else if (orderStatus === "ready") {
-      setProgress(100);
-    }
+    // Update progress when order status changes
+    setProgress(getProgress());
   }, [orderStatus]);
 
   if (isLoading) {
@@ -125,21 +130,23 @@ export default function OrderStatusPage() {
       label: "Order Placed",
       icon: CheckCircle,
       completed: true,
-      time: "2:30 PM"
+      time: order ? new Date(order.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ""
     },
     {
       status: "preparing",
       label: "Preparing",
       icon: ChefHat,
-      completed: orderStatus === "preparing" || orderStatus === "ready",
-      time: orderStatus === "preparing" || orderStatus === "ready" ? "2:33 PM" : ""
+      completed: orderStatus === "preparing" || orderStatus === "ready" || orderStatus === "completed",
+      time: orderStatus === "preparing" || orderStatus === "ready" || orderStatus === "completed" ? 
+        order ? new Date(new Date(order.createdAt).getTime() + 3 * 60000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : "" : ""
     },
     {
       status: "ready",
       label: "Ready for Pickup",
       icon: Package,
-      completed: orderStatus === "ready",
-      time: orderStatus === "ready" ? "2:48 PM" : ""
+      completed: orderStatus === "ready" || orderStatus === "completed",
+      time: orderStatus === "ready" || orderStatus === "completed" ? 
+        order ? new Date(new Date(order.createdAt).getTime() + (order.estimatedTime || 15) * 60000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : "" : ""
     }
   ];
 
@@ -195,21 +202,21 @@ export default function OrderStatusPage() {
         <Card className="shadow-card">
           <CardContent className="p-6 text-center">
             <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              {orderStatus === "placed" && <Clock className="w-10 h-10 text-primary" />}
               {orderStatus === "preparing" && <ChefHat className="w-10 h-10 text-warning" />}
               {orderStatus === "ready" && <Package className="w-10 h-10 text-success" />}
+              {orderStatus === "completed" && <CheckCircle className="w-10 h-10 text-success" />}
             </div>
             
             <h2 className="text-xl font-bold mb-2">
-              {orderStatus === "placed" && "Order Received!"}
               {orderStatus === "preparing" && "Preparing Your Order"}
               {orderStatus === "ready" && "Ready for Pickup!"}
+              {orderStatus === "completed" && "Order Completed!"}
             </h2>
             
             <p className="text-muted-foreground mb-4">
-              {orderStatus === "placed" && "Your order has been received and will be prepared shortly"}
               {orderStatus === "preparing" && "Our chef is preparing your delicious meal"}
               {orderStatus === "ready" && "Your order is ready! Please collect from the canteen counter"}
+              {orderStatus === "completed" && "Your order has been completed. Thank you for your visit!"}
             </p>
 
             <div className="bg-accent/50 rounded-lg p-3 mb-4">
