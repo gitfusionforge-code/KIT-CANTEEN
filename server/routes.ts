@@ -252,8 +252,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log("Scanning barcode:", barcode);
       
-      // Find order by barcode
-      const order = await storage.getOrderByBarcode(barcode);
+      // Find order by barcode or order number
+      let order = await storage.getOrderByBarcode(barcode);
+      
+      // If not found by barcode, try to find by order number
+      if (!order && barcode.startsWith('ORD')) {
+        const orders = await storage.getOrders();
+        order = orders.find(o => o.orderNumber === barcode);
+      }
+      
       if (!order) {
         return res.status(404).json({ 
           message: "Invalid barcode. No order found.", 
