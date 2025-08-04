@@ -170,6 +170,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const order = await storage.updateOrder(parseInt(req.params.id), req.body);
       res.json(order);
     } catch (error) {
+      console.error("Error updating order:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.patch("/api/orders/:id", async (req, res) => {
+    try {
+      console.log(`Updating order ${req.params.id} with data:`, req.body);
+      const order = await storage.updateOrder(parseInt(req.params.id), req.body);
+      console.log("Updated order:", order);
+      res.json(order);
+    } catch (error) {
+      console.error("Error updating order:", error);
       res.status(500).json({ message: "Internal server error" });
     }
   });
