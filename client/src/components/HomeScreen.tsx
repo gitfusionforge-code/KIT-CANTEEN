@@ -198,7 +198,7 @@ export default function HomeScreen() {
             </div>
             <div className="space-y-3">
               {trendingItems.map((item, index) => (
-                <Card key={item.id} className="shadow-card hover-scale transition-all duration-300">
+                <Card key={item.id} className="shadow-card hover-scale transition-all duration-300 cursor-pointer" onClick={() => setLocation(`/dish/${item.id}`)}>
                   <CardContent className="p-4 flex items-center space-x-4">
                     <div className="w-16 h-16 bg-gradient-to-br from-orange-400 to-red-500 rounded-lg flex-shrink-0 flex items-center justify-center">
                       <Zap className="w-8 h-8 text-white" />
@@ -218,11 +218,14 @@ export default function HomeScreen() {
                       <p className="text-lg font-bold">₹{item.price}</p>
                       <Button
                         size="sm"
-                        onClick={() => addToCart({
-                          id: parseInt(item.id),
-                          name: item.name,
-                          price: item.price
-                        })}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          addToCart({
+                            id: parseInt(item.id),
+                            name: item.name,
+                            price: item.price
+                          });
+                        }}
                       >
                         {getCartQuantity(parseInt(item.id)) > 0 
                           ? `ADD (${getCartQuantity(parseInt(item.id))})` 
@@ -248,7 +251,7 @@ export default function HomeScreen() {
             </div>
             <div className="space-y-3">
               {quickPickItems.map((item, index) => (
-                <Card key={item.id} className="shadow-card hover-scale transition-all duration-300">
+                <Card key={item.id} className="shadow-card hover-scale transition-all duration-300 cursor-pointer" onClick={() => setLocation(`/dish/${item.id}`)}>
                   <CardContent className="p-4 flex items-center space-x-4">
                     <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-blue-500 rounded-lg flex-shrink-0 flex items-center justify-center">
                       <Utensils className="w-8 h-8 text-white" />
@@ -266,11 +269,14 @@ export default function HomeScreen() {
                       <p className="text-lg font-bold">₹{item.price}</p>
                       <Button
                         size="sm"
-                        onClick={() => addToCart({
-                          id: parseInt(item.id),
-                          name: item.name,
-                          price: item.price
-                        })}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          addToCart({
+                            id: parseInt(item.id),
+                            name: item.name,
+                            price: item.price
+                          });
+                        }}
                       >
                         {getCartQuantity(parseInt(item.id)) > 0 
                           ? `ADD (${getCartQuantity(parseInt(item.id))})` 

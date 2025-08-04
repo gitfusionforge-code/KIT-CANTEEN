@@ -25,6 +25,7 @@ export const menuItems = pgTable("menu_items", {
   available: boolean("available").notNull().default(true),
   stock: integer("stock").notNull().default(0),
   description: text("description"),
+  addOns: text("add_ons").default('[]'), // JSON array of add-ons
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -106,6 +107,7 @@ export const insertMenuItemSchema = createInsertSchema(menuItems).pick({
   available: true,
   stock: true,
   description: true,
+  addOns: true,
 });
 
 export const insertOrderSchema = createInsertSchema(orders).pick({

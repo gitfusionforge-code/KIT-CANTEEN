@@ -93,7 +93,7 @@ export default function CanteenOwnerDashboard() {
 
   const [newCategory, setNewCategory] = useState("");
 
-  const [newItem, setNewItem] = useState({ name: "", price: "", category: "", stock: "", barcode: "" });
+  const [newItem, setNewItem] = useState({ name: "", price: "", category: "", stock: "", barcode: "", description: "", addOns: [] as any[] });
   const [editingItem, setEditingItem] = useState<any>(null);
   const [isScannerActive, setIsScannerActive] = useState(false);
   const [stockUpdateItem, setStockUpdateItem] = useState<any>(null);
@@ -148,7 +148,7 @@ export default function CanteenOwnerDashboard() {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/analytics'] });
       refetchMenuItems(); // Force immediate refetch
       toast.success("Menu item added successfully - synced across all dashboards");
-      setNewItem({ name: "", price: "", category: "", stock: "", barcode: "" });
+      setNewItem({ name: "", price: "", category: "", stock: "", barcode: "", description: "", addOns: [] });
     },
     onError: () => {
       toast.error("Failed to add menu item");
@@ -258,7 +258,8 @@ export default function CanteenOwnerDashboard() {
       categoryId: selectedCategory ? selectedCategory.id : null,
       available: true,
       stock: parseInt(newItem.stock) || 0,
-      description: ""
+      description: newItem.description || "",
+      addOns: JSON.stringify(newItem.addOns.filter(addon => addon.name && addon.name.trim()))
     };
     
     addMenuItemMutation.mutate(itemData);
@@ -895,6 +896,65 @@ export default function CanteenOwnerDashboard() {
                             onChange={(e) => setNewItem({...newItem, stock: e.target.value})}
                             placeholder="Enter stock quantity"
                           />
+                        </div>
+                        <div>
+                          <Label htmlFor="description">Description (Optional)</Label>
+                          <Textarea
+                            id="description"
+                            value={newItem.description}
+                            onChange={(e) => setNewItem({...newItem, description: e.target.value})}
+                            placeholder="Enter item description"
+                            rows={2}
+                          />
+                        </div>
+                        <div>
+                          <Label>Add-ons (Optional)</Label>
+                          <div className="space-y-2">
+                            {newItem.addOns.map((addon, index) => (
+                              <div key={index} className="flex space-x-2">
+                                <Input
+                                  placeholder="Add-on name"
+                                  value={addon.name || ''}
+                                  onChange={(e) => {
+                                    const updatedAddOns = [...newItem.addOns];
+                                    updatedAddOns[index] = { ...updatedAddOns[index], name: e.target.value };
+                                    setNewItem({...newItem, addOns: updatedAddOns});
+                                  }}
+                                />
+                                <Input
+                                  placeholder="Price"
+                                  type="number"
+                                  value={addon.price || ''}
+                                  onChange={(e) => {
+                                    const updatedAddOns = [...newItem.addOns];
+                                    updatedAddOns[index] = { ...updatedAddOns[index], price: parseInt(e.target.value) || 0 };
+                                    setNewItem({...newItem, addOns: updatedAddOns});
+                                  }}
+                                />
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="icon"
+                                  onClick={() => {
+                                    const updatedAddOns = newItem.addOns.filter((_, i) => i !== index);
+                                    setNewItem({...newItem, addOns: updatedAddOns});
+                                  }}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            ))}
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() => {
+                                setNewItem({...newItem, addOns: [...newItem.addOns, { name: '', price: 0 }]});
+                              }}
+                            >
+                              <Plus className="w-4 h-4 mr-2" />
+                              Add Add-on
+                            </Button>
+                          </div>
                         </div>
                         <Button onClick={handleAddMenuItem} className="w-full">
                           Add Menu Item
