@@ -8,12 +8,8 @@ import { useToast } from "@/hooks/use-toast";
 export default function FavoritesPage() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const [favorites, setFavorites] = useState([
-    { id: 1, name: "Veg Thali", price: 85, rating: 4.5, category: "Main Course", isVeg: true },
-    { id: 2, name: "Masala Dosa", price: 60, rating: 4.3, category: "South Indian", isVeg: true },
-    { id: 3, name: "Chole Bhature", price: 70, rating: 4.6, category: "North Indian", isVeg: true },
-    { id: 4, name: "Masala Tea", price: 15, rating: 4.5, category: "Beverages", isVeg: true }
-  ]);
+  // Show empty favorites since no favorites system is implemented yet
+  const [favorites, setFavorites] = useState([]);
 
   const removeFavorite = (itemId: number) => {
     setFavorites(prev => prev.filter(item => item.id !== itemId));
