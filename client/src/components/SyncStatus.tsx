@@ -7,10 +7,13 @@ import { useDataSync } from "@/hooks/useDataSync";
  * Displays across all dashboards to confirm data consistency
  */
 export default function SyncStatus() {
-  const { isLoading, hasError, stats } = useDataSync();
+  const { isLoading, hasError, stats, queries } = useDataSync();
 
   const getSyncStatus = () => {
-    if (hasError) return { icon: WifiOff, text: "Sync Error", variant: "destructive" as const };
+    // Check for critical errors only (not analytics)
+    const criticalError = queries.categories.error || queries.menuItems.error || queries.orders.error;
+    
+    if (criticalError) return { icon: WifiOff, text: "Sync Error", variant: "destructive" as const };
     if (isLoading) return { icon: RefreshCw, text: "Syncing...", variant: "secondary" as const };
     return { icon: Wifi, text: "Synced", variant: "default" as const };
   };
@@ -25,7 +28,7 @@ export default function SyncStatus() {
         <span>{status.text}</span>
       </Badge>
       
-      {!hasError && !isLoading && (
+      {status.variant !== "destructive" && !isLoading && (
         <div className="flex items-center space-x-1 text-muted-foreground">
           <span>{stats.totalMenuItems} items</span>
           <span>•</span>

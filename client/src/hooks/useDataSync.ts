@@ -33,13 +33,15 @@ export function useDataSync() {
     refetchInterval: 1000 * 30, // Auto-refresh every 30 seconds
   });
 
-  // Analytics query for admin dashboards
+  // Analytics query for admin dashboards (optional, don't fail sync if not available)
   const analyticsQuery = useQuery({
     queryKey: ['/api/admin/analytics'],
     staleTime: 1000 * 60, // 1 minute for analytics
     refetchOnMount: true,
     refetchOnWindowFocus: true,
     refetchInterval: 1000 * 120, // Auto-refresh every 2 minutes
+    retry: false, // Don't retry analytics failures
+    retryOnMount: false,
   });
 
   // Computed values for dashboard consistency
@@ -56,7 +58,7 @@ export function useDataSync() {
   // Combined loading state
   const isLoading = categoriesQuery.isLoading || menuItemsQuery.isLoading || ordersQuery.isLoading;
 
-  // Combined error state
+  // Combined error state (excluding analytics errors as they're optional)
   const hasError = categoriesQuery.error || menuItemsQuery.error || ordersQuery.error;
 
   return {
