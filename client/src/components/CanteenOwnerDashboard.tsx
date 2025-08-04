@@ -540,7 +540,7 @@ export default function CanteenOwnerDashboard() {
                     <div 
                       key={order.id} 
                       className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-accent/50 transition-colors"
-                      onClick={() => setLocation(`/canteen-order-detail/${order.id.replace('#', '')}`)}
+                      onClick={() => setLocation(`/canteen-order-detail/${order.id}`)}
                     >
                       <div className="flex-1">
                         <div className="flex items-center space-x-2">
@@ -600,7 +600,7 @@ export default function CanteenOwnerDashboard() {
                         <div key={order.id} className="p-4 border rounded-lg space-y-3">
                           <div 
                             className="flex items-center justify-between cursor-pointer hover:bg-accent/20 -m-2 p-2 rounded transition-colors"
-                            onClick={() => setLocation(`/canteen-order-detail/${order.id.replace('#', '')}`)}
+                            onClick={() => setLocation(`/canteen-order-detail/${order.id}`)}
                           >
                             <div className="flex items-center space-x-3">
                               <span className="font-semibold">#{order.orderNumber || order.id}</span>
@@ -618,7 +618,7 @@ export default function CanteenOwnerDashboard() {
                           
                           <div 
                             className="cursor-pointer hover:bg-accent/20 -mx-2 px-2 py-1 rounded transition-colors"
-                            onClick={() => setLocation(`/canteen-order-detail/${order.id.replace('#', '')}`)}
+                            onClick={() => setLocation(`/canteen-order-detail/${order.id}`)}
                           >
                             <p className="text-sm text-muted-foreground">Customer: {order.customerName || 'N/A'}</p>
                             <p className="text-sm">
