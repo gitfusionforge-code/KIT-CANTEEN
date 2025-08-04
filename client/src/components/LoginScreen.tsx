@@ -212,20 +212,13 @@ export default function LoginScreen() {
     }
   };
 
-  const handleSkip = () => {
-    setLocation("/home");
-  };
-
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
-      <div className="flex justify-between items-center p-4">
+      <div className="flex justify-center items-center p-4">
         <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
           <span className="text-primary text-lg font-bold">KIT</span>
         </div>
-        <Button variant="ghost" onClick={handleSkip} className="text-muted-foreground">
-          Skip for now
-        </Button>
       </div>
 
       {/* Main content */}
@@ -259,28 +252,7 @@ export default function LoginScreen() {
             </CardContent>
           </Card>
 
-          {/* Dashboard Access Buttons */}
-          <div className="mt-8 space-y-4">
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground mb-4">Dashboard Access</p>
-            </div>
-            <Button
-              onClick={() => setLocation("/canteen-owner")}
-              variant="outline"
-              size="mobile"
-              className="w-full"
-            >
-              Canteen Owner Login
-            </Button>
-            <Button
-              onClick={() => setLocation("/admin")}
-              variant="outline"
-              size="mobile"
-              className="w-full"
-            >
-              Admin Dashboard
-            </Button>
-          </div>
+
         </div>
       </div>
 
