@@ -164,7 +164,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/orders", async (req, res) => {
     try {
-      const validatedData = insertOrderSchema.parse(req.body);
+      // Generate unique barcode for the order
+      const generateBarcode = () => {
+        const timestamp = Date.now().toString();
+        const random = Math.random().toString(36).substring(2, 8).toUpperCase();
+        return `KC${timestamp.slice(-6)}${random}`;
+      };
+      
+      const orderData = { ...req.body, barcode: generateBarcode() };
+      const validatedData = insertOrderSchema.parse(orderData);
       const order = await storage.createOrder(validatedData);
       res.status(201).json(order);
     } catch (error) {
@@ -228,6 +236,94 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteNotification(parseInt(req.params.id));
       res.status(204).send();
     } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+
+
+  // Barcode delivery endpoints
+  app.post("/api/delivery/scan", async (req, res) => {
+    try {
+      const { barcode } = req.body;
+      if (!barcode) {
+        return res.status(400).json({ message: "Barcode is required" });
+      }
+
+      console.log("Scanning barcode:", barcode);
+      
+      // Find order by barcode
+      const order = await storage.getOrderByBarcode(barcode);
+      if (!order) {
+        return res.status(404).json({ 
+          message: "Invalid barcode. No order found.", 
+          error: "BARCODE_NOT_FOUND" 
+        });
+      }
+
+      // Check if barcode was already used
+      if (order.barcodeUsed) {
+        return res.status(400).json({ 
+          message: "🔒 This order has already been delivered.", 
+          error: "BARCODE_ALREADY_USED",
+          deliveredAt: order.deliveredAt 
+        });
+      }
+
+      // Check if order is ready for pickup
+      if (order.status !== "ready") {
+        return res.status(400).json({ 
+          message: `Order is not ready for pickup. Current status: ${order.status}`, 
+          error: "ORDER_NOT_READY" 
+        });
+      }
+
+      // Update order to delivered and mark barcode as used
+      const updatedOrder = await storage.updateOrder(order.id, {
+        status: "delivered",
+        barcodeUsed: true,
+        deliveredAt: new Date()
+      });
+
+      console.log("Order delivered successfully:", updatedOrder);
+
+      res.json({
+        success: true,
+        message: "Order delivered successfully!",
+        order: updatedOrder
+      });
+    } catch (error) {
+      console.error("Error processing barcode scan:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.get("/api/delivery/verify/:barcode", async (req, res) => {
+    try {
+      const { barcode } = req.params;
+      
+      const order = await storage.getOrderByBarcode(barcode);
+      if (!order) {
+        return res.status(404).json({ 
+          valid: false, 
+          message: "Invalid barcode" 
+        });
+      }
+
+      res.json({
+        valid: true,
+        order: {
+          id: order.id,
+          orderNumber: order.orderNumber,
+          customerName: order.customerName,
+          status: order.status,
+          barcodeUsed: order.barcodeUsed,
+          deliveredAt: order.deliveredAt,
+          amount: order.amount
+        }
+      });
+    } catch (error) {
+      console.error("Error verifying barcode:", error);
       res.status(500).json({ message: "Internal server error" });
     }
   });

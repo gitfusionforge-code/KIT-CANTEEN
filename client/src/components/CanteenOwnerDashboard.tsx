@@ -19,6 +19,7 @@ import type { MenuItem, Category, Order } from "@shared/schema";
 import SyncStatus from "./SyncStatus";
 import TestLogoutButton from "./TestLogoutButton";
 import { useAuthSync } from "@/hooks/useDataSync";
+import BarcodeDisplay from "./BarcodeDisplay";
 import { 
   ChefHat, 
   DollarSign, 
@@ -46,6 +47,13 @@ export default function CanteenOwnerDashboard() {
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("overview");
   const { user, isAuthenticated, isCanteenOwner } = useAuthSync();
+  
+  // Scanner state
+  const [isScanning, setIsScanning] = useState(false);
+  const [scannedBarcode, setScannedBarcode] = useState("");
+  const [manualBarcode, setManualBarcode] = useState("");
+  const [scanResult, setScanResult] = useState<any>(null);
+  const [scanError, setScanError] = useState("");
 
   // Enhanced security check - redirect if not authenticated OR not canteen owner
   useEffect(() => {
@@ -478,6 +486,89 @@ export default function CanteenOwnerDashboard() {
     }
   };
 
+  // Barcode scanning functionality
+  const scanBarcodeMutation = useMutation({
+    mutationFn: async (barcode: string) => {
+      const response = await apiRequest('/api/delivery/scan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ barcode })
+      });
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Scan failed' }));
+        throw new Error(errorData.message || 'Scan failed');
+      }
+      return response.json();
+    },
+    onSuccess: (data) => {
+      setScanResult(data);
+      setScanError("");
+      toast.success("Order delivered successfully!");
+      // Refresh orders list
+      queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+    },
+    onError: (error: Error) => {
+      setScanError(error.message);
+      setScanResult(null);
+      toast.error(error.message);
+    }
+  });
+
+  const handleBarcodeSubmit = async (barcode: string) => {
+    if (!barcode.trim()) {
+      setScanError("Please enter a barcode");
+      return;
+    }
+    setScanError("");
+    setScanResult(null);
+    scanBarcodeMutation.mutate(barcode.trim());
+  };
+
+  const startCameraScanner = async () => {
+    try {
+      setIsScanning(true);
+      
+      // Check camera permissions
+      const permissions = await BarcodeScanner.checkPermission({ force: true });
+      
+      if (!permissions.granted) {
+        if (permissions.neverAsked) {
+          setScanError("Camera permission required. Please enable in settings.");
+          setIsScanning(false);
+          return;
+        }
+        
+        // On mobile devices, we may need to handle permissions differently
+        setScanError("Camera permission denied");
+        setIsScanning(false);
+        return;
+      }
+
+      // Start scanning
+      document.body.classList.add('scanner-active');
+      const result = await BarcodeScanner.startScan();
+      
+      if (result.hasContent) {
+        setScannedBarcode(result.content);
+        await handleBarcodeSubmit(result.content);
+      }
+      
+    } catch (error) {
+      console.error('Camera scan error:', error);
+      setScanError("Camera scanning failed. Use manual entry instead.");
+    } finally {
+      setIsScanning(false);
+      document.body.classList.remove('scanner-active');
+      BarcodeScanner.stopScan();
+    }
+  };
+
+  const stopScanner = () => {
+    setIsScanning(false);
+    document.body.classList.remove('scanner-active');
+    BarcodeScanner.stopScan();
+  };
+
 
 
 
@@ -544,9 +635,10 @@ export default function CanteenOwnerDashboard() {
 
       <div className="p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="orders">Orders</TabsTrigger>
+            <TabsTrigger value="scanner">Scanner</TabsTrigger>
             <TabsTrigger value="menu">Menu</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="inventory">Inventory</TabsTrigger>
@@ -645,73 +737,106 @@ export default function CanteenOwnerDashboard() {
                     <div className="space-y-4">
                       {(orders as any[]).map((order: any) => (
                         <div key={order.id} className="p-4 border rounded-lg space-y-3">
-                          <div 
-                            className="flex items-center justify-between cursor-pointer hover:bg-accent/20 -m-2 p-2 rounded transition-colors"
-                            onClick={() => setLocation(`/canteen-order-detail/${order.id}`)}
-                          >
-                            <div className="flex items-center space-x-3">
-                              <span className="font-semibold">#{order.orderNumber || order.id}</span>
-                              <Badge className={getOrderStatusColor(order.status)}>
-                                {getOrderStatusText(order.status)}
-                              </Badge>
-                              {order.estimatedTime > 0 && (
-                                <span className="text-sm text-muted-foreground">
-                                  ETA: {order.estimatedTime} min
-                                </span>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {/* Order Info */}
+                            <div className="md:col-span-2">
+                              <div 
+                                className="flex items-center justify-between cursor-pointer hover:bg-accent/20 -m-2 p-2 rounded transition-colors"
+                                onClick={() => setLocation(`/canteen-order-detail/${order.id}`)}
+                              >
+                                <div className="flex items-center space-x-3">
+                                  <span className="font-semibold">#{order.orderNumber || order.id}</span>
+                                  <Badge className={getOrderStatusColor(order.status)}>
+                                    {getOrderStatusText(order.status)}
+                                  </Badge>
+                                  {order.estimatedTime > 0 && (
+                                    <span className="text-sm text-muted-foreground">
+                                      ETA: {order.estimatedTime} min
+                                    </span>
+                                  )}
+                                </div>
+                                <span className="font-bold text-lg">₹{order.amount}</span>
+                              </div>
+                              
+                              <div 
+                                className="cursor-pointer hover:bg-accent/20 -mx-2 px-2 py-1 rounded transition-colors"
+                                onClick={() => setLocation(`/canteen-order-detail/${order.id}`)}
+                              >
+                                <p className="text-sm text-muted-foreground">Customer: {order.customerName || 'N/A'}</p>
+                                <p className="text-sm">
+                                  {order.items && typeof order.items === 'string' 
+                                    ? (() => {
+                                        try {
+                                          const parsedItems = JSON.parse(order.items);
+                                          return Array.isArray(parsedItems) 
+                                            ? parsedItems.map((item: any) => `${item.quantity}x ${item.name}`).join(', ')
+                                            : order.items;
+                                        } catch {
+                                          return order.items;
+                                        }
+                                      })()
+                                    : 'No items'
+                                  }
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  {order.createdAt ? new Date(order.createdAt).toLocaleTimeString() : order.time || 'N/A'}
+                                </p>
+                              </div>
+
+                              <div className="flex space-x-2 mt-3">
+                                {order.status === "preparing" && (
+                                  <Button 
+                                    size="sm" 
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleOrderStatusUpdate(order.id, "ready");
+                                    }}
+                                  >
+                                    Mark Ready
+                                  </Button>
+                                )}
+                                {order.status === "ready" && (
+                                  <Button 
+                                    size="sm" 
+                                    className="bg-success text-success-foreground hover:bg-success/90"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleOrderStatusUpdate(order.id, "completed");
+                                    }}
+                                  >
+                                    Complete Order
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                            
+                            {/* Barcode Display */}
+                            <div className="md:col-span-1 flex items-center justify-center">
+                              {order.barcode && order.status === "ready" && (
+                                <div className="text-center">
+                                  <BarcodeDisplay 
+                                    value={order.barcode}
+                                    width={1.5}
+                                    height={60}
+                                    displayValue={false}
+                                    className="mb-2"
+                                  />
+                                  <p className="text-xs text-muted-foreground font-mono">{order.barcode}</p>
+                                  <Badge variant="outline" className="mt-1">Ready for Pickup</Badge>
+                                </div>
+                              )}
+                              {order.status === "delivered" && (
+                                <div className="text-center">
+                                  <CheckCircle className="w-8 h-8 text-success mx-auto mb-2" />
+                                  <Badge className="bg-success">Delivered</Badge>
+                                  {order.deliveredAt && (
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                      {new Date(order.deliveredAt).toLocaleString()}
+                                    </p>
+                                  )}
+                                </div>
                               )}
                             </div>
-                            <span className="font-bold text-lg">₹{order.amount}</span>
-                          </div>
-                          
-                          <div 
-                            className="cursor-pointer hover:bg-accent/20 -mx-2 px-2 py-1 rounded transition-colors"
-                            onClick={() => setLocation(`/canteen-order-detail/${order.id}`)}
-                          >
-                            <p className="text-sm text-muted-foreground">Customer: {order.customerName || 'N/A'}</p>
-                            <p className="text-sm">
-                              {order.items && typeof order.items === 'string' 
-                                ? (() => {
-                                    try {
-                                      const parsedItems = JSON.parse(order.items);
-                                      return Array.isArray(parsedItems) 
-                                        ? parsedItems.map((item: any) => `${item.quantity}x ${item.name}`).join(', ')
-                                        : order.items;
-                                    } catch {
-                                      return order.items;
-                                    }
-                                  })()
-                                : 'No items'
-                              }
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {order.createdAt ? new Date(order.createdAt).toLocaleTimeString() : order.time || 'N/A'}
-                            </p>
-                          </div>
-
-                          <div className="flex space-x-2">
-                            {order.status === "preparing" && (
-                              <Button 
-                                size="sm" 
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleOrderStatusUpdate(order.id, "ready");
-                                }}
-                              >
-                                Mark Ready
-                              </Button>
-                            )}
-                            {order.status === "ready" && (
-                              <Button 
-                                size="sm" 
-                                className="bg-success text-success-foreground hover:bg-success/90"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleOrderStatusUpdate(order.id, "completed");
-                                }}
-                              >
-                                Complete Order
-                              </Button>
-                            )}
                           </div>
                         </div>
                       ))}
@@ -798,6 +923,158 @@ export default function CanteenOwnerDashboard() {
                     </div>
                   </TabsContent>
                 </Tabs>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="scanner" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <ScanLine className="w-5 h-5" />
+                  <span>Barcode Scanner</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Scanner Controls */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Camera Scanner */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-medium">Camera Scanner</h3>
+                    <div className="space-y-4 p-4 border rounded-lg">
+                      {!isScanning ? (
+                        <Button 
+                          onClick={startCameraScanner}
+                          className="w-full"
+                          size="lg"
+                        >
+                          <ScanLine className="w-5 h-5 mr-2" />
+                          Start Camera Scanner
+                        </Button>
+                      ) : (
+                        <div className="text-center space-y-4">
+                          <div className="animate-pulse">
+                            <ScanLine className="w-12 h-12 mx-auto text-primary" />
+                            <p className="text-lg font-medium">Scanning...</p>
+                            <p className="text-sm text-muted-foreground">Point camera at barcode</p>
+                          </div>
+                          <Button 
+                            onClick={stopScanner}
+                            variant="outline"
+                            className="w-full"
+                          >
+                            <X className="w-4 h-4 mr-2" />
+                            Stop Scanner
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Manual Entry */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-medium">Manual Entry</h3>
+                    <div className="space-y-4 p-4 border rounded-lg">
+                      <div>
+                        <Label htmlFor="manual-barcode">Enter Barcode</Label>
+                        <Input
+                          id="manual-barcode"
+                          value={manualBarcode}
+                          onChange={(e) => setManualBarcode(e.target.value)}
+                          placeholder="KC123456789ABC"
+                          className="mt-1"
+                          disabled={scanBarcodeMutation.isPending}
+                        />
+                      </div>
+                      <Button 
+                        onClick={() => handleBarcodeSubmit(manualBarcode)}
+                        className="w-full"
+                        disabled={!manualBarcode.trim() || scanBarcodeMutation.isPending}
+                      >
+                        {scanBarcodeMutation.isPending ? (
+                          <>Processing...</>
+                        ) : (
+                          <>
+                            <CheckCircle className="w-4 h-4 mr-2" />
+                            Process Delivery
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Results Section */}
+                {(scanError || scanResult) && (
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-medium">Scan Results</h3>
+                    
+                    {scanError && (
+                      <div className="p-4 border border-destructive rounded-lg bg-destructive/10">
+                        <div className="flex items-center space-x-2">
+                          <XCircle className="w-5 h-5 text-destructive" />
+                          <span className="text-destructive font-medium">Error</span>
+                        </div>
+                        <p className="mt-2 text-sm">{scanError}</p>
+                      </div>
+                    )}
+
+                    {scanResult && (
+                      <div className="p-4 border border-success rounded-lg bg-success/10">
+                        <div className="flex items-center space-x-2 mb-3">
+                          <CheckCircle className="w-5 h-5 text-success" />
+                          <span className="text-success font-medium">Delivery Successful</span>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <span className="font-medium">Order #:</span>
+                            <span className="ml-2">{scanResult.order?.orderNumber}</span>
+                          </div>
+                          <div>
+                            <span className="font-medium">Customer:</span>
+                            <span className="ml-2">{scanResult.order?.customerName}</span>
+                          </div>
+                          <div>
+                            <span className="font-medium">Amount:</span>
+                            <span className="ml-2">₹{scanResult.order?.amount}</span>
+                          </div>
+                          <div>
+                            <span className="font-medium">Status:</span>
+                            <Badge className="ml-2 bg-success">{scanResult.order?.status}</Badge>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Recent Deliveries */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">Recent Deliveries</h3>
+                  <div className="space-y-2">
+                    {(orders as any[])
+                      .filter((order: any) => order.status === "delivered")
+                      .slice(0, 5)
+                      .map((order: any) => (
+                        <div key={order.id} className="flex items-center justify-between p-3 border rounded-lg">
+                          <div className="flex items-center space-x-3">
+                            <CheckCircle className="w-4 h-4 text-success" />
+                            <div>
+                              <span className="font-medium">#{order.orderNumber}</span>
+                              <p className="text-sm text-muted-foreground">{order.customerName}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-medium">₹{order.amount}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {order.deliveredAt ? new Date(order.deliveredAt).toLocaleTimeString() : 'Just now'}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

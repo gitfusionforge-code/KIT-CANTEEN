@@ -143,7 +143,7 @@ export class DatabaseStorage implements IStorage {
     return newOrder;
   }
 
-  async updateOrder(id: number, order: Partial<InsertOrder>): Promise<Order> {
+  async updateOrder(id: number, order: Partial<InsertOrder & { deliveredAt?: Date; barcodeUsed?: boolean }>): Promise<Order> {
     const db = getDb();
     const [updatedOrder] = await db
       .update(orders)
@@ -151,6 +151,12 @@ export class DatabaseStorage implements IStorage {
       .where(eq(orders.id, id))
       .returning();
     return updatedOrder;
+  }
+
+  async getOrderByBarcode(barcode: string): Promise<Order | undefined> {
+    const db = getDb();
+    const [order] = await db.select().from(orders).where(eq(orders.barcode, barcode));
+    return order || undefined;
   }
 
   // Notifications

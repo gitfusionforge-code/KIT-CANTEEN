@@ -38,6 +38,9 @@ export const orders = pgTable("orders", {
   amount: integer("amount").notNull(),
   status: text("status").notNull().default("preparing"),
   estimatedTime: integer("estimated_time").notNull().default(15),
+  barcode: text("barcode").notNull(), // unique barcode for delivery verification
+  barcodeUsed: boolean("barcode_used").default(false).notNull(), // prevents barcode reuse
+  deliveredAt: timestamp("delivered_at"), // timestamp when order was delivered
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -118,6 +121,7 @@ export const insertOrderSchema = createInsertSchema(orders).pick({
   amount: true,
   status: true,
   estimatedTime: true,
+  barcode: true,
 });
 
 export const insertNotificationSchema = createInsertSchema(notifications).pick({
