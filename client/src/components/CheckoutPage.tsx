@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Clock, MapPin, CreditCard, Wallet, Timer } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function CheckoutPage() {
   const [, setLocation] = useLocation();
@@ -16,15 +18,64 @@ export default function CheckoutPage() {
   const [paymentInProgress, setPaymentInProgress] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const paymentValidRef = useRef(false);
+  const queryClient = useQueryClient();
 
-  const orderItems = [
-    { name: "Veg Thali", quantity: 2, price: 170 },
-    { name: "Masala Tea", quantity: 1, price: 15 }
-  ];
+  // Get cart data from localStorage (using the same key as useCart hook)
+  const cartData = JSON.parse(localStorage.getItem('kit-canteen-cart') || '[]');
+  const userData = JSON.parse(localStorage.getItem('user') || '{}');
+  
+  const orderItems = cartData;
+  const subtotal = cartData.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0);
+  const tax = Math.round(subtotal * 0.05);
+  const total = subtotal + tax;
 
-  const subtotal = 185;
-  const tax = 9;
-  const total = 194;
+  // Add fallback for testing - create order without payment if in dev mode
+  const createOrderDirectly = async () => {
+    const orderNumber = `ORD${Date.now()}`;
+    const orderData = {
+      orderNumber,
+      customerId: userData.id || null,
+      customerName: userData.name || 'Guest User',
+      items: JSON.stringify(cartData),
+      amount: total,
+      status: 'preparing',
+      estimatedTime: 15
+    };
+
+    try {
+      const newOrder = await createOrderMutation.mutateAsync(orderData);
+      
+      toast({
+        title: "Order Created",
+        description: "Your order has been placed successfully!",
+      });
+      
+      setLocation(`/order-status/${newOrder.orderNumber || orderNumber}`);
+    } catch (error) {
+      console.error("Failed to create order:", error);
+      toast({
+        title: "Order Creation Failed",
+        description: "Unable to create order. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Create order mutation
+  const createOrderMutation = useMutation({
+    mutationFn: async (orderData: any) => {
+      return apiRequest('/api/orders', {
+        method: 'POST',
+        body: JSON.stringify(orderData),
+      });
+    },
+    onSuccess: () => {
+      // Invalidate orders cache to refresh order lists
+      queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+      // Clear cart after successful order (using correct cart key)
+      localStorage.removeItem('kit-canteen-cart');
+    },
+  });
 
   // Timer effect
   useEffect(() => {
@@ -83,17 +134,42 @@ export default function CheckoutPage() {
       description: "Food Order Payment",
       image: "/favicon.ico",
       order_id: "", // This should come from your backend
-      handler: function (response: any) {
+      handler: async function (response: any) {
         // Payment successful - stop timer immediately
         setIsTimerActive(false);
         setPaymentInProgress(false);
         
         console.log("Payment successful:", response);
-        toast({
-          title: "Payment Successful",
-          description: "Your order has been confirmed!",
-        });
-        setLocation("/order-status/12345");
+
+        // Create order in database
+        const orderNumber = `ORD${Date.now()}`;
+        const orderData = {
+          orderNumber,
+          customerId: userData.id || null,
+          customerName: userData.name || 'Guest User',
+          items: JSON.stringify(cartData),
+          amount: total,
+          status: 'preparing',
+          estimatedTime: 15
+        };
+
+        try {
+          const newOrder = await createOrderMutation.mutateAsync(orderData);
+          
+          toast({
+            title: "Payment Successful",
+            description: "Your order has been confirmed!",
+          });
+          
+          setLocation(`/order-status/${newOrder.orderNumber || orderNumber}`);
+        } catch (error) {
+          console.error("Failed to create order:", error);
+          toast({
+            title: "Order Creation Failed",
+            description: "Payment successful but order creation failed. Contact support.",
+            variant: "destructive"
+          });
+        }
       },
       prefill: {
         name: "Student Name",
@@ -183,7 +259,7 @@ export default function CheckoutPage() {
           <CardContent className="p-4">
             <h3 className="font-semibold mb-4">Order Summary</h3>
             <div className="space-y-3">
-              {orderItems.map((item, index) => (
+              {orderItems.map((item: any, index: number) => (
                 <div key={index} className="flex justify-between items-center">
                   <div>
                     <span className="font-medium">{item.name}</span>
@@ -257,15 +333,35 @@ export default function CheckoutPage() {
       </div>
 
       {/* Place Order Button */}
-      <div className="sticky bottom-0 bg-white border-t p-4">
+      <div className="sticky bottom-0 bg-white border-t p-4 space-y-2">
         <Button
           variant="food"
           size="mobile"
           className="w-full"
           onClick={handlePlaceOrder}
+          disabled={paymentInProgress || cartData.length === 0}
         >
-          Confirm Order • ₹{total}
+          {paymentInProgress ? 'Processing...' : `Pay Now • ₹${total}`}
         </Button>
+        
+        {/* Test mode - Direct order creation */}
+        {process.env.NODE_ENV === 'development' && (
+          <Button
+            variant="outline"
+            size="mobile"
+            className="w-full"
+            onClick={createOrderDirectly}
+            disabled={createOrderMutation.isPending || cartData.length === 0}
+          >
+            {createOrderMutation.isPending ? 'Creating Order...' : 'Skip Payment (Test Mode)'}
+          </Button>
+        )}
+        
+        {cartData.length === 0 && (
+          <p className="text-center text-sm text-muted-foreground">
+            Your cart is empty. Add items to continue.
+          </p>
+        )}
       </div>
     </div>
   );
