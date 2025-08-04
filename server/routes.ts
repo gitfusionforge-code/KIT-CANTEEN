@@ -62,12 +62,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/categories", async (req, res) => {
     try {
-      console.log("Creating category with data:", req.body);
       const validatedData = insertCategorySchema.parse(req.body);
       const category = await storage.createCategory(validatedData);
       res.status(201).json(category);
-    } catch (error) {
-      console.error("Category creation error:", error);
+    } catch (error: any) {
       if (error.code === '23505') { // PostgreSQL unique constraint violation
         res.status(409).json({ message: "Category already exists" });
       } else {

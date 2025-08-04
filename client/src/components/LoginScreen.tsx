@@ -29,7 +29,6 @@ export default function LoginScreen() {
               userId = userData.id;
             } else if (response.status === 404) {
               // User doesn't exist, create new user
-              console.log("Creating new user account...");
               
               // Determine role based on email for special accounts
               if (result.user.email === 'kitcanteen1@gmail.com') {
@@ -51,7 +50,6 @@ export default function LoginScreen() {
               if (createResponse.ok) {
                 const newUser = await createResponse.json();
                 userId = newUser.id;
-                console.log("New user created:", newUser);
               }
             }
             

@@ -16,27 +16,15 @@ export default function MenuListingPage() {
   const [filter, setFilter] = useState<"all" | "veg" | "non-veg">("all");
   const { addToCart, getCartQuantity, decreaseQuantity } = useCart();
 
-  // Fetch categories and menu items from database
+  // Fetch categories and menu items from database with optimized caching
   const { data: categories = [], isLoading: categoriesLoading } = useQuery<Category[]>({
     queryKey: ['/api/categories'],
-    queryFn: async () => {
-      const response = await fetch('/api/categories');
-      if (!response.ok) {
-        throw new Error(`Failed to fetch categories: ${response.status}`);
-      }
-      return response.json();
-    },
+    staleTime: 1000 * 60 * 10, // 10 minutes for categories
   });
 
   const { data: menuItems = [], isLoading: menuItemsLoading } = useQuery<MenuItem[]>({
     queryKey: ['/api/menu'],
-    queryFn: async () => {
-      const response = await fetch('/api/menu');
-      if (!response.ok) {
-        throw new Error(`Failed to fetch menu items: ${response.status}`);
-      }
-      return response.json();
-    },
+    staleTime: 1000 * 60 * 5, // 5 minutes for menu items
   });
 
   const isLoading = categoriesLoading || menuItemsLoading;

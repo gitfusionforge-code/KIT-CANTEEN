@@ -26,9 +26,9 @@ export default function HomeScreen() {
       }
       return response.json();
     },
-    staleTime: 1000 * 30,
+    staleTime: 1000 * 60 * 10, // 10 minutes for categories
     refetchOnMount: true,
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false,
   });
 
   const { data: menuItems = [], isLoading: menuItemsLoading } = useQuery<MenuItem[]>({
@@ -40,7 +40,7 @@ export default function HomeScreen() {
       }
       return response.json();
     },
-    staleTime: 1000 * 30, 
+    staleTime: 1000 * 60 * 5, // 5 minutes for menu items
     refetchOnMount: true,
     refetchOnWindowFocus: true,
   });

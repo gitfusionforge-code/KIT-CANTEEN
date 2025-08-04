@@ -9,6 +9,29 @@ Environment variables: Always store credentials in .env file when possible for b
 
 # Recent Changes
 
+## August 2025 - Performance Optimization & Code Cleanup
+- **Performance Improvements**: Optimized React Query caching strategies
+  - Reduced stale time from 30 seconds to 5-10 minutes for categories and menu items
+  - Disabled automatic polling (refetchInterval) to reduce unnecessary API calls
+  - Implemented selective cache invalidation instead of global invalidation
+  - Categories now cache for 10 minutes (they change infrequently)
+  - Menu items cache for 5 minutes (balanced performance)
+  - Orders maintain 1-minute cache for real-time updates
+- **Code Quality Enhancements**: Removed unused code and fixed TypeScript issues
+  - Fixed `displayName` typo in menubar component
+  - Removed console.log statements from production code
+  - Cleaned up unused helper functions and variables
+  - Enhanced AdminOverviewPage with real data integration instead of placeholder values
+  - Streamlined AdminPanel by removing unused state variables
+  - Optimized query configurations across all components for better performance
+- **Database Integration**: AdminOverviewPage now shows real statistics from database
+  - Real revenue calculations from order data
+  - Actual user count from users table
+  - Live order status tracking with recent activity display
+  - Improved error handling and empty state management
+
+# Recent Changes
+
 ## January 2025 - Complete Dashboard Synchronization Implementation
 - **Real-Time Data Synchronization**: Implemented comprehensive data synchronization across all user dashboards
   - Enhanced React Query configuration with aggressive refresh intervals (30-second stale time, automatic refetch)

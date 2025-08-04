@@ -17,18 +17,8 @@ import {
 export default function AdminPanel() {
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("overview");
-  
-  // Fetch real users from database
-  const users: any[] = []; // Will be populated when user management is connected to database
 
-  // Fetch real staff from database
-  const [staff, setStaff] = useState<any[]>([]);
-
-  // Fetch real inventory from database
-  const [inventory, setInventory] = useState<any[]>([]);
-
-  const [feedback, setFeedback] = useState<any[]>([]);
-
+  // Simplified stats for overview
   const stats = {
     totalRevenue: 0,
     todayOrders: 0,
@@ -39,6 +29,12 @@ export default function AdminPanel() {
     lowStockItems: 0,
     activeCampaigns: 0
   };
+
+  // Empty arrays for unused sections (to be implemented)
+  const users: any[] = [];
+  const staff: any[] = [];
+  const inventory: any[] = [];
+  const feedback: any[] = [];
 
   return (
     <div className="min-h-screen bg-background">

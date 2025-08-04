@@ -6,40 +6,36 @@ import type { MenuItem, Category, Order, User } from "@shared/schema";
  * Ensures real-time data consistency between admin, canteen owner, and student views
  */
 export function useDataSync() {
-  // Categories query with aggressive refresh for real-time sync
+  // Categories query - optimized refresh
   const categoriesQuery = useQuery<Category[]>({
     queryKey: ['/api/categories'],
-    staleTime: 1000 * 30, // 30 seconds
+    staleTime: 1000 * 60 * 10, // 10 minutes (categories change infrequently)
     refetchOnMount: true,
-    refetchOnWindowFocus: true,
-    refetchInterval: 1000 * 60, // Auto-refresh every minute
+    refetchOnWindowFocus: false, // Categories don't need frequent refetch
   });
 
-  // Menu items query with real-time sync
+  // Menu items query - balanced refresh
   const menuItemsQuery = useQuery<MenuItem[]>({
     queryKey: ['/api/menu'],
-    staleTime: 1000 * 30,
+    staleTime: 1000 * 60 * 5, // 5 minutes
     refetchOnMount: true,
     refetchOnWindowFocus: true,
-    refetchInterval: 1000 * 60,
   });
 
-  // Orders query for dashboard sync
+  // Orders query - more frequent for real-time updates
   const ordersQuery = useQuery<Order[]>({
     queryKey: ['/api/orders'],
-    staleTime: 1000 * 15, // More frequent for orders
+    staleTime: 1000 * 60, // 1 minute for orders
     refetchOnMount: true,
     refetchOnWindowFocus: true,
-    refetchInterval: 1000 * 30, // Auto-refresh every 30 seconds
   });
 
-  // Analytics query for admin dashboards (optional, don't fail sync if not available)
+  // Analytics query - least frequent
   const analyticsQuery = useQuery({
     queryKey: ['/api/admin/analytics'],
-    staleTime: 1000 * 60, // 1 minute for analytics
+    staleTime: 1000 * 60 * 15, // 15 minutes for analytics
     refetchOnMount: true,
-    refetchOnWindowFocus: true,
-    refetchInterval: 1000 * 120, // Auto-refresh every 2 minutes
+    refetchOnWindowFocus: false,
     retry: false, // Don't retry analytics failures
     retryOnMount: false,
   });

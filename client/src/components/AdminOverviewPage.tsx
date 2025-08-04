@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -11,22 +12,43 @@ import {
   Clock,
   Star
 } from "lucide-react";
+import type { Order, User } from "@shared/schema";
 
 export default function AdminOverviewPage() {
-  // Real stats from database - currently showing baseline values
+  // Fetch real data from database
+  const { data: orders = [] } = useQuery<Order[]>({
+    queryKey: ['/api/orders'],
+  });
+
+  const { data: users = [] } = useQuery<User[]>({
+    queryKey: ['/api/users'],
+  });
+
+  // Calculate real stats from database data
   const stats = {
-    totalRevenue: 0,
-    totalUsers: 0,
-    totalOrders: 0,
+    totalRevenue: orders.reduce((sum, order) => sum + order.amount, 0),
+    totalUsers: users.length,
+    totalOrders: orders.length,
     activeCanteens: 1,
-    pendingOrders: 0,
-    completedOrders: 0,
-    averageRating: 0,
+    pendingOrders: orders.filter(order => order.status === 'preparing').length,
+    completedOrders: orders.filter(order => order.status === 'completed').length,
+    averageRating: 0, // To be calculated when ratings are available
     systemUptime: 100
   };
 
-  const recentActivity: any[] = []; // Will be populated from real activity logs
-  const topPerformingItems: any[] = []; // Will be calculated from real order data
+  // Get recent activity from orders (last 5 orders)
+  const recentActivity = orders
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 5)
+    .map(order => ({
+      id: order.id,
+      message: `New order #${order.orderNumber} by ${order.customerName}`,
+      time: new Date(order.createdAt).toLocaleTimeString(),
+      status: order.status
+    }));
+
+  // Calculate top performing items (placeholder for now)
+  const topPerformingItems: Array<{name: string, orders: number, revenue: number}> = [];
 
   return (
     <div className="p-6 space-y-6">
@@ -143,19 +165,21 @@ export default function AdminOverviewPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentActivity.map((activity) => (
+              {recentActivity.length > 0 ? recentActivity.map((activity) => (
                 <div key={activity.id} className="flex items-center space-x-3 p-3 border rounded-lg">
                   <div className={`w-2 h-2 rounded-full ${
-                    activity.status === 'success' ? 'bg-success' :
-                    activity.status === 'error' ? 'bg-destructive' :
-                    activity.status === 'pending' ? 'bg-warning' : 'bg-primary'
+                    activity.status === 'completed' ? 'bg-success' :
+                    activity.status === 'cancelled' ? 'bg-destructive' :
+                    activity.status === 'preparing' ? 'bg-warning' : 'bg-primary'
                   }`} />
                   <div className="flex-1">
                     <p className="text-sm text-foreground">{activity.message}</p>
                     <p className="text-xs text-muted-foreground">{activity.time}</p>
                   </div>
                 </div>
-              ))}
+              )) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No recent activity</p>
+              )}
             </div>
           </CardContent>
         </Card>
