@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
+import { useAuthSync } from "@/hooks/useDataSync";
+import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,6 +14,16 @@ import { queryClient } from "@/lib/queryClient";
 export default function ProfilePage() {
   const [, setLocation] = useLocation();
   const [isEditing, setIsEditing] = useState(false);
+  const { isAuthenticated } = useAuthSync();
+
+  // Enhanced security check for authenticated users only
+  useEffect(() => {
+    if (!isAuthenticated) {
+      toast.error("Please log in to view your profile.");
+      setLocation("/login");
+      return;
+    }
+  }, [isAuthenticated, setLocation]);
   const [userInfo, setUserInfo] = useState({
     name: "",
     email: "",

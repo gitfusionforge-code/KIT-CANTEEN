@@ -44,14 +44,29 @@ import {
 export default function CanteenOwnerDashboard() {
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("overview");
-  const { user, isAuthenticated } = useAuthSync();
+  const { user, isAuthenticated, isCanteenOwner } = useAuthSync();
 
-  // Redirect to login if not authenticated
+  // Enhanced security check - redirect if not authenticated OR not canteen owner
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!isAuthenticated || !isCanteenOwner) {
+      toast.error("Access denied. Canteen owner authentication required.");
       setLocation("/login");
+      return;
     }
-  }, [isAuthenticated, setLocation]);
+  }, [isAuthenticated, isCanteenOwner, setLocation]);
+
+  // Return early if not properly authenticated
+  if (!isAuthenticated || !isCanteenOwner) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold mb-4">Access Denied</h2>
+          <p className="text-muted-foreground mb-4">Canteen owner authentication required</p>
+          <Button onClick={() => setLocation("/login")}>Go to Login</Button>
+        </div>
+      </div>
+    );
+  }
   
   // Fetch real data from database using React Query with proper typing
   const { data: categories = [], isLoading: categoriesLoading, refetch: refetchCategories, error: categoriesError } = useQuery<Category[]>({

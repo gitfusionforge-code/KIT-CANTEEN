@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
+import { useAuthSync } from "@/hooks/useDataSync";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +19,29 @@ import {
 export default function AdminPanel() {
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("overview");
+  const { user, isAuthenticated, isSuperAdmin } = useAuthSync();
+
+  // Enhanced security check for super admin access
+  useEffect(() => {
+    if (!isAuthenticated || !isSuperAdmin) {
+      toast.error("Access denied. Super admin authentication required.");
+      setLocation("/login");
+      return;
+    }
+  }, [isAuthenticated, isSuperAdmin, setLocation]);
+
+  // Return early if not properly authenticated
+  if (!isAuthenticated || !isSuperAdmin) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold mb-4">Access Denied</h2>
+          <p className="text-muted-foreground mb-4">Super admin authentication required</p>
+          <Button onClick={() => setLocation("/login")}>Go to Login</Button>
+        </div>
+      </div>
+    );
+  }
 
   // Simplified stats for overview
   const stats = {

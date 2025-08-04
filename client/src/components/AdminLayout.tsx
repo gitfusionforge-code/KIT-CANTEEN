@@ -1,14 +1,41 @@
+import { useEffect } from "react";
+import { useLocation } from "wouter";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AdminSidebar } from "./AdminSidebar";
 import SyncStatus from "./SyncStatus";
 import { useAuthSync } from "@/hooks/useDataSync";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
-  const { user } = useAuthSync();
+  const [, setLocation] = useLocation();
+  const { user, isAuthenticated, isAdmin, isSuperAdmin } = useAuthSync();
+
+  // Enhanced security check for admin access
+  useEffect(() => {
+    if (!isAuthenticated || (!isAdmin && !isSuperAdmin)) {
+      toast.error("Access denied. Admin authentication required.");
+      setLocation("/login");
+      return;
+    }
+  }, [isAuthenticated, isAdmin, isSuperAdmin, setLocation]);
+
+  // Return early if not properly authenticated
+  if (!isAuthenticated || (!isAdmin && !isSuperAdmin)) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold mb-4">Access Denied</h2>
+          <p className="text-muted-foreground mb-4">Admin authentication required</p>
+          <Button onClick={() => setLocation("/login")}>Go to Login</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <SidebarProvider>

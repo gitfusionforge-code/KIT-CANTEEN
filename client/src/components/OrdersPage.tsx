@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
+import { useAuthSync } from "@/hooks/useDataSync";
+import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,6 +18,16 @@ export default function OrdersPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const { isAuthenticated } = useAuthSync();
+
+  // Enhanced security check for authenticated users only
+  useEffect(() => {
+    if (!isAuthenticated) {
+      toast("Please log in to view your orders.");
+      setLocation("/login");
+      return;
+    }
+  }, [isAuthenticated, setLocation]);
 
   // Get current user from localStorage
   useEffect(() => {
