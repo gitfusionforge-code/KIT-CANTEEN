@@ -592,10 +592,10 @@ export default function CanteenOwnerDashboard() {
             <Button 
               variant="outline" 
               size="sm"
-              onClick={() => setLocation("/barcode-scanner")}
+              onClick={() => setActiveTab("scanner")}
             >
               <ScanLine className="w-4 h-4 mr-2" />
-              Enter Order
+              Scanner
             </Button>
             <Button 
               variant="outline" 
