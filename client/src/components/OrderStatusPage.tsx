@@ -219,9 +219,7 @@ export default function OrderStatusPage() {
               {orderStatus === "completed" && "Your order has been completed. Thank you for your visit!"}
             </p>
 
-            <div className="bg-accent/50 rounded-lg p-3 mb-4">
-              <p className="font-medium">Estimated Time: {orderDetails.actualTime}</p>
-            </div>
+
 
             <Progress value={progress} className="w-full" />
           </CardContent>
