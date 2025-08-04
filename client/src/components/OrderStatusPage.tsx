@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation, useParams } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle, Clock, ChefHat, Package, Phone, ArrowLeft } from "lucide-react";
 import JsBarcode from 'jsbarcode';
+import type { Order } from '@shared/schema';
 
 // Real Barcode Generator Component using JsBarcode library
 const BarcodeGenerator = ({ orderId }: { orderId: string }) => {
@@ -57,38 +59,61 @@ const BarcodeGenerator = ({ orderId }: { orderId: string }) => {
 export default function OrderStatusPage() {
   const [, setLocation] = useLocation();
   const { orderId } = useParams();
-  const [orderStatus, setOrderStatus] = useState<"placed" | "preparing" | "ready">("preparing");
   const [progress, setProgress] = useState(60);
 
+  // Fetch real order data from API
+  const { data: orders = [], isLoading } = useQuery<Order[]>({
+    queryKey: ['/api/orders'],
+  });
+
+  // Find the specific order by ID
+  const order = orders.find(o => o.id.toString() === orderId);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background p-4">
+        <div className="max-w-2xl mx-auto">
+          <div className="text-center py-8">Loading order details...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!order) {
+    return (
+      <div className="min-h-screen bg-background p-4">
+        <div className="max-w-2xl mx-auto">
+          <div className="text-center py-8">Order not found</div>
+          <Button onClick={() => setLocation("/orders")} className="w-full">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Orders
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  const orderStatus = order.status as "placed" | "preparing" | "ready" || "preparing";
+
   const orderDetails = {
-    id: orderId || "12345",
-    items: [
-      { name: "Veg Thali", quantity: 2, price: 170 },
-      { name: "Masala Tea", quantity: 1, price: 15 }
-    ],
-    total: 194,
-    estimatedTime: "15-20 mins",
-    actualTime: orderStatus === "ready" ? "18 mins" : "15-20 mins",
+    id: order.orderNumber,
+    items: JSON.parse(order.items || '[]') as Array<{id: number, name: string, price: number, quantity: number}>,
+    total: order.amount,
+    estimatedTime: `${order.estimatedTime || 15} mins`,
+    actualTime: orderStatus === "ready" ? `${order.estimatedTime || 15} mins` : `${order.estimatedTime || 15} mins`,
     pickupLocation: "KIT College Main Canteen, Ground Floor"
   };
 
   useEffect(() => {
-    // Simulate order progress
-    const timer1 = setTimeout(() => {
-      setOrderStatus("preparing");
-      setProgress(60);
-    }, 3000);
-
-    const timer2 = setTimeout(() => {
-      setOrderStatus("ready");
+    // Set progress based on order status
+    if (orderStatus === "placed") {
+      setProgress(33);
+    } else if (orderStatus === "preparing") {
+      setProgress(66);
+    } else if (orderStatus === "ready") {
       setProgress(100);
-    }, 8000);
-
-    return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-    };
-  }, []);
+    }
+  }, [orderStatus]);
 
 
   const statusSteps = [
