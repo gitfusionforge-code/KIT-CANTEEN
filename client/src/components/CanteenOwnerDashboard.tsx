@@ -512,7 +512,7 @@ export default function CanteenOwnerDashboard() {
       // Improve error message formatting for better user experience
       let errorMessage = error.message;
       
-      if (errorMessage.includes("already been delivered") || errorMessage.includes("already processed")) {
+      if (errorMessage.includes("already been delivered") || errorMessage.includes("already processed") || errorMessage.includes("🔒")) {
         errorMessage = "✅ This order has already been delivered";
       } else if (errorMessage.includes("not ready for pickup")) {
         errorMessage = "⏳ Order is not ready for pickup yet";
