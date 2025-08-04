@@ -156,11 +156,9 @@ export default function OrdersPage() {
                 className="px-3 py-2 border rounded-md"
               >
                 <option value="all">All Status</option>
-                <option value="pending">Pending</option>
                 <option value="preparing">Preparing</option>
                 <option value="ready">Ready</option>
-                <option value="delivered">Delivered</option>
-                <option value="cancelled">Cancelled</option>
+                <option value="completed">Completed</option>
               </select>
             </div>
           </CardContent>
