@@ -149,6 +149,7 @@ export default function CanteenOwnerDashboard() {
   // Add category mutation
   const addCategoryMutation = useMutation({
     mutationFn: async (data: any) => {
+      console.log("Adding category:", data);
       return apiRequest('/api/categories', {
         method: 'POST',
         body: JSON.stringify(data),
@@ -160,7 +161,8 @@ export default function CanteenOwnerDashboard() {
       toast.success("Category added successfully");
       setNewCategory("");
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error("Category mutation error:", error);
       toast.error("Failed to add category");
     }
   });
@@ -253,7 +255,8 @@ export default function CanteenOwnerDashboard() {
       return;
     }
     
-    addCategoryMutation.mutate({ name: newCategory });
+    addCategoryMutation.mutate({ name: newCategory.trim() });
+    setNewCategory("");
   };
 
   const handleDeleteCategory = (categoryToDelete: any) => {
@@ -709,14 +712,17 @@ export default function CanteenOwnerDashboard() {
                                       onChange={(e) => setNewCategory(e.target.value)}
                                       onKeyDown={(e) => e.key === 'Enter' && handleAddCategory()}
                                     />
-                                    <Button onClick={handleAddCategory}>
+                                    <Button 
+                                      onClick={handleAddCategory}
+                                      disabled={addCategoryMutation.isPending}
+                                    >
                                       <Plus className="w-4 h-4" />
                                     </Button>
                                   </div>
                                   <div className="space-y-2 max-h-48 overflow-y-auto">
-                                    {categories.map((category) => (
-                                      <div key={category} className="flex items-center justify-between p-2 border rounded">
-                                        <span className="text-sm">{category}</span>
+                                    {(categories as any[]).map((category: any) => (
+                                      <div key={category.id} className="flex items-center justify-between p-2 border rounded">
+                                        <span className="text-sm">{category.name}</span>
                                         <Button
                                           size="sm"
                                           variant="ghost"
