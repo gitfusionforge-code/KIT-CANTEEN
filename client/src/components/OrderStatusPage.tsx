@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle, Clock, ChefHat, Package, Phone, ArrowLeft } from "lucide-react";
 import JsBarcode from 'jsbarcode';
+import { formatOrderIdDisplay } from "@shared/utils";
 import type { Order } from '@shared/schema';
 
 // Real Barcode Generator Component using JsBarcode library
@@ -178,7 +179,19 @@ export default function OrderStatusPage() {
         </div>
         <div className="text-center">
           <h1 className="text-2xl font-bold text-white mb-2">Order Status</h1>
-          <p className="text-white/80">Order #{orderDetails.orderNumber}</p>
+          <p className="text-white/80">
+            Order #{(() => {
+              const formatted = formatOrderIdDisplay(orderDetails.orderNumber);
+              return (
+                <>
+                  {formatted.prefix}
+                  <span className="bg-white/20 text-white font-bold px-1 rounded">
+                    {formatted.suffix}
+                  </span>
+                </>
+              );
+            })()}
+          </p>
         </div>
       </div>
 

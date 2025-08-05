@@ -1,34 +1,46 @@
 /**
- * Generates a unique 12-digit alphanumeric order ID
- * Format: AAAABBBBCCCC (12 characters total)
- * Uses uppercase letters and numbers for better barcode compatibility
+ * Generates a unique 12-digit numeric order ID
+ * Format: 123456789012 (12 digits total)
+ * Uses only numbers for better compatibility and easier identification
  */
 export function generateOrderId(): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  // Generate 8 random digits
   let result = '';
-  
-  // Generate 8 random characters
   for (let i = 0; i < 8; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
+    result += Math.floor(Math.random() * 10).toString();
   }
   
-  // Add 4 characters from timestamp for uniqueness
-  const timestamp = Date.now().toString(36).toUpperCase();
-  const timestampPart = timestamp.slice(-4).padStart(4, '0');
+  // Add 4 digits from timestamp for uniqueness
+  const timestamp = Date.now();
+  const timestampPart = (timestamp % 10000).toString().padStart(4, '0');
   
-  // Ensure timestamp part only contains valid characters
-  const validTimestampPart = timestampPart
-    .split('')
-    .map(char => chars.includes(char) ? char : chars[Math.floor(Math.random() * chars.length)])
-    .join('');
-  
-  return result + validTimestampPart;
+  return result + timestampPart;
 }
 
 /**
- * Validates if a string is a valid 12-digit alphanumeric order ID
+ * Validates if a string is a valid 12-digit numeric order ID
  */
 export function isValidOrderId(orderId: string): boolean {
-  const pattern = /^[A-Z0-9]{12}$/;
+  const pattern = /^[0-9]{12}$/;
   return pattern.test(orderId);
+}
+
+/**
+ * Formats order ID with highlighted last 4 digits for display
+ * Returns object with formatted parts for UI highlighting
+ */
+export function formatOrderIdDisplay(orderId: string): { 
+  prefix: string; 
+  suffix: string; 
+  full: string 
+} {
+  if (!orderId || orderId.length !== 12) {
+    return { prefix: orderId || '', suffix: '', full: orderId || '' };
+  }
+  
+  return {
+    prefix: orderId.slice(0, 8),
+    suffix: orderId.slice(8, 12),
+    full: orderId
+  };
 }

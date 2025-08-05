@@ -33,16 +33,16 @@ export default function BarcodeScannerPage() {
       return;
     }
     
-    // Validate 12-digit alphanumeric format
-    const orderIdPattern = /^[A-Z0-9]{12}$/;
-    if (!orderIdPattern.test(orderId.toUpperCase())) {
-      toast.error("Order ID must be exactly 12 characters (letters and numbers only)");
+    // Validate 12-digit numeric format
+    const orderIdPattern = /^[0-9]{12}$/;
+    if (!orderIdPattern.test(orderId)) {
+      toast.error("Order ID must be exactly 12 digits (numbers only)");
       return;
     }
     
-    toast.success(`Processing Order ID: ${orderId.toUpperCase()}`);
+    toast.success(`Processing Order ID: ${orderId}`);
     // Navigate to order status or processing page
-    setLocation(`/order-status/${orderId.toUpperCase()}`);
+    setLocation(`/order-status/${orderId}`);
   };
 
   // Manual order creation handlers

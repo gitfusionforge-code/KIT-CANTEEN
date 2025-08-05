@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { useToast } from "@/hooks/use-toast";
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
 import type { MenuItem, Category, Order } from "@shared/schema";
+import { formatOrderIdDisplay } from "@shared/utils";
 import SyncStatus from "./SyncStatus";
 import TestLogoutButton from "./TestLogoutButton";
 import { useAuthSync } from "@/hooks/useDataSync";
@@ -808,7 +809,19 @@ export default function CanteenOwnerDashboard() {
                     >
                       <div className="flex-1">
                         <div className="flex items-center space-x-2">
-                          <span className="font-medium">#{order.orderNumber || order.id}</span>
+                          <span className="font-medium">
+                            #{(() => {
+                              const formatted = formatOrderIdDisplay(order.orderNumber || order.id.toString());
+                              return (
+                                <>
+                                  {formatted.prefix}
+                                  <span className="bg-primary/20 text-primary font-bold px-1 rounded">
+                                    {formatted.suffix}
+                                  </span>
+                                </>
+                              );
+                            })()}
+                          </span>
                           <Badge className={getOrderStatusColor(order.status)}>
                             {getOrderStatusText(order.status)}
                           </Badge>
@@ -870,7 +883,19 @@ export default function CanteenOwnerDashboard() {
                                 onClick={() => setLocation(`/canteen-order-detail/${order.id}`)}
                               >
                                 <div className="flex items-center space-x-3">
-                                  <span className="font-semibold">#{order.orderNumber || order.id}</span>
+                                  <span className="font-semibold">
+                                    #{(() => {
+                                      const formatted = formatOrderIdDisplay(order.orderNumber || order.id.toString());
+                                      return (
+                                        <>
+                                          {formatted.prefix}
+                                          <span className="bg-primary/20 text-primary font-bold px-1 rounded">
+                                            {formatted.suffix}
+                                          </span>
+                                        </>
+                                      );
+                                    })()}
+                                  </span>
                                   <Badge className={getOrderStatusColor(order.status)}>
                                     {getOrderStatusText(order.status)}
                                   </Badge>
@@ -1162,7 +1187,19 @@ export default function CanteenOwnerDashboard() {
                           <div className="flex items-center space-x-3">
                             <CheckCircle className="w-4 h-4 text-success" />
                             <div>
-                              <span className="font-medium">#{order.orderNumber}</span>
+                              <span className="font-medium">
+                                #{(() => {
+                                  const formatted = formatOrderIdDisplay(order.orderNumber);
+                                  return (
+                                    <>
+                                      {formatted.prefix}
+                                      <span className="bg-primary/20 text-primary font-bold px-1 rounded">
+                                        {formatted.suffix}
+                                      </span>
+                                    </>
+                                  );
+                                })()}
+                              </span>
                               <p className="text-sm text-muted-foreground">{order.customerName}</p>
                             </div>
                           </div>
