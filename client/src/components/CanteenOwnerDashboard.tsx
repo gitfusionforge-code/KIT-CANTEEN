@@ -49,12 +49,12 @@ export default function CanteenOwnerDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const { user, isAuthenticated, isCanteenOwner } = useAuthSync();
   
-  // Scanner state
+  // Scanner state - completely rewritten for better control
   const [isScanning, setIsScanning] = useState(false);
-  const [scannedBarcode, setScannedBarcode] = useState("");
   const [manualBarcode, setManualBarcode] = useState("");
   const [scanResult, setScanResult] = useState<any>(null);
   const [scanError, setScanError] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
 
   // Enhanced security check - redirect if not authenticated OR not canteen owner
   useEffect(() => {
@@ -487,58 +487,68 @@ export default function CanteenOwnerDashboard() {
     }
   };
 
-  // Barcode scanning functionality
-  const scanBarcodeMutation = useMutation({
-    mutationFn: async (barcode: string) => {
-      const response = await apiRequest('/api/delivery/scan', {
+  // Completely rewritten barcode processing logic
+  const processBarcodeDelivery = async (barcode: string) => {
+    // Prevent any duplicate processing
+    if (isProcessing) {
+      console.log("Already processing, ignoring duplicate request");
+      return;
+    }
+
+    setIsProcessing(true);
+    setScanError("");
+    setScanResult(null);
+
+    try {
+      console.log("Processing barcode:", barcode);
+      
+      const response = await fetch('/api/delivery/scan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ barcode })
+        body: JSON.stringify({ barcode: barcode.trim() })
       });
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: 'Scan failed' }));
-        throw new Error(errorData.message || 'Scan failed');
-      }
-      return response.json();
-    },
-    onSuccess: (data) => {
-      setScanResult(data);
-      setScanError("");
-      toast.success("Order delivered successfully!");
-      // Ensure inputs stay cleared
-      setScannedBarcode("");
-      setManualBarcode("");
-      // Refresh orders list
-      queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
-    },
-    onError: (error: Error) => {
-      // If we just had a successful delivery, ignore subsequent "already delivered" errors
-      if (scanResult && error.message.includes("already been delivered")) {
-        return; // Ignore duplicate scan errors when we already have a successful result
-      }
-      
-      // Improve error message formatting for better user experience
-      let errorMessage = error.message;
-      
-      if (errorMessage.includes("already been delivered") || errorMessage.includes("already processed") || errorMessage.includes("🔒")) {
-        errorMessage = "✅ This order has already been delivered";
-      } else if (errorMessage.includes("not ready for pickup")) {
-        errorMessage = "⏳ Order is not ready for pickup yet";
-      } else if (errorMessage.includes("not found") || errorMessage.includes("Invalid barcode")) {
-        errorMessage = "❌ Order number not found";
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Success
+        setScanResult(data);
+        setScanError("");
+        toast.success("Order delivered successfully!");
+        console.log("Delivery processed successfully:", data);
+        
+        // Refresh orders list
+        queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
       } else {
-        // For any other errors, show the actual error message from server
-        errorMessage = `⚠️ ${errorMessage}`;
+        // Error - format message appropriately
+        let errorMessage = data.message || 'Scan failed';
+        
+        if (errorMessage.includes("already been delivered") || errorMessage.includes("🔒")) {
+          errorMessage = "✅ This order has already been delivered";
+        } else if (errorMessage.includes("not ready for pickup")) {
+          errorMessage = "⏳ Order is not ready for pickup yet";
+        } else if (errorMessage.includes("not found") || errorMessage.includes("Invalid barcode")) {
+          errorMessage = "❌ Order number not found";
+        } else {
+          errorMessage = `⚠️ ${errorMessage}`;
+        }
+        
+        setScanError(errorMessage);
+        setScanResult(null);
+        toast.error(errorMessage);
+        console.log("Delivery processing error:", errorMessage);
       }
-      
-      setScanError(errorMessage);
+    } catch (error) {
+      console.error("Network error during barcode processing:", error);
+      setScanError("⚠️ Network error. Please try again.");
       setScanResult(null);
-      toast.error(errorMessage);
-      // Ensure inputs stay cleared
-      setScannedBarcode("");
+      toast.error("Network error. Please try again.");
+    } finally {
+      // Always reset processing state and clear input
+      setIsProcessing(false);
       setManualBarcode("");
     }
-  });
+  };
 
   const handleBarcodeSubmit = async (barcode: string) => {
     if (!barcode.trim()) {
@@ -546,20 +556,12 @@ export default function CanteenOwnerDashboard() {
       return;
     }
     
-    // Prevent duplicate submissions by checking if already processing
-    if (scanBarcodeMutation.isPending) {
+    // Prevent duplicate submissions
+    if (isProcessing) {
       return;
     }
     
-    // Clear previous results immediately
-    setScanError("");
-    setScanResult(null);
-    
-    // Clear the input immediately to prevent duplicate submissions
-    setManualBarcode("");
-    setScannedBarcode("");
-    
-    scanBarcodeMutation.mutate(barcode.trim());
+    await processBarcodeDelivery(barcode);
   };
 
   const startCameraScanner = async () => {
@@ -587,8 +589,7 @@ export default function CanteenOwnerDashboard() {
       const result = await BarcodeScanner.startScan();
       
       if (result.hasContent) {
-        setScannedBarcode(result.content);
-        await handleBarcodeSubmit(result.content);
+        await processBarcodeDelivery(result.content);
       }
       
     } catch (error) {
@@ -1012,23 +1013,23 @@ export default function CanteenOwnerDashboard() {
                           value={manualBarcode}
                           onChange={(e) => setManualBarcode(e.target.value)}
                           onKeyDown={(e) => {
-                            if (e.key === 'Enter' && manualBarcode.trim() && !scanBarcodeMutation.isPending) {
+                            if (e.key === 'Enter' && manualBarcode.trim() && !isProcessing) {
                               e.preventDefault();
                               handleBarcodeSubmit(manualBarcode);
                             }
                           }}
                           placeholder="ORD1754332914519"
                           className="mt-1"
-                          disabled={scanBarcodeMutation.isPending}
+                          disabled={isProcessing}
                         />
                       </div>
                       <Button 
                         onClick={() => handleBarcodeSubmit(manualBarcode)}
                         className="w-full"
                         size="lg"
-                        disabled={!manualBarcode.trim() || scanBarcodeMutation.isPending}
+                        disabled={!manualBarcode.trim() || isProcessing}
                       >
-                        {scanBarcodeMutation.isPending ? (
+                        {isProcessing ? (
                           <>Processing...</>
                         ) : (
                           <>
