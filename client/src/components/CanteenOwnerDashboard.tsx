@@ -505,12 +505,18 @@ export default function CanteenOwnerDashboard() {
       setScanResult(data);
       setScanError("");
       toast.success("Order delivered successfully!");
-      // Clear the barcode input after successful processing
+      // Ensure inputs stay cleared
       setScannedBarcode("");
+      setManualBarcode("");
       // Refresh orders list
       queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
     },
     onError: (error: Error) => {
+      // If we just had a successful delivery, ignore subsequent "already delivered" errors
+      if (scanResult && error.message.includes("already been delivered")) {
+        return; // Ignore duplicate scan errors when we already have a successful result
+      }
+      
       // Improve error message formatting for better user experience
       let errorMessage = error.message;
       
@@ -528,8 +534,9 @@ export default function CanteenOwnerDashboard() {
       setScanError(errorMessage);
       setScanResult(null);
       toast.error(errorMessage);
-      // Clear the barcode input after error to prevent re-submission
+      // Ensure inputs stay cleared
       setScannedBarcode("");
+      setManualBarcode("");
     }
   });
 
@@ -538,8 +545,20 @@ export default function CanteenOwnerDashboard() {
       setScanError("Please enter a barcode");
       return;
     }
+    
+    // Prevent duplicate submissions by checking if already processing
+    if (scanBarcodeMutation.isPending) {
+      return;
+    }
+    
+    // Clear previous results immediately
     setScanError("");
     setScanResult(null);
+    
+    // Clear the input immediately to prevent duplicate submissions
+    setManualBarcode("");
+    setScannedBarcode("");
+    
     scanBarcodeMutation.mutate(barcode.trim());
   };
 
