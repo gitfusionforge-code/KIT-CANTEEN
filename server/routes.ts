@@ -10,10 +10,39 @@ import {
 } from "@shared/schema";
 import { generateOrderId } from "@shared/utils";
 
+// Store SSE connections for real-time notifications
+const sseConnections = new Set<any>();
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Health check endpoint
   app.get("/api/health", (req, res) => {
     res.json({ status: "ok", timestamp: new Date().toISOString() });
+  });
+
+  // Server-Sent Events endpoint for real-time order notifications
+  app.get("/api/events/orders", (req, res) => {
+    // Set headers for SSE
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Headers': 'Cache-Control'
+    });
+
+    // Add connection to the set
+    sseConnections.add(res);
+    
+    // Send initial connection confirmation
+    res.write('data: {"type": "connected", "message": "Connected to real-time order updates"}\n\n');
+    
+    console.log(`📡 SSE client connected. Total connections: ${sseConnections.size}`);
+
+    // Handle client disconnect
+    req.on('close', () => {
+      sseConnections.delete(res);
+      console.log(`📡 SSE client disconnected. Total connections: ${sseConnections.size}`);
+    });
   });
 
   // User management endpoints
@@ -171,6 +200,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const orderData = { ...req.body, barcode };
       const validatedData = insertOrderSchema.parse(orderData);
       const order = await storage.createOrder(validatedData);
+      
+      // Broadcast new order to all connected SSE clients (canteen owners)
+      if (sseConnections.size > 0) {
+        const message = `data: ${JSON.stringify({
+          type: 'new_order',
+          data: order
+        })}\n\n`;
+        
+        // Send to all connected SSE clients
+        sseConnections.forEach((connection) => {
+          try {
+            connection.write(message);
+          } catch (error) {
+            // Remove dead connections
+            sseConnections.delete(connection);
+          }
+        });
+        
+        console.log(`📢 Broadcasted new order ${order.orderNumber} to ${sseConnections.size} connected clients`);
+      }
+      
       res.status(201).json(order);
     } catch (error) {
       res.status(500).json({ message: "Internal server error" });

@@ -6,6 +6,9 @@ KIT-Canteen is a modern food ordering application for college campuses, enabling
 - Updated barcode generation across all components including server routes, client forms, and scanner validation.
 - Enhanced order lookup to support both legacy and new ID formats for backward compatibility.
 - Improved barcode scanner UI with real-time validation feedback and format guidance.
+- **Real-time Order Notifications**: Implemented Server-Sent Events (SSE) for automatic order updates in canteen owner dashboard when students place orders, eliminating the need for manual page refreshes.
+- Fixed "Mark Ready" button issue that was incorrectly calling menu update API instead of order update API.
+- Added comprehensive error handling and duplicate prevention in barcode scanner functionality.
 
 # User Preferences
 Preferred communication style: Simple, everyday language.

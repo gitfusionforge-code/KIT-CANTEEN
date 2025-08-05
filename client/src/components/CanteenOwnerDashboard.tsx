@@ -65,6 +65,49 @@ export default function CanteenOwnerDashboard() {
     }
   }, [isAuthenticated, isCanteenOwner, setLocation]);
 
+  // Real-time Server-Sent Events connection for order notifications
+  useEffect(() => {
+    if (!isAuthenticated || !isCanteenOwner) return;
+
+    const eventSource = new EventSource('/api/events/orders');
+    
+    eventSource.onopen = () => {
+      console.log('🔗 Connected to real-time order updates via SSE');
+    };
+    
+    eventSource.onmessage = (event) => {
+      try {
+        const message = JSON.parse(event.data);
+        
+        if (message.type === 'new_order') {
+          // Invalidate orders query to trigger refetch
+          queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+          
+          // Show notification toast for new order
+          toast.success(`📋 New Order Received! #${message.data.orderNumber}`, {
+            description: `Customer: ${message.data.customerName} | Amount: ₹${message.data.amount}`,
+            duration: 6000,
+          });
+          
+          console.log('📢 New order received:', message.data);
+        } else if (message.type === 'connected') {
+          console.log('✅ SSE connection established:', message.message);
+        }
+      } catch (error) {
+        console.error('Error processing SSE message:', error);
+      }
+    };
+    
+    eventSource.onerror = (error) => {
+      console.error('SSE connection error:', error);
+    };
+    
+    // Cleanup SSE connection on component unmount
+    return () => {
+      eventSource.close();
+    };
+  }, [isAuthenticated, isCanteenOwner]);
+
   // Return early if not properly authenticated
   if (!isAuthenticated || !isCanteenOwner) {
     return (
