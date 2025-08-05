@@ -159,9 +159,8 @@ export default function CanteenOwnerDashboard() {
   ];
 
   const handleOrderStatusUpdate = (orderId: any, newStatus: any) => {
-    // Update order status using API
-    updateMenuItemMutation.mutate({ id: orderId, data: { status: newStatus } });
-    toast.success(`Order ${orderId} marked as ${newStatus}`);
+    // Update order status using correct API endpoint
+    updateOrderStatusMutation.mutate({ id: orderId, status: newStatus });
   };
 
   // Enhanced mutations with comprehensive synchronization
@@ -269,6 +268,27 @@ export default function CanteenOwnerDashboard() {
       } else {
         toast.error("Failed to add category");
       }
+    }
+  });
+
+  // Order status update mutation - correctly calls /api/orders endpoint
+  const updateOrderStatusMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: number; status: string }) => {
+      return apiRequest(`/api/orders/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status }),
+        headers: { 'Content-Type': 'application/json' }
+      });
+    },
+    onSuccess: (data, variables) => {
+      // Refresh orders list to show updated status
+      queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+      refetchOrders();
+      toast.success(`Order ${variables.id} marked as ${variables.status}`);
+    },
+    onError: (error: any, variables) => {
+      toast.error(`Failed to update order ${variables.id} status`);
+      console.error('Order status update error:', error);
     }
   });
 
