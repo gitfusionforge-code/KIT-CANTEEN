@@ -24,15 +24,35 @@ export default function CanteenOrderDetailPage() {
   const { orderId } = useParams();
   const queryClient = useQueryClient();
 
-  // Fetch real order data from database
+  // Fetch real order data from database, supporting both ID and barcode lookup
   const { data: orderDetails, isLoading, error } = useQuery<Order>({
     queryKey: ['/api/orders', orderId],
     queryFn: async () => {
-      const response = await fetch(`/api/orders/${orderId}`);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch order: ${response.status}`);
+      // Try to fetch by database ID first
+      try {
+        const response = await fetch(`/api/orders/${orderId}`);
+        if (response.ok) {
+          return response.json();
+        }
+      } catch (error) {
+        // If ID lookup fails, continue to barcode lookup
       }
-      return response.json();
+      
+      // Fallback: search all orders for matching barcode or order number
+      const ordersResponse = await fetch('/api/orders');
+      if (!ordersResponse.ok) {
+        throw new Error('Failed to fetch orders');
+      }
+      const orders = await ordersResponse.json();
+      const order = orders.find((o: Order) => 
+        o.barcode === orderId || o.orderNumber === orderId
+      );
+      
+      if (!order) {
+        throw new Error('Order not found');
+      }
+      
+      return order;
     },
     enabled: !!orderId,
   });

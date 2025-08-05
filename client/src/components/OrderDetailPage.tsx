@@ -71,7 +71,7 @@ export default function OrderDetailPage() {
 
   // Mock order data - in real app, fetch based on orderId
   const orderDetails = {
-    id: orderId || "12344",
+    id: orderId || "A1B2C3D4E5F6", // Use 12-digit alphanumeric format
     status: "completed",
     placedAt: "Yesterday, 1:15 PM",
     deliveredAt: "Yesterday, 1:35 PM",

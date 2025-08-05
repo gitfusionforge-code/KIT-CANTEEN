@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ArrowLeft, CheckCircle, Plus, Trash2, ShoppingCart } from "lucide-react";
+import { ArrowLeft, CheckCircle, Plus, Trash2, ShoppingCart, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 
 export default function BarcodeScannerPage() {
@@ -33,9 +33,16 @@ export default function BarcodeScannerPage() {
       return;
     }
     
-    toast.success(`Processing Order ID: ${orderId}`);
+    // Validate 12-digit alphanumeric format
+    const orderIdPattern = /^[A-Z0-9]{12}$/;
+    if (!orderIdPattern.test(orderId.toUpperCase())) {
+      toast.error("Order ID must be exactly 12 characters (letters and numbers only)");
+      return;
+    }
+    
+    toast.success(`Processing Order ID: ${orderId.toUpperCase()}`);
     // Navigate to order status or processing page
-    setLocation(`/order-status/${orderId}`);
+    setLocation(`/order-status/${orderId.toUpperCase()}`);
   };
 
   // Manual order creation handlers
@@ -76,7 +83,30 @@ export default function BarcodeScannerPage() {
       return;
     }
 
-    const orderNumber = `#C${String(Date.now()).slice(-3)}`;
+    // Generate 12-digit alphanumeric order number
+    const generateOrderNumber = () => {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let result = '';
+      
+      // Generate 8 random characters
+      for (let i = 0; i < 8; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      
+      // Add 4 characters from timestamp for uniqueness
+      const timestamp = Date.now().toString(36).toUpperCase();
+      const timestampPart = timestamp.slice(-4).padStart(4, '0');
+      
+      // Ensure timestamp part only contains valid characters
+      const validTimestampPart = timestampPart
+        .split('')
+        .map(char => chars.includes(char) ? char : chars[Math.floor(Math.random() * chars.length)])
+        .join('');
+      
+      return result + validTimestampPart;
+    };
+
+    const orderNumber = generateOrderNumber();
     const orderItems = selectedItems.map(item => `${item.quantity}x ${item.name}`).join(', ');
     const total = calculateOrderTotal();
 
@@ -124,17 +154,29 @@ export default function BarcodeScannerPage() {
               <Label htmlFor="orderId">Order ID</Label>
               <Input
                 id="orderId"
-                placeholder="Enter Order ID"
+                placeholder="e.g., A1B2C3D4E5F6"
                 value={orderId}
-                onChange={(e) => setOrderId(e.target.value)}
+                onChange={(e) => setOrderId(e.target.value.toUpperCase())}
+                maxLength={12}
               />
             </div>
 
             {orderId && (
-              <Alert className="border-primary/50 text-primary dark:border-primary [&>svg]:text-primary">
-                <CheckCircle className="h-4 w-4" />
+              <Alert className={
+                /^[A-Z0-9]{12}$/.test(orderId) 
+                  ? "border-green-500/50 text-green-600 dark:border-green-500 [&>svg]:text-green-600"
+                  : "border-amber-500/50 text-amber-600 dark:border-amber-500 [&>svg]:text-amber-600"
+              }>
+                {/^[A-Z0-9]{12}$/.test(orderId) ? (
+                  <CheckCircle className="h-4 w-4" />
+                ) : (
+                  <AlertTriangle className="h-4 w-4" />
+                )}
                 <AlertDescription>
-                  Order ID ready: {orderId}
+                  {/^[A-Z0-9]{12}$/.test(orderId) 
+                    ? `Valid Order ID: ${orderId}`
+                    : `Invalid format. Expected 12 characters (A-Z, 0-9): ${orderId.length}/12`
+                  }
                 </AlertDescription>
               </Alert>
             )}

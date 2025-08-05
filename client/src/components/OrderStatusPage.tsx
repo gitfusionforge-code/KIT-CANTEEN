@@ -66,10 +66,11 @@ export default function OrderStatusPage() {
     refetchInterval: 5000, // Auto-refresh every 5 seconds
   });
 
-  // Find the specific order by ID or order number
+  // Find the specific order by ID, order number, or barcode (supporting both old and new formats)
   const order = orders.find(o => 
     o.id.toString() === orderId || 
-    o.orderNumber === orderId
+    o.orderNumber === orderId ||
+    o.barcode === orderId
   );
 
   const orderStatus = order?.status as "preparing" | "ready" | "completed" | "delivered" || "preparing";
@@ -86,7 +87,8 @@ export default function OrderStatusPage() {
   }, [orderStatus]);
 
   const orderDetails = order ? {
-    id: order.orderNumber,
+    id: order.barcode, // Use barcode as the primary ID for consistency
+    orderNumber: order.orderNumber, // Keep order number for reference
     items: JSON.parse(order.items || '[]') as Array<{id: number, name: string, price: number, quantity: number}>,
     total: order.amount,
     estimatedTime: `${order.estimatedTime || 15} mins`,
@@ -176,7 +178,7 @@ export default function OrderStatusPage() {
         </div>
         <div className="text-center">
           <h1 className="text-2xl font-bold text-white mb-2">Order Status</h1>
-          <p className="text-white/80">Order #{orderDetails.id}</p>
+          <p className="text-white/80">Order #{orderDetails.orderNumber}</p>
         </div>
       </div>
 

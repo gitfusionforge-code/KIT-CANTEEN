@@ -8,6 +8,7 @@ import {
   insertOrderSchema, 
   insertNotificationSchema 
 } from "@shared/schema";
+import { generateOrderId } from "@shared/utils";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Health check endpoint
@@ -164,14 +165,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/orders", async (req, res) => {
     try {
-      // Generate unique barcode for the order
-      const generateBarcode = () => {
-        const timestamp = Date.now().toString();
-        const random = Math.random().toString(36).substring(2, 8).toUpperCase();
-        return `KC${timestamp.slice(-6)}${random}`;
-      };
+      // Generate unique 12-digit alphanumeric barcode for the order
+      const barcode = generateOrderId();
       
-      const orderData = { ...req.body, barcode: generateBarcode() };
+      const orderData = { ...req.body, barcode };
       const validatedData = insertOrderSchema.parse(orderData);
       const order = await storage.createOrder(validatedData);
       res.status(201).json(order);
@@ -255,8 +252,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Find order by barcode or order number
       let order = await storage.getOrderByBarcode(barcode);
       
-      // If not found by barcode, try to find by order number
-      if (!order && barcode.startsWith('ORD')) {
+      // If not found by barcode, try to find by order number (12-digit alphanumeric format)
+      if (!order && barcode.match(/^[A-Z0-9]{12}$/)) {
         order = await storage.getOrderByOrderNumber(barcode);
       }
       
