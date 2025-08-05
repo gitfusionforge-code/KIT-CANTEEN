@@ -77,44 +77,41 @@ export default function BarcodeScannerPage() {
     return selectedItems.reduce((total, item) => total + (item.price * item.quantity), 0);
   };
 
-  const handleCreateManualOrder = () => {
+  const handleCreateManualOrder = async () => {
     if (selectedItems.length === 0) {
       toast.error("Please add at least one item");
       return;
     }
 
-    // Generate 12-digit alphanumeric order number
-    const generateOrderNumber = () => {
-      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-      let result = '';
-      
-      // Generate 8 random characters
-      for (let i = 0; i < 8; i++) {
-        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    try {
+      const orderData = {
+        customerId: 6, // Temporary - should get from auth
+        customerName: "Manual Order",
+        items: JSON.stringify(selectedItems),
+        amount: calculateOrderTotal(),
+        status: "preparing",
+        estimatedTime: 15
+      };
+
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderData)
+      });
+
+      if (response.ok) {
+        const order = await response.json();
+        toast.success(`Order created: ${order.orderNumber} - Total: ₹${order.amount}`);
+        
+        // Reset form and close modal
+        setSelectedItems([]);
+        setIsMenuModalOpen(false);
+      } else {
+        toast.error("Failed to create order");
       }
-      
-      // Add 4 characters from timestamp for uniqueness
-      const timestamp = Date.now().toString(36).toUpperCase();
-      const timestampPart = timestamp.slice(-4).padStart(4, '0');
-      
-      // Ensure timestamp part only contains valid characters
-      const validTimestampPart = timestampPart
-        .split('')
-        .map(char => chars.includes(char) ? char : chars[Math.floor(Math.random() * chars.length)])
-        .join('');
-      
-      return result + validTimestampPart;
-    };
-
-    const orderNumber = generateOrderNumber();
-    const orderItems = selectedItems.map(item => `${item.quantity}x ${item.name}`).join(', ');
-    const total = calculateOrderTotal();
-
-    toast.success(`Order created: ${orderNumber} - Total: ₹${total}`);
-    
-    // Reset form and close modal
-    setSelectedItems([]);
-    setIsMenuModalOpen(false);
+    } catch (error) {
+      toast.error("Error creating order");
+    }
   };
 
   return (

@@ -31,9 +31,8 @@ export default function CheckoutPage() {
 
   // Add fallback for testing - create order without payment if in dev mode
   const createOrderDirectly = async () => {
-    const orderNumber = `ORD${Date.now()}`;
+    // Server will generate the orderNumber and barcode using new 12-digit alphanumeric format
     const orderData = {
-      orderNumber,
       customerId: userData.id || null,
       customerName: userData.name || 'Guest User',
       items: JSON.stringify(cartData),
@@ -50,7 +49,7 @@ export default function CheckoutPage() {
         description: "Your order has been placed successfully!",
       });
       
-      setLocation(`/order-status/${newOrder.orderNumber || orderNumber}`);
+      setLocation(`/order-status/${newOrder.orderNumber}`);
     } catch (error) {
       // Failed to create order - show error message
       toast({
@@ -149,9 +148,8 @@ export default function CheckoutPage() {
         setPaymentInProgress(false);
         
         // Payment successful - create order in database
-        const orderNumber = `ORD${Date.now()}`;
+        // Server will generate orderNumber and barcode using new format
         const orderData = {
-          orderNumber,
           customerId: userData.id || null,
           customerName: userData.name || 'Guest User',
           items: JSON.stringify(cartData),
@@ -168,7 +166,7 @@ export default function CheckoutPage() {
             description: "Your order has been confirmed!",
           });
           
-          setLocation(`/order-status/${newOrder.orderNumber || orderNumber}`);
+          setLocation(`/order-status/${newOrder.orderNumber}`);
         } catch (error) {
           // Failed to create order after payment - critical error
           toast({

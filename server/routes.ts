@@ -194,10 +194,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/orders", async (req, res) => {
     try {
-      // Generate unique 12-digit alphanumeric barcode for the order
+      // Generate unique 12-digit alphanumeric order ID for both orderNumber and barcode
+      const orderNumber = generateOrderId();
       const barcode = generateOrderId();
       
-      const orderData = { ...req.body, barcode };
+      const orderData = { ...req.body, orderNumber, barcode };
       const validatedData = insertOrderSchema.parse(orderData);
       const order = await storage.createOrder(validatedData);
       
