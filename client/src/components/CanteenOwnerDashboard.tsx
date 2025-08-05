@@ -505,6 +505,8 @@ export default function CanteenOwnerDashboard() {
       setScanResult(data);
       setScanError("");
       toast.success("Order delivered successfully!");
+      // Clear the barcode input after successful processing
+      setScannedBarcode("");
       // Refresh orders list
       queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
     },
@@ -516,15 +518,18 @@ export default function CanteenOwnerDashboard() {
         errorMessage = "✅ This order has already been delivered";
       } else if (errorMessage.includes("not ready for pickup")) {
         errorMessage = "⏳ Order is not ready for pickup yet";
-      } else if (errorMessage.includes("not found")) {
+      } else if (errorMessage.includes("not found") || errorMessage.includes("Invalid barcode")) {
         errorMessage = "❌ Order number not found";
-      } else if (errorMessage === "HTTP error! status: 400") {
-        errorMessage = "⚠️ Order cannot be processed (may already be delivered)";
+      } else {
+        // For any other errors, show the actual error message from server
+        errorMessage = `⚠️ ${errorMessage}`;
       }
       
       setScanError(errorMessage);
       setScanResult(null);
       toast.error(errorMessage);
+      // Clear the barcode input after error to prevent re-submission
+      setScannedBarcode("");
     }
   });
 
@@ -987,6 +992,12 @@ export default function CanteenOwnerDashboard() {
                           id="manual-barcode"
                           value={manualBarcode}
                           onChange={(e) => setManualBarcode(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && manualBarcode.trim() && !scanBarcodeMutation.isPending) {
+                              e.preventDefault();
+                              handleBarcodeSubmit(manualBarcode);
+                            }
+                          }}
                           placeholder="ORD1754332914519"
                           className="mt-1"
                           disabled={scanBarcodeMutation.isPending}
